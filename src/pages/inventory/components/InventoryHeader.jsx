@@ -1,178 +1,130 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
-  Calendar,
-  Download,
   RefreshCw,
+  Download,
   Plus,
+  Boxes,
+  Calendar,
+  Warehouse as WarehouseIcon,
   ChevronDown,
-  Check,
-  FileSpreadsheet,
-  FileText,
 } from 'lucide-react';
-import Button from '../../../components/ui/Button';
 
 export const InventoryHeader = ({
-  dateRange,
-  setDateRange,
-  onRefresh,
+  warehouse = 'all',
+  onWarehouseChange,
+  warehouses = [],
+  dateRange = '30 Days',
+  onDateRangeChange,
   onExport,
-  onAddStock,
-  lastUpdated,
-  isRefreshing,
+  onRefresh,
+  onAddInventory,
+  isRefreshing = false,
+  lastUpdated = 'Just now',
 }) => {
-  const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
-  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
-  const [secondsAgo, setSecondsAgo] = useState(0);
-
-  const dateOptions = [
-    { key: 'today', label: 'Today' },
-    { key: 'week', label: 'This Week' },
-    { key: 'month', label: 'This Month' },
-    { key: 'quarter', label: 'This Quarter' },
-    { key: 'year', label: 'This Year' },
-    { key: 'custom', label: 'Custom Range' },
-  ];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (lastUpdated) {
-        setSecondsAgo(Math.floor((Date.now() - lastUpdated) / 1000));
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [lastUpdated]);
-
-  const activeLabel = dateOptions.find((o) => o.key === dateRange)?.label || 'This Month';
+  const dateRanges = ['7 Days', '30 Days', '3 Months', '6 Months', '1 Year'];
 
   return (
-    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2">
-      {/* Title & Subtitle */}
-      <div>
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Inventory Dashboard
-          </h1>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200/60">
-            Real-time Telemetry
-          </span>
+    <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 shadow-sm">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        {/* Left: Title & Subtitle + Live status */}
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="w-10 h-10 rounded-xl bg-[#162B53] text-white flex items-center justify-center shadow-sm">
+              <Boxes className="w-5 h-5 text-[#0F9D8A]" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-[#172033] tracking-tight">
+                Inventory Dashboard
+              </h1>
+            </div>
+            {/* Live Indicator Badge */}
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/60 text-xs font-semibold text-emerald-700">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span>Live Inventory</span>
+            </div>
+            <span className="text-xs text-[#64748B] hidden sm:inline-block">
+              Last updated: {lastUpdated}
+            </span>
+          </div>
+          <p className="text-sm text-[#64748B] max-w-2xl">
+            Monitor stock levels, inventory value, warehouse capacity and product movement in real time.
+          </p>
         </div>
-        <p className="text-sm text-slate-500 mt-1 max-w-2xl">
-          Monitor stock, warehouse capacity, inventory value, purchase activity and low-stock alerts across all active enterprise hubs.
-        </p>
-      </div>
 
-      {/* Right Controls */}
-      <div className="flex flex-wrap items-center gap-2.5">
-        {/* Live Timer Status */}
-        <span className="hidden sm:inline-flex items-center text-xs text-slate-400 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200/80 shadow-2xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
-          Updated {secondsAgo < 5 ? 'just now' : `${secondsAgo}s ago`}
-        </span>
+        {/* Right Controls: Warehouse, Date Range, Export, Refresh, Add Inventory */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          {/* Warehouse Dropdown */}
+          <div className="relative">
+            <div className="flex items-center gap-2 bg-[#F7F8FA] border border-[#E5E7EB] rounded-xl px-3 py-2 text-xs font-medium text-[#172033] hover:border-slate-300 transition-colors">
+              <WarehouseIcon className="w-3.5 h-3.5 text-[#64748B]" />
+              <select
+                value={warehouse}
+                onChange={(e) => onWarehouseChange && onWarehouseChange(e.target.value)}
+                className="bg-transparent focus:outline-none cursor-pointer pr-4 font-medium text-xs text-[#172033]"
+              >
+                <option value="all">All Warehouses</option>
+                {warehouses.map((wh) => (
+                  <option key={wh.id} value={wh.id}>
+                    {wh.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-        {/* Date Range Dropdown */}
-        <div className="relative">
+          {/* Date Range Dropdown */}
+          <div className="relative">
+            <div className="flex items-center gap-2 bg-[#F7F8FA] border border-[#E5E7EB] rounded-xl px-3 py-2 text-xs font-medium text-[#172033] hover:border-slate-300 transition-colors">
+              <Calendar className="w-3.5 h-3.5 text-[#64748B]" />
+              <select
+                value={dateRange}
+                onChange={(e) => onDateRangeChange && onDateRangeChange(e.target.value)}
+                className="bg-transparent focus:outline-none cursor-pointer pr-4 font-medium text-xs text-[#172033]"
+              >
+                {dateRanges.map((range) => (
+                  <option key={range} value={range}>
+                    {range}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Export Button */}
           <button
-            type="button"
-            onClick={() => setDateDropdownOpen(!dateDropdownOpen)}
-            className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-2xs"
+            onClick={() => onExport && onExport('stock_summary')}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-[#E5E7EB] hover:bg-slate-50 text-xs font-medium text-[#172033] transition-colors shadow-2xs"
+            title="Export CSV or PDF"
           >
-            <Calendar className="w-3.5 h-3.5 text-slate-500" />
-            <span>{activeLabel}</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <Download className="w-3.5 h-3.5 text-[#64748B]" />
+            <span className="hidden sm:inline">Export</span>
           </button>
 
-          {dateDropdownOpen && (
-            <div className="absolute right-0 mt-1 w-44 bg-white border border-slate-200 rounded-lg shadow-lg z-30 py-1">
-              {dateOptions.map((opt) => (
-                <button
-                  key={opt.key}
-                  type="button"
-                  onClick={() => {
-                    setDateRange(opt.key);
-                    setDateDropdownOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 text-left"
-                >
-                  <span>{opt.label}</span>
-                  {dateRange === opt.key && <Check className="w-3.5 h-3.5 text-teal-600" />}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Export Dropdown */}
-        <div className="relative">
+          {/* Refresh Button */}
           <button
-            type="button"
-            onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
-            className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-2xs"
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-[#E5E7EB] hover:bg-slate-50 text-xs font-medium text-[#172033] transition-colors shadow-2xs disabled:opacity-60"
+            title="Synchronize live inventory records"
           >
-            <Download className="w-3.5 h-3.5 text-slate-500" />
-            <span>Export</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <RefreshCw
+              className={`w-3.5 h-3.5 text-[#64748B] ${isRefreshing ? 'animate-spin text-[#0F9D8A]' : ''}`}
+            />
+            <span className="hidden sm:inline">Refresh</span>
           </button>
 
-          {exportDropdownOpen && (
-            <div className="absolute right-0 mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-30 py-1">
-              <button
-                type="button"
-                onClick={() => {
-                  onExport('stock_summary');
-                  setExportDropdownOpen(false);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 text-left"
-              >
-                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-                <span>Export Stock Summary (CSV)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onExport('low_stock');
-                  setExportDropdownOpen(false);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 text-left"
-              >
-                <FileText className="w-4 h-4 text-amber-600" />
-                <span>Export Low Stock Report</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  window.print();
-                  setExportDropdownOpen(false);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 text-left"
-              >
-                <FileText className="w-4 h-4 text-slate-600" />
-                <span>Print / Save as PDF</span>
-              </button>
-            </div>
-          )}
+          {/* + Add Inventory Button */}
+          <button
+            onClick={onAddInventory}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0F9D8A] hover:bg-[#0d8777] text-white text-xs font-semibold transition-all shadow-sm active:scale-98"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Add Inventory</span>
+          </button>
         </div>
-
-        {/* Refresh Button */}
-        <button
-          type="button"
-          onClick={onRefresh}
-          disabled={isRefreshing}
-          title="Refresh Data"
-          className="p-2 text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-2xs disabled:opacity-50"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-teal-600' : ''}`} />
-        </button>
-
-        {/* + Add Stock Button */}
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={onAddStock}
-          className="bg-teal-600 hover:bg-teal-700 text-white font-medium text-xs px-3.5 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>+ Add Inventory</span>
-        </Button>
       </div>
     </div>
   );

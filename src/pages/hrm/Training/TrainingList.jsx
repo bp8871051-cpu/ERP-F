@@ -6,6 +6,7 @@ import {
   Calendar,
   Clock,
   Users,
+  User,
   Award,
   BookOpen,
   MapPin,

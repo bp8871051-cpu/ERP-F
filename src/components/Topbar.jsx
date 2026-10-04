@@ -440,6 +440,7 @@ export const Topbar = ({ isCollapsed, setIsCollapsed }) => {
         {/* User Profile Menu */}
         <div className="relative pl-1" ref={profileRef}>
           <button
+            id="topbar-profile-button"
             onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
             className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
           >
@@ -479,9 +480,11 @@ export const Topbar = ({ isCollapsed, setIsCollapsed }) => {
 
               <div className="pt-1 border-t border-slate-100">
                 <button
+                  id="topbar-signout-button"
                   onClick={() => {
                     setIsProfileDropdownOpen(false);
                     logout();
+                    navigate('/login');
                   }}
                   className="w-full flex items-center gap-2 px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                 >

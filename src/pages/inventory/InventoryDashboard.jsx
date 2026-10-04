@@ -6,40 +6,28 @@ import {
   AlertCircle,
   X,
   RefreshCw,
-  Sliders,
-  ArrowRightLeft,
   Plus,
-  FileSpreadsheet,
+  Package,
 } from 'lucide-react';
 
 import inventoryService from '../../services/inventoryService';
 
-// Modular Dashboard Components
+// Redesigned Dashboard Modular Components (Sections 3 to 15)
 import InventoryHeader from './components/InventoryHeader';
+import InventoryAlertCenter from './components/InventoryAlertCenter';
 import InventoryKPICards from './components/InventoryKPICards';
-import InventoryHealth from './components/InventoryHealth';
-import StockMovementChart from './components/StockMovementChart';
-import InventoryValueChart from './components/InventoryValueChart';
-import CategoryDistribution from './components/CategoryDistribution';
-import TopProducts from './components/TopProducts';
-import LowStockAlerts from './components/LowStockAlerts';
-import RecentStockActivity from './components/RecentStockActivity';
-import WarehouseOverview from './components/WarehouseOverview';
-import SupplierSummary from './components/SupplierSummary';
-import PurchaseSalesChart from './components/PurchaseSalesChart';
-import StockTurnover from './components/StockTurnover';
-import FastMovingProducts from './components/FastMovingProducts';
-import DeadStock from './components/DeadStock';
-import StockTransferSummary from './components/StockTransferSummary';
-import PurchaseOrders from './components/PurchaseOrders';
-import SalesImpact from './components/SalesImpact';
-import InventoryForecast from './components/InventoryForecast';
-import ReorderRecommendations from './components/ReorderRecommendations';
-import InventoryAlerts from './components/InventoryAlerts';
-import QuickActions from './components/QuickActions';
-import InventoryReports from './components/InventoryReports';
+import StockMovementAnalytics from './components/StockMovementAnalytics';
+import StockHealthDonut from './components/StockHealthDonut';
+import InventoryValuationCard from './components/InventoryValuationCard';
+import WarehouseOverviewCards from './components/WarehouseOverviewCards';
+import LowStockProductsTable from './components/LowStockProductsTable';
+import TopPerformingProductsTable from './components/TopPerformingProductsTable';
+import RecentTransactionsTable from './components/RecentTransactionsTable';
+import CategoryInventoryCard from './components/CategoryInventoryCard';
+import QuickActionsToolbar from './components/QuickActionsToolbar';
+import InventoryFilterBar from './components/InventoryFilterBar';
 
-// Interactive Action Modals
+// Operational Modals
 import AddStockModal from './components/AddStockModal';
 import StockAdjustmentModal from '../../components/inventory/StockAdjustmentModal';
 import StockTransferModal from '../../components/inventory/StockTransferModal';
@@ -53,11 +41,22 @@ export const InventoryDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
-  const [dateRange, setDateRange] = useState('This Month');
+
+  // Filter States (Section 15)
+  const [search, setSearch] = useState('');
+  const [warehouse, setWarehouse] = useState('all');
+  const [category, setCategory] = useState('all');
+  const [brand, setBrand] = useState('all');
+  const [supplier, setSupplier] = useState('all');
+  const [stockStatus, setStockStatus] = useState('all');
+  const [dateRange, setDateRange] = useState('30 Days');
+
+  // Live Time Tracker
   const [lastUpdated, setLastUpdated] = useState('Just now');
   const [lastUpdatedTimestamp, setLastUpdatedTimestamp] = useState(Date.now());
+  const timerRef = useRef(null);
 
-  // Toast / Feedback Notification
+  // Toast Notification State
   const [notification, setNotification] = useState(null);
 
   // Modals Visibility
@@ -67,9 +66,6 @@ export const InventoryDashboard = () => {
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [selectedProductForRestock, setSelectedProductForRestock] = useState(null);
 
-  // Live Timer Tracker
-  const timerRef = useRef(null);
-
   const showToast = (message, type = 'success') => {
     setNotification({ message, type });
     setTimeout(() => {
@@ -77,52 +73,64 @@ export const InventoryDashboard = () => {
     }, 4000);
   };
 
-  // 1. Authoritative Data Fetch from Laravel APIs
-  const fetchDashboardData = useCallback(async (isManualRefresh = false) => {
+  // Fetch Dashboard Data from Backend API
+  const fetchDashboardData = useCallback(async (isManual = false) => {
     try {
-      if (isManualRefresh) {
+      if (isManual) {
         setIsRefreshing(true);
       } else {
         setLoading(true);
       }
       setError(null);
 
-      const res = await inventoryService.getDashboardData({ date_range: dateRange });
+      const params = {
+        date_range: dateRange,
+        warehouse_id: warehouse !== 'all' ? warehouse : undefined,
+        category_id: category !== 'all' ? category : undefined,
+        brand_id: brand !== 'all' ? brand : undefined,
+        supplier_id: supplier !== 'all' ? supplier : undefined,
+        stock_status: stockStatus !== 'all' ? stockStatus : undefined,
+        search: search || undefined,
+      };
+
+      const res = await inventoryService.getDashboardData(params);
       const payload = res?.data || res;
       setData(payload);
       setLastUpdatedTimestamp(Date.now());
       setLastUpdated('Just now');
 
-      if (isManualRefresh) {
+      if (isManual) {
         showToast('Inventory dashboard synchronized with live database.', 'success');
       }
     } catch (err) {
-      console.error('Failed to load enterprise inventory dashboard:', err);
+      console.error('Failed to load inventory dashboard:', err);
       setError(
         err?.response?.data?.message ||
-          'Failed to synchronize inventory levels and warehouse metrics. Please verify backend connection.'
+          'Unable to load inventory dashboard. Please verify backend connection and MySQL database.'
       );
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [dateRange]);
+  }, [dateRange, warehouse, category, brand, supplier, stockStatus, search]);
 
-  // Initial load and filter change
+  // Initial fetch and on filter changes (with debounce on search)
   useEffect(() => {
-    fetchDashboardData();
+    const handler = setTimeout(() => {
+      fetchDashboardData();
+    }, 250);
+    return () => clearTimeout(handler);
   }, [fetchDashboardData]);
 
-  // Optional periodic auto-refresh (every 60s)
+  // Periodic Auto-refresh every 60s
   useEffect(() => {
-    const autoRefreshInterval = setInterval(() => {
+    const interval = setInterval(() => {
       fetchDashboardData(true);
     }, 60000);
-
-    return () => clearInterval(autoRefreshInterval);
+    return () => clearInterval(interval);
   }, [fetchDashboardData]);
 
-  // Update "Last updated X seconds ago" counter
+  // Live dynamic time ticker
   useEffect(() => {
     timerRef.current = setInterval(() => {
       const elapsedSec = Math.floor((Date.now() - lastUpdatedTimestamp) / 1000);
@@ -135,42 +143,21 @@ export const InventoryDashboard = () => {
         setLastUpdated(`${mins}m ago`);
       }
     }, 5000);
-
     return () => clearInterval(timerRef.current);
   }, [lastUpdatedTimestamp]);
 
-  // Handle Export CSV / PDF via backend API
-  const handleExport = async (type = 'stock_summary') => {
-    try {
-      showToast(`Generating ${type.replace(/_/g, ' ')} export...`, 'info');
-      await inventoryService.exportInventory(type);
-      showToast('Export downloaded successfully.', 'success');
-    } catch (err) {
-      console.error('Export error:', err);
-      showToast('Export failed. Please try again.', 'error');
-    }
+  // Reset Filters
+  const handleResetFilters = () => {
+    setSearch('');
+    setWarehouse('all');
+    setCategory('all');
+    setBrand('all');
+    setSupplier('all');
+    setStockStatus('all');
+    setDateRange('30 Days');
   };
 
-  // Quick Action Handlers
-  const handleAddStockClick = (product = null) => {
-    setSelectedProductForRestock(product);
-    setShowAddStockModal(true);
-  };
-
-  const handleStockMutationSuccess = (msg) => {
-    showToast(msg || 'Inventory records updated successfully.', 'success');
-    fetchDashboardData(true);
-  };
-
-  const handleCreatePO = (item) => {
-    showToast(`Navigating to Purchase Order creation for ${item?.name || item?.product || 'SKU'}...`, 'info');
-    navigate('/app/purchases/orders', {
-      state: {
-        prefilledProduct: item,
-      },
-    });
-  };
-
+  // Scroll to section helper
   const scrollToSection = (id) => {
     const el = document.getElementById(id);
     if (el) {
@@ -178,74 +165,173 @@ export const InventoryDashboard = () => {
     }
   };
 
-  // Loading skeleton screen
+  // Restock action trigger
+  const handleRestock = (product) => {
+    setSelectedProductForRestock(product);
+    setShowAddStockModal(true);
+  };
+
+  // Export handler
+  const handleExport = (type = 'stock_summary') => {
+    try {
+      showToast(`Generating ${type.replace(/_/g, ' ')} export...`, 'info');
+      if (data?.low_stock_products || data?.top_products) {
+        const rows = [
+          ['Product Name', 'SKU', 'Category', 'Stock Qty', 'Min Stock', 'Status'],
+          ...(data.low_stock_products || []).map((p) => [
+            p.name,
+            p.sku,
+            p.category,
+            p.current_stock,
+            p.minimum_stock,
+            p.status,
+          ]),
+        ];
+        const csvContent = 'data:text/csv;charset=utf-8,' + rows.map((e) => e.join(',')).join('\n');
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', `inventory_${type}_${Date.now()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('Inventory report exported successfully.', 'success');
+      }
+    } catch (err) {
+      console.error('Export error:', err);
+      showToast('Export failed. Please try again.', 'error');
+    }
+  };
+
+  // Alert action router
+  const handleAlertAction = (alert) => {
+    if (alert.type === 'out_of_stock' || alert.action_type === 'add_stock') {
+      setShowAddStockModal(true);
+    } else if (alert.type === 'low_stock' || alert.action_type === 'view_low_stock') {
+      scrollToSection('low-stock-products-section');
+    } else if (alert.type === 'warehouse_capacity' || alert.action_type === 'stock_transfer') {
+      setShowTransferModal(true);
+    } else if (alert.type === 'pending_po' || alert.action_type === 'view_po') {
+      navigate('/app/procurement/orders');
+    } else if (alert.type === 'pending_transfers' || alert.action_type === 'view_transfers') {
+      navigate('/app/inventory/stock/transfer');
+    } else if (alert.type === 'inventory_adjustment' || alert.action_type === 'view_adjustments') {
+      setShowAdjustmentModal(true);
+    } else {
+      scrollToSection('low-stock-products-section');
+    }
+  };
+
+  // Success handler for stock mutations
+  const handleMutationSuccess = (msg) => {
+    showToast(msg || 'Inventory records successfully updated.', 'success');
+    fetchDashboardData(true);
+  };
+
+  // =========================================================================
+  // SECTION 19: LOADING STATE (SKELETON)
+  // =========================================================================
   if (loading && !data) {
     return (
       <div className="space-y-6 p-4 sm:p-6 max-w-[1920px] mx-auto animate-pulse">
-        <div className="h-20 bg-slate-200/70 rounded-xl" />
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="h-24 bg-slate-200/80 rounded-2xl" />
+        <div className="h-16 bg-slate-200/80 rounded-2xl" />
+        <div className="h-32 bg-slate-200/80 rounded-2xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-32 bg-slate-200/70 rounded-xl" />
+            <div key={i} className="h-32 bg-slate-200/80 rounded-2xl" />
           ))}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 h-96 bg-slate-200/70 rounded-xl" />
-          <div className="h-96 bg-slate-200/70 rounded-xl" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 h-96 bg-slate-200/80 rounded-2xl" />
+          <div className="lg:col-span-4 h-96 bg-slate-200/80 rounded-2xl" />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-80 bg-slate-200/70 rounded-xl" />
-          <div className="h-80 bg-slate-200/70 rounded-xl" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-6 h-96 bg-slate-200/80 rounded-2xl" />
+          <div className="lg:col-span-6 h-96 bg-slate-200/80 rounded-2xl" />
         </div>
+        <div className="h-80 bg-slate-200/80 rounded-2xl" />
       </div>
     );
   }
 
-  // Error state screen
+  // =========================================================================
+  // SECTION 19: ERROR STATE
+  // =========================================================================
   if (error && !data) {
     return (
       <div className="max-w-xl mx-auto my-16 p-8 bg-white border border-rose-200 rounded-2xl shadow-sm text-center">
         <div className="w-14 h-14 mx-auto mb-4 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center">
           <AlertCircle className="w-7 h-7" />
         </div>
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Unable to Load Inventory Dashboard</h2>
+        <h2 className="text-xl font-bold text-slate-900 mb-2">
+          Unable to Load Inventory Dashboard
+        </h2>
         <p className="text-sm text-slate-600 mb-6">{error}</p>
         <button
           onClick={() => fetchDashboardData(false)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-medium text-sm transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F9D8A] hover:bg-[#0c7c6d] text-white font-semibold text-sm transition-colors shadow-sm active:scale-98"
         >
           <RefreshCw className="w-4 h-4" />
-          Retry Connection
+          <span>Retry Connection</span>
         </button>
       </div>
     );
   }
 
+  // =========================================================================
+  // SECTION 19: EMPTY STATE
+  // =========================================================================
   const {
-    kpi,
-    inventory_health = [],
-    stock_movement = [],
-    inventory_value_trend = [],
-    category_distribution = [],
-    top_products = [],
-    low_stock_alerts = [],
-    recent_activity = [],
-    warehouse_overview = [],
-    top_suppliers = [],
-    purchase_vs_sales = [],
-    stock_turnover = {},
-    fast_moving_products = [],
-    dead_stock = [],
-    stock_transfer_summary = {},
-    recent_purchase_orders = [],
-    sales_impact = [],
-    forecast = [],
-    reorder_recommendations = [],
+    kpi = {},
     alert_center = [],
-    reports = [],
+    stock_movement = [],
+    stock_health = {},
+    inventory_value = {},
+    warehouse_overview = [],
+    low_stock_products = [],
+    top_products = [],
+    recent_transactions = [],
+    category_inventory = [],
+    filters_meta = {},
   } = data || {};
 
+  const totalProductsCount = kpi?.total_products?.value || 0;
+
+  if (totalProductsCount === 0 && !loading && !search && warehouse === 'all') {
+    return (
+      <div className="max-w-xl mx-auto my-20 p-10 bg-white border border-slate-200 rounded-2xl shadow-sm text-center space-y-4">
+        <div className="w-16 h-16 mx-auto bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center">
+          <Package className="w-8 h-8 text-[#0F9D8A]" />
+        </div>
+        <h2 className="text-2xl font-bold text-[#172033]">No Inventory Data</h2>
+        <p className="text-sm text-[#64748B] max-w-md mx-auto">
+          Add your first product to start tracking inventory, stock movements, and warehouse capacity.
+        </p>
+        <button
+          onClick={() => setShowAddProductModal(true)}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F9D8A] hover:bg-[#0c7c6d] text-white font-semibold text-sm transition-all shadow-sm active:scale-98"
+        >
+          <Plus className="w-4 h-4" />
+          <span>+ Add Product</span>
+        </button>
+      </div>
+    );
+  }
+
+  // Metadata for filter dropdowns
+  const availableWarehouses = filters_meta?.warehouses || warehouse_overview || [];
+  const availableCategories = filters_meta?.categories || category_inventory || [];
+  const availableBrands = filters_meta?.brands || [];
+  const availableSuppliers = filters_meta?.suppliers || [];
+
   return (
-    <div className="min-h-screen bg-slate-50/60 pb-16 space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-screen bg-[#F7F8FA] pb-16 space-y-6 max-w-[1920px] mx-auto px-4 sm:px-6 pt-2"
+    >
       {/* Toast Notification Banner */}
       <AnimatePresence>
         {notification && (
@@ -277,177 +363,156 @@ export const InventoryDashboard = () => {
         )}
       </AnimatePresence>
 
-      {/* 1. Header with Range Filter, Export, Refresh, and Add Inventory */}
+      {/* =========================================================================
+          1. HEADER (Section 3)
+          ========================================================================= */}
       <InventoryHeader
+        warehouse={warehouse}
+        onWarehouseChange={setWarehouse}
+        warehouses={availableWarehouses}
         dateRange={dateRange}
-        onDateRangeChange={(range) => setDateRange(range)}
+        onDateRangeChange={setDateRange}
         onExport={handleExport}
         onRefresh={() => fetchDashboardData(true)}
-        onAddInventory={() => handleAddStockClick(null)}
+        onAddInventory={() => setShowAddStockModal(true)}
         isRefreshing={isRefreshing}
         lastUpdated={lastUpdated}
       />
 
-      {/* 2. Urgent Inventory Alert Center (Prominent when items require action) */}
-      {alert_center && alert_center.length > 0 && (
-        <div id="inventory-alerts-section">
-          <InventoryAlerts
-            alerts={alert_center}
-            onAlertAction={(alert) => {
-              if (alert.type === 'low_stock' || alert.type === 'out_of_stock') {
-                scrollToSection('low-stock-section');
-              } else if (alert.type === 'warehouse_capacity') {
-                scrollToSection('warehouse-overview-section');
-              } else if (alert.type === 'dead_stock') {
-                scrollToSection('dead-stock-section');
-              } else {
-                scrollToSection('stock-movement-section');
-              }
-            }}
-          />
-        </div>
-      )}
-
-      {/* 3. Top 6 KPI Cards */}
-      <InventoryKPICards
-        kpi={kpi}
-        onCardClick={(key) => {
-          if (key === 'low_stock_items' || key === 'out_of_stock') {
-            scrollToSection('low-stock-section');
-          } else if (key === 'warehouse_utilization') {
-            scrollToSection('warehouse-overview-section');
-          } else if (key === 'inventory_value') {
-            scrollToSection('inventory-value-section');
-          }
-        }}
+      {/* =========================================================================
+          15. SEARCH & FILTERS BAR (Section 15)
+          ========================================================================= */}
+      <InventoryFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        warehouse={warehouse}
+        onWarehouseChange={setWarehouse}
+        warehouses={availableWarehouses}
+        category={category}
+        onCategoryChange={setCategory}
+        categories={availableCategories}
+        brand={brand}
+        onBrandChange={setBrand}
+        brands={availableBrands}
+        supplier={supplier}
+        onSupplierChange={setSupplier}
+        suppliers={availableSuppliers}
+        stockStatus={stockStatus}
+        onStockStatusChange={setStockStatus}
+        onResetFilters={handleResetFilters}
       />
 
-      {/* 4. Quick Action Shortcuts Toolbar */}
-      <QuickActions
-        onAddProduct={() => setShowAddProductModal(true)}
-        onAddStock={() => handleAddStockClick(null)}
-        onStockAdjustment={() => setShowAdjustmentModal(true)}
-        onStockTransfer={() => setShowTransferModal(true)}
-        onCreatePO={() => handleCreatePO(null)}
-        onAddSupplier={() => navigate('/app/inventory/suppliers')}
-        onViewLowStock={() => scrollToSection('low-stock-section')}
-        onViewReports={() => scrollToSection('inventory-reports-section')}
-      />
-
-      {/* 5. Primary Charts: Stock Movement Area/Line + Inventory Health Donut */}
-      <div id="stock-movement-section" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-8">
-          <StockMovementChart movementData={stock_movement} />
-        </div>
-        <div className="lg:col-span-4">
-          <InventoryHealth healthData={inventory_health} />
-        </div>
-      </div>
-
-      {/* 6. Valuation & Commercial Comparison: Value Trend + Purchase vs Sales */}
-      <div id="inventory-value-section" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-6">
-          <InventoryValueChart valueTrend={inventory_value_trend} />
-        </div>
-        <div className="lg:col-span-6">
-          <PurchaseSalesChart data={purchase_vs_sales} />
-        </div>
-      </div>
-
-      {/* 7. Category Distribution + Multi-Warehouse Overview */}
-      <div id="warehouse-overview-section" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-5">
-          <CategoryDistribution categoryData={category_distribution} />
-        </div>
-        <div className="lg:col-span-7">
-          <WarehouseOverview warehouses={warehouse_overview} />
-        </div>
-      </div>
-
-      {/* 8. Critical Action Tables: Low Stock Alerts + Automated Reorder Recommendations */}
-      <div id="low-stock-section" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7">
-          <LowStockAlerts
-            alerts={low_stock_alerts}
-            onAdjustStock={(item) => {
-              setShowAdjustmentModal(true);
-            }}
-            onCreatePO={(item) => handleCreatePO(item)}
-          />
-        </div>
-        <div className="lg:col-span-5">
-          <ReorderRecommendations
-            recommendations={reorder_recommendations}
-            onCreatePO={(rec) => handleCreatePO(rec)}
-          />
-        </div>
-      </div>
-
-      {/* 9. Predictive Analytics: Run-Rate Stockout Forecast + Top Products by Value */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-6">
-          <InventoryForecast
-            forecasts={forecast}
-            onOrderClick={(item) => handleCreatePO(item)}
-          />
-        </div>
-        <div className="lg:col-span-6">
-          <TopProducts products={top_products} />
-        </div>
-      </div>
-
-      {/* 10. Velocity & Turnover Analysis: Ratio Breakdown + Fast Moving + Dead Stock */}
-      <div id="dead-stock-section" className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-4">
-            <StockTurnover turnoverData={stock_turnover} />
-          </div>
-          <div className="lg:col-span-4">
-            <FastMovingProducts products={fast_moving_products} />
-          </div>
-          <div className="lg:col-span-4">
-            <StockTransferSummary summary={stock_transfer_summary} />
-          </div>
-        </div>
-
-        {/* Dead Stock Alert Table */}
-        <DeadStock
-          deadStock={dead_stock}
-          onAdjustStock={(item) => setShowAdjustmentModal(true)}
-          onTransferStock={(item) => setShowTransferModal(true)}
-        />
-      </div>
-
-      {/* 11. Pipeline & Audit Logs: Recent Activity + Supplier Summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7">
-          <RecentStockActivity activities={recent_activity} />
-        </div>
-        <div className="lg:col-span-5">
-          <SupplierSummary suppliers={top_suppliers} />
-        </div>
-      </div>
-
-      {/* 12. Purchasing & Sales Impact Logs */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-6">
-          <PurchaseOrders purchaseOrders={recent_purchase_orders} />
-        </div>
-        <div className="lg:col-span-6">
-          <SalesImpact salesImpact={sales_impact} />
-        </div>
-      </div>
-
-      {/* 13. Reports Catalog & Quick Generator */}
-      <div id="inventory-reports-section">
-        <InventoryReports
-          reports={reports}
-          onExport={(reportId) => handleExport(reportId)}
+      {/* =========================================================================
+          2. INVENTORY ALERT CENTER (Section 4)
+          ========================================================================= */}
+      <div id="inventory-alert-center-section">
+        <InventoryAlertCenter
+          alerts={alert_center}
+          onAlertAction={handleAlertAction}
         />
       </div>
 
       {/* =========================================================================
-          INTERACTIVE ACTION MODALS (Add Stock, Adjust Stock, Transfer, Add Product)
+          3. KPI CARDS (Section 5)
+          ========================================================================= */}
+      <div id="kpi-cards-section">
+        <InventoryKPICards
+          kpi={kpi}
+          onCardClick={(key) => {
+            if (key === 'low_stock_items' || key === 'out_of_stock') {
+              scrollToSection('low-stock-products-section');
+            } else if (key === 'warehouse_utilization') {
+              scrollToSection('warehouse-overview-section');
+            } else if (key === 'inventory_value') {
+              scrollToSection('inventory-value-section');
+            }
+          }}
+        />
+      </div>
+
+      {/* =========================================================================
+          4 & 5. STOCK MOVEMENT ANALYTICS & STOCK HEALTH (Sections 6 & 7)
+          ========================================================================= */}
+      <div id="stock-movement-section" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* 4. Stock Movement (8 cols) */}
+        <div className="lg:col-span-8">
+          <StockMovementAnalytics
+            movementData={stock_movement}
+            timeframe={dateRange}
+            onTimeframeChange={setDateRange}
+          />
+        </div>
+
+        {/* 5. Stock Health (4 cols) */}
+        <div className="lg:col-span-4">
+          <StockHealthDonut stockHealth={stock_health} />
+        </div>
+      </div>
+
+      {/* =========================================================================
+          6 & 11. INVENTORY VALUE & CATEGORY INVENTORY (Sections 8 & 13)
+          ========================================================================= */}
+      <div id="inventory-value-section" className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* 6. Inventory Value Trend (6 cols) */}
+        <div className="lg:col-span-6">
+          <InventoryValuationCard valueStats={inventory_value} />
+        </div>
+
+        {/* 11. Category Inventory (6 cols) */}
+        <div className="lg:col-span-6">
+          <CategoryInventoryCard categories={category_inventory} />
+        </div>
+      </div>
+
+      {/* =========================================================================
+          7. WAREHOUSE OVERVIEW (Section 9)
+          ========================================================================= */}
+      <div id="warehouse-overview-section">
+        <WarehouseOverviewCards warehouses={warehouse_overview} />
+      </div>
+
+      {/* =========================================================================
+          8. LOW STOCK PRODUCTS (Section 10)
+          ========================================================================= */}
+      <div id="low-stock-products-section">
+        <LowStockProductsTable
+          lowStockProducts={low_stock_products}
+          onRestockProduct={handleRestock}
+        />
+      </div>
+
+      {/* =========================================================================
+          9. TOP PERFORMING PRODUCTS (Section 11) - Full Width Table
+          ========================================================================= */}
+      <div id="top-products-section">
+        <TopPerformingProductsTable products={top_products} />
+      </div>
+
+      {/* =========================================================================
+          10. RECENT INVENTORY TRANSACTIONS (Section 12) - Full Width Table
+          ========================================================================= */}
+      <div id="recent-transactions-section">
+        <RecentTransactionsTable transactions={recent_transactions} />
+      </div>
+
+      {/* =========================================================================
+          12. QUICK ACTIONS TOOLBAR (Section 14) - Full Width 4x2 Grid
+          ========================================================================= */}
+      <div id="quick-actions-section">
+        <QuickActionsToolbar
+          onAddProduct={() => setShowAddProductModal(true)}
+          onStockIn={() => setShowAddStockModal(true)}
+          onStockOut={() => setShowAdjustmentModal(true)}
+          onStockTransfer={() => setShowTransferModal(true)}
+          onCreatePO={() => navigate('/app/procurement/orders')}
+          onAddSupplier={() => navigate('/app/inventory/suppliers')}
+          onViewLowStock={() => scrollToSection('low-stock-products-section')}
+          onViewReports={() => handleExport('consolidated_audit')}
+        />
+      </div>
+
+      {/* =========================================================================
+          OPERATIONAL ACTION MODALS
           ========================================================================= */}
       <AddStockModal
         isOpen={showAddStockModal}
@@ -459,7 +524,7 @@ export const InventoryDashboard = () => {
         onSuccess={() => {
           setShowAddStockModal(false);
           setSelectedProductForRestock(null);
-          handleStockMutationSuccess('Stock added successfully to designated warehouse.');
+          handleMutationSuccess('Stock added successfully to designated warehouse.');
         }}
       />
 
@@ -468,7 +533,7 @@ export const InventoryDashboard = () => {
         onClose={() => setShowAdjustmentModal(false)}
         onSaved={() => {
           setShowAdjustmentModal(false);
-          handleStockMutationSuccess('Stock adjustment recorded and inventory balance updated.');
+          handleMutationSuccess('Stock adjustment logged and inventory balance updated.');
         }}
       />
 
@@ -477,7 +542,7 @@ export const InventoryDashboard = () => {
         onClose={() => setShowTransferModal(false)}
         onSaved={() => {
           setShowTransferModal(false);
-          handleStockMutationSuccess('Stock transfer scheduled and logged in inventory records.');
+          handleMutationSuccess('Stock transfer scheduled and recorded in ledger.');
         }}
       />
 
@@ -486,10 +551,10 @@ export const InventoryDashboard = () => {
         onClose={() => setShowAddProductModal(false)}
         onSaved={() => {
           setShowAddProductModal(false);
-          handleStockMutationSuccess('New product registered and catalog updated.');
+          handleMutationSuccess('New catalog product registered successfully.');
         }}
       />
-    </div>
+    </motion.div>
   );
 };
 

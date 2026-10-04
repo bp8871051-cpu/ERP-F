@@ -59,14 +59,30 @@ import {
   UserPlus,
   Gift,
   CreditCard,
+  Barcode,
+  QrCode,
+  Printer,
+  TrendingDown,
+  Wrench,
+  Trash2,
+  BookOpen,
+  Ticket,
+  Puzzle,
+  Lock,
+  Bell,
+  Shield,
+  Clock,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLayout } from '../context/LayoutContext';
+import AuthenticationSection from './sidebar/AuthenticationSection';
+import UIInterfaceSection from './sidebar/UIInterfaceSection';
+import HelpSection from './sidebar/HelpSection';
 
 export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, hasPermission } = useAuth();
   const {
     sidebarMode,
     contentWidth,
@@ -114,6 +130,90 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     const saved = localStorage.getItem('erp_crm_open');
     return saved !== null ? JSON.parse(saved) : true;
   });
+  const [isPosOpen, setIsPosOpen] = useState(() => {
+    const saved = localStorage.getItem('erp_pos_open');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [isAssetsOpen, setIsAssetsOpen] = useState(() => {
+    const saved = localStorage.getItem('erp_assets_open');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [isDocumentsOpen, setIsDocumentsOpen] = useState(() => {
+    const saved = localStorage.getItem('erp_documents_open');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [isSupportOpen, setIsSupportOpen] = useState(() => {
+    const saved = localStorage.getItem('erp_support_open');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [isMembershipOpen, setIsMembershipOpen] = useState(() => {
+    const saved = localStorage.getItem('erp_membership_open');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [isSystemOpen, setIsSystemOpen] = useState(() => {
+    const saved = localStorage.getItem('erp_system_open');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [isSettingsOpen, setIsSettingsOpen] = useState(() => {
+    const saved = localStorage.getItem('erp_settings_open');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  const toggleSupportOpen = () => {
+    setIsSupportOpen((prev) => {
+      const next = !prev;
+      localStorage.setItem('erp_support_open', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const toggleMembershipOpen = () => {
+    setIsMembershipOpen((prev) => {
+      const next = !prev;
+      localStorage.setItem('erp_membership_open', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const toggleSystemOpen = () => {
+    setIsSystemOpen((prev) => {
+      const next = !prev;
+      localStorage.setItem('erp_system_open', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const toggleSettingsOpen = () => {
+    setIsSettingsOpen((prev) => {
+      const next = !prev;
+      localStorage.setItem('erp_settings_open', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const togglePosOpen = () => {
+    setIsPosOpen((prev) => {
+      const next = !prev;
+      localStorage.setItem('erp_pos_open', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const toggleAssetsOpen = () => {
+    setIsAssetsOpen((prev) => {
+      const next = !prev;
+      localStorage.setItem('erp_assets_open', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const toggleDocumentsOpen = () => {
+    setIsDocumentsOpen((prev) => {
+      const next = !prev;
+      localStorage.setItem('erp_documents_open', JSON.stringify(next));
+      return next;
+    });
+  };
 
   const toggleCrmOpen = () => {
     setIsCrmOpen((prev) => {
@@ -179,17 +279,18 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     });
   };
 
-  const dashboardItems = [
-    { name: 'HRM Dashboard', path: '/app/hrm', icon: Users },
-    { name: 'Inventory Dashboard', path: '/app/inventory', icon: Boxes },
-    { name: 'CRM Dashboard', path: '/app/crm', icon: Briefcase },
-    { name: 'POS Dashboard', path: '/app/pos', icon: Store },
-    { name: 'Finance Dashboard', path: '/app/finance', icon: DollarSign },
-    { name: 'Sales Dashboard', path: '/app/sales', icon: TrendingUp },
-    { name: 'Procurement Dashboard', path: '/app/procurement', icon: Truck },
-    { name: 'Project Dashboard', path: '/app/projects', icon: FolderKanban },
-    { name: 'Support Dashboard', path: '/app/support', icon: LifeBuoy },
+  const rawDashboardItems = [
+    { name: 'HRM Dashboard', path: '/app/hrm', icon: Users, perm: 'hrm.view' },
+    { name: 'Inventory Dashboard', path: '/app/inventory', icon: Boxes, perm: 'inventory.view' },
+    { name: 'CRM Dashboard', path: '/app/crm', icon: Briefcase, perm: 'crm.view' },
+    { name: 'POS Dashboard', path: '/app/pos', icon: Store, perm: 'pos.view' },
+    { name: 'Finance Dashboard', path: '/app/finance', icon: DollarSign, perm: 'finance.view' },
+    { name: 'Sales Dashboard', path: '/app/sales', icon: TrendingUp, perm: 'sales.view' },
+    { name: 'Procurement Dashboard', path: '/app/procurement', icon: Truck, perm: 'procurement.view' },
+    { name: 'Project Dashboard', path: '/app/projects', icon: FolderKanban, perm: 'projects.view' },
+    { name: 'Support Dashboard', path: '/app/support', icon: LifeBuoy, perm: 'support.view' },
   ];
+  const dashboardItems = rawDashboardItems.filter(item => !item.perm || (hasPermission && hasPermission(item.perm)));
 
   const applicationItems = [
     { name: 'Chat', path: '/app/applications/chat', icon: MessageSquare },
@@ -283,6 +384,56 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     { name: 'HR Analytics', path: '/app/hrm/analytics', icon: BarChart3 },
   ];
 
+  const posItems = [
+    { name: 'POS', path: '/app/pos/terminal', icon: Store },
+    { name: 'POS Orders', path: '/app/pos/orders', icon: Receipt },
+    { name: 'Barcode Print', path: '/app/pos/barcode-print', icon: Barcode },
+    { name: 'QR Code Print', path: '/app/pos/qr-print', icon: QrCode },
+    { name: 'Print Settings', path: '/app/pos/print-settings', icon: Printer },
+  ];
+
+  const assetItems = [
+    { name: 'Asset Register', path: '/app/assets/register', icon: Boxes },
+    { name: 'Assignments', path: '/app/assets/assignments', icon: UserCheck },
+    { name: 'Depreciation', path: '/app/assets/depreciation', icon: TrendingDown },
+    { name: 'Maintenance', path: '/app/assets/maintenance', icon: Wrench },
+    { name: 'Disposal', path: '/app/assets/disposal', icon: Trash2 },
+    { name: 'Asset Analytics', path: '/app/assets/analytics', icon: BarChart3 },
+  ];
+
+  const documentItems = [
+    { name: 'Document Repository', path: '/app/documents/repository', icon: FolderClosed },
+    { name: 'Policies & Manuals', path: '/app/documents/policies', icon: BookOpen },
+    { name: 'Compliance Docs', path: '/app/documents/compliance', icon: Scale },
+    { name: 'Document Workflows', path: '/app/documents/workflows', icon: GitPullRequest },
+  ];
+
+  const supportItems = [
+    { name: 'Contact Messages', path: '/app/support/contact-messages', icon: MessageSquare },
+    { name: 'Tickets', path: '/app/support/tickets', icon: Ticket },
+    { name: 'Knowledge Base', path: '/app/support/knowledge-base', icon: BookOpen },
+    { name: 'SLA Management', path: '/app/support/sla', icon: Clock },
+  ];
+
+  const membershipItems = [
+    { name: 'Membership Plans', path: '/app/membership/plans', icon: Package },
+    { name: 'Membership Addons', path: '/app/membership/addons', icon: Puzzle },
+    { name: 'Transactions', path: '/app/membership/transactions', icon: Receipt },
+  ];
+
+  const systemItems = [
+    { name: 'User Management', path: '/app/system/users', icon: Users },
+    { name: 'Roles & Permissions', path: '/app/system/roles', icon: Shield },
+    { name: 'Delete Requests', path: '/app/system/delete-requests', icon: Trash2 },
+  ];
+
+  const settingsSubItems = [
+    { name: 'General', path: '/app/system/settings/general', icon: Building2 },
+    { name: 'Security', path: '/app/system/settings/security', icon: Lock },
+    { name: 'Notifications', path: '/app/system/settings/notifications', icon: Bell },
+    { name: 'Integrations', path: '/app/system/settings/integrations', icon: Puzzle },
+  ];
+
   const isAnyDashboardActive = dashboardItems.some((item) => location.pathname === item.path);
   const isAnyAppActive = applicationItems.some((item) => location.pathname.startsWith(item.path));
   const isAnyLayoutActive = location.pathname.startsWith('/app/layouts');
@@ -296,6 +447,13 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const isAnyPurchaseActive = location.pathname.startsWith('/app/purchase');
   const isAnyFinanceActive = location.pathname.startsWith('/app/finance');
   const isAnyHrmActive = location.pathname.startsWith('/app/hrm');
+  const isAnyPosActive = location.pathname.startsWith('/app/pos');
+  const isAnyAssetsActive = location.pathname.startsWith('/app/assets');
+  const isAnyDocumentsActive = location.pathname.startsWith('/app/documents');
+  const isAnySupportActive = location.pathname.startsWith('/app/support');
+  const isAnyMembershipActive = location.pathname.startsWith('/app/membership');
+  const isAnySystemActive = location.pathname.startsWith('/app/system') && !location.pathname.startsWith('/app/system/settings');
+  const isAnySettingsActive = location.pathname.startsWith('/app/system/settings');
 
   // Auto-expand submenus if user navigates to their routes
   useEffect(() => {
@@ -323,7 +481,45 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     if (isAnyHrmActive && !isHrmOpen) {
       setIsHrmOpen(true);
     }
-  }, [location.pathname, isAnyAppActive, isAnyLayoutActive, isAnyStockActive, isAnySalesActive, isAnyCrmActive, isAnyPurchaseActive, isAnyFinanceActive, isAnyHrmActive]);
+    if (isAnyPosActive && !isPosOpen) {
+      setIsPosOpen(true);
+    }
+    if (isAnyAssetsActive && !isAssetsOpen) {
+      setIsAssetsOpen(true);
+    }
+    if (isAnyDocumentsActive && !isDocumentsOpen) {
+      setIsDocumentsOpen(true);
+    }
+    if (isAnySupportActive && !isSupportOpen) {
+      setIsSupportOpen(true);
+    }
+    if (isAnyMembershipActive && !isMembershipOpen) {
+      setIsMembershipOpen(true);
+    }
+    if (isAnySystemActive && !isSystemOpen) {
+      setIsSystemOpen(true);
+    }
+    if (isAnySettingsActive && !isSettingsOpen) {
+      setIsSettingsOpen(true);
+    }
+  }, [
+    location.pathname,
+    isAnyAppActive,
+    isAnyLayoutActive,
+    isAnyStockActive,
+    isAnySalesActive,
+    isAnyCrmActive,
+    isAnyPurchaseActive,
+    isAnyFinanceActive,
+    isAnyHrmActive,
+    isAnyPosActive,
+    isAnyAssetsActive,
+    isAnyDocumentsActive,
+    isAnySupportActive,
+    isAnyMembershipActive,
+    isAnySystemActive,
+    isAnySettingsActive,
+  ]);
 
   // Determine if sidebar is currently in compact/icon-only display
   const isMiniMode = sidebarMode === 'mini';
@@ -593,92 +789,150 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
           </div>
 
           {/* INVENTORY SECTION */}
-          <div>
-            {showText && (
-              <p className="px-2.5 text-[11px] font-semibold text-slate-400 tracking-wider uppercase mb-1.5 flex items-center justify-between">
-                <span>Inventory</span>
-              </p>
-            )}
+          {(!hasPermission || hasPermission('inventory.view')) && (
+            <div>
+              {showText && (
+                <p className="px-2.5 text-[11px] font-semibold text-slate-400 tracking-wider uppercase mb-1.5 flex items-center justify-between">
+                  <span>Inventory</span>
+                </p>
+              )}
 
-            {/* Inventory Direct Links */}
-            <div className="space-y-0.5">
-              {inventoryItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = item.end
-                  ? location.pathname === item.path
-                  : location.pathname === item.path || (item.path !== '/app/inventory' && location.pathname.startsWith(item.path));
+              {/* Inventory Direct Links */}
+              <div className="space-y-0.5">
+                {inventoryItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = item.end
+                    ? location.pathname === item.path
+                    : location.pathname === item.path || (item.path !== '/app/inventory' && location.pathname.startsWith(item.path));
 
-                return (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    title={!showText ? item.name : ''}
-                    className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                      isActive
-                        ? 'bg-teal-600 text-white font-semibold shadow-xs'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                    } ${!showText ? 'justify-center' : ''}`}
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      title={!showText ? item.name : ''}
+                      className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                        isActive
+                          ? 'bg-teal-600 text-white font-semibold shadow-xs'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      } ${!showText ? 'justify-center' : ''}`}
+                    >
+                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                      {showText && <span className="truncate">{item.name}</span>}
+                    </NavLink>
+                  );
+                })}
+
+                {/* Stock ▼ Submenu Trigger */}
+                <button
+                  onClick={toggleStockOpen}
+                  title={!showText ? 'Stock' : ''}
+                  className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    isAnyStockActive
+                      ? 'text-white bg-slate-800/80 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  } ${!showText ? 'justify-center' : ''}`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <ArrowRightLeft className={`w-4 h-4 shrink-0 ${isAnyStockActive ? 'text-teal-400' : 'text-slate-400'}`} />
+                    {showText && <span className="truncate">Stock</span>}
+                  </div>
+                  {showText && (
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${
+                        isStockOpen ? 'transform rotate-180 text-teal-400' : ''
+                      }`}
+                    />
+                  )}
+                </button>
+
+                {/* Stock Submenu Items */}
+                <AnimatePresence initial={false}>
+                  {isStockOpen && showText && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="pl-3 pr-1 py-1 space-y-0.5 overflow-hidden"
+                    >
+                      {stockSubItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = location.pathname === item.path || location.pathname.startsWith(item.path);
+
+                        return (
+                          <NavLink
+                            key={item.path}
+                            to={item.path}
+                            className={`flex items-center justify-between px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all ${
+                              isActive
+                                ? 'bg-teal-600/30 text-teal-300 font-semibold border border-teal-500/30'
+                                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-teal-400' : 'text-slate-400'}`} />
+                              <span className="truncate">{item.name}</span>
+                            </div>
+                            {isActive && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0" />
+                            )}
+                          </NavLink>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          )}
+
+          {/* SALES SECTION */}
+          {(!hasPermission || hasPermission('sales.view')) && (
+            <div>
+              {showText ? (
+                <div className="flex items-center justify-between px-2.5 mb-1.5">
+                  <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                    Sales
+                  </span>
+                  <button
+                    onClick={toggleSalesOpen}
+                    className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
                   >
-                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                    {showText && <span className="truncate">{item.name}</span>}
-                  </NavLink>
-                );
-              })}
-
-              {/* Stock ▼ Submenu Trigger */}
-              <button
-                onClick={toggleStockOpen}
-                title={!showText ? 'Stock' : ''}
-                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  isAnyStockActive
-                    ? 'text-white bg-slate-800/80 font-semibold'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                } ${!showText ? 'justify-center' : ''}`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <ArrowRightLeft className={`w-4 h-4 shrink-0 ${isAnyStockActive ? 'text-teal-400' : 'text-slate-400'}`} />
-                  {showText && <span className="truncate">Stock</span>}
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isSalesOpen ? 'transform rotate-180 text-teal-400' : ''
+                      }`}
+                    />
+                  </button>
                 </div>
-                {showText && (
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${
-                      isStockOpen ? 'transform rotate-180 text-teal-400' : ''
-                    }`}
-                  />
-                )}
-              </button>
+              ) : null}
 
-              {/* Stock Submenu Items */}
               <AnimatePresence initial={false}>
-                {isStockOpen && showText && (
+                {(isSalesOpen || !showText) && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
+                    initial={showText ? { opacity: 0, height: 0 } : false}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="pl-3 pr-1 py-1 space-y-0.5 overflow-hidden"
+                    className="space-y-0.5 overflow-hidden"
                   >
-                    {stockSubItems.map((item) => {
+                    {salesItems.map((item) => {
                       const Icon = item.icon;
-                      const isActive = location.pathname === item.path || location.pathname.startsWith(item.path);
+                      const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
 
                       return (
                         <NavLink
                           key={item.path}
                           to={item.path}
-                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all ${
+                          title={!showText ? item.name : ''}
+                          className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
                             isActive
-                              ? 'bg-teal-600/30 text-teal-300 font-semibold border border-teal-500/30'
+                              ? 'bg-teal-600 text-white font-semibold shadow-xs'
                               : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                          }`}
+                          } ${!showText ? 'justify-center' : ''}`}
                         >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-teal-400' : 'text-slate-400'}`} />
-                            <span className="truncate">{item.name}</span>
-                          </div>
-                          {isActive && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0" />
-                          )}
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                          {showText && <span className="truncate">{item.name}</span>}
                         </NavLink>
                       );
                     })}
@@ -686,281 +940,637 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                 )}
               </AnimatePresence>
             </div>
-          </div>
-
-          {/* SALES SECTION */}
-          <div>
-            {showText ? (
-              <div className="flex items-center justify-between px-2.5 mb-1.5">
-                <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
-                  Sales
-                </span>
-                <button
-                  onClick={toggleSalesOpen}
-                  className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
-                >
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      isSalesOpen ? 'transform rotate-180 text-teal-400' : ''
-                    }`}
-                  />
-                </button>
-              </div>
-            ) : null}
-
-            <AnimatePresence initial={false}>
-              {(isSalesOpen || !showText) && (
-                <motion.div
-                  initial={showText ? { opacity: 0, height: 0 } : false}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-0.5 overflow-hidden"
-                >
-                  {salesItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
-
-                    return (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        title={!showText ? item.name : ''}
-                        className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                          isActive
-                            ? 'bg-teal-600 text-white font-semibold shadow-xs'
-                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                        } ${!showText ? 'justify-center' : ''}`}
-                      >
-                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                        {showText && <span className="truncate">{item.name}</span>}
-                      </NavLink>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          )}
 
           {/* CRM SECTION */}
-          <div>
-            {showText ? (
-              <div className="flex items-center justify-between px-2.5 mb-1.5">
-                <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
-                  CRM
-                </span>
-                <button
-                  onClick={toggleCrmOpen}
-                  className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
-                >
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      isCrmOpen ? 'transform rotate-180 text-teal-400' : ''
-                    }`}
-                  />
-                </button>
-              </div>
-            ) : null}
+          {(!hasPermission || hasPermission('crm.view')) && (
+            <div>
+              {showText ? (
+                <div className="flex items-center justify-between px-2.5 mb-1.5">
+                  <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                    CRM
+                  </span>
+                  <button
+                    onClick={toggleCrmOpen}
+                    className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isCrmOpen ? 'transform rotate-180 text-teal-400' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              ) : null}
 
-            <AnimatePresence initial={false}>
-              {(isCrmOpen || !showText) && (
-                <motion.div
-                  initial={showText ? { opacity: 0, height: 0 } : false}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-0.5 overflow-hidden"
-                >
-                  {crmItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+              <AnimatePresence initial={false}>
+                {(isCrmOpen || !showText) && (
+                  <motion.div
+                    initial={showText ? { opacity: 0, height: 0 } : false}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-0.5 overflow-hidden"
+                  >
+                    {crmItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
 
-                    return (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        title={!showText ? item.name : ''}
-                        className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                          isActive
-                            ? 'bg-teal-600 text-white font-semibold shadow-xs'
-                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                        } ${!showText ? 'justify-center' : ''}`}
-                      >
-                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                        {showText && <span className="truncate">{item.name}</span>}
-                      </NavLink>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          title={!showText ? item.name : ''}
+                          className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? 'bg-teal-600 text-white font-semibold shadow-xs'
+                              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                          } ${!showText ? 'justify-center' : ''}`}
+                        >
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                          {showText && <span className="truncate">{item.name}</span>}
+                        </NavLink>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
 
           {/* PURCHASE SECTION */}
-          <div>
-            {showText ? (
-              <div className="flex items-center justify-between px-2.5 mb-1.5">
-                <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
-                  Purchase
-                </span>
-                <button
-                  onClick={togglePurchaseOpen}
-                  className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
-                >
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      isPurchaseOpen ? 'transform rotate-180 text-teal-400' : ''
-                    }`}
-                  />
-                </button>
-              </div>
-            ) : null}
+          {(!hasPermission || hasPermission('procurement.view')) && (
+            <div>
+              {showText ? (
+                <div className="flex items-center justify-between px-2.5 mb-1.5">
+                  <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                    Purchase
+                  </span>
+                  <button
+                    onClick={togglePurchaseOpen}
+                    className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isPurchaseOpen ? 'transform rotate-180 text-teal-400' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              ) : null}
 
-            <AnimatePresence initial={false}>
-              {(isPurchaseOpen || !showText) && (
-                <motion.div
-                  initial={showText ? { opacity: 0, height: 0 } : false}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-0.5 overflow-hidden"
-                >
-                  {purchaseItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+              <AnimatePresence initial={false}>
+                {(isPurchaseOpen || !showText) && (
+                  <motion.div
+                    initial={showText ? { opacity: 0, height: 0 } : false}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-0.5 overflow-hidden"
+                  >
+                    {purchaseItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
 
-                    return (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        title={!showText ? item.name : ''}
-                        className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                          isActive
-                            ? 'bg-teal-600 text-white font-semibold shadow-xs'
-                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                        } ${!showText ? 'justify-center' : ''}`}
-                      >
-                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                        {showText && <span className="truncate">{item.name}</span>}
-                      </NavLink>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          title={!showText ? item.name : ''}
+                          className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? 'bg-teal-600 text-white font-semibold shadow-xs'
+                              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                          } ${!showText ? 'justify-center' : ''}`}
+                        >
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                          {showText && <span className="truncate">{item.name}</span>}
+                        </NavLink>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
 
           {/* FINANCE SECTION */}
-          <div>
-            {showText ? (
-              <div className="flex items-center justify-between px-2.5 mb-1.5">
-                <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
-                  Finance
-                </span>
-                <button
-                  onClick={toggleFinanceOpen}
-                  className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
-                >
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      isFinanceOpen ? 'transform rotate-180 text-teal-400' : ''
-                    }`}
-                  />
-                </button>
-              </div>
-            ) : null}
+          {(!hasPermission || hasPermission('finance.view')) && (
+            <div>
+              {showText ? (
+                <div className="flex items-center justify-between px-2.5 mb-1.5">
+                  <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                    Finance
+                  </span>
+                  <button
+                    onClick={toggleFinanceOpen}
+                    className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isFinanceOpen ? 'transform rotate-180 text-teal-400' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              ) : null}
 
-            <AnimatePresence initial={false}>
-              {(isFinanceOpen || !showText) && (
-                <motion.div
-                  initial={showText ? { opacity: 0, height: 0 } : false}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-0.5 overflow-hidden"
-                >
-                  {financeItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = item.end
-                      ? location.pathname === item.path
-                      : location.pathname === item.path || (item.path !== '/app/finance' && location.pathname.startsWith(item.path));
+              <AnimatePresence initial={false}>
+                {(isFinanceOpen || !showText) && (
+                  <motion.div
+                    initial={showText ? { opacity: 0, height: 0 } : false}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-0.5 overflow-hidden"
+                  >
+                    {financeItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = item.end
+                        ? location.pathname === item.path
+                        : location.pathname === item.path || (item.path !== '/app/finance' && location.pathname.startsWith(item.path));
 
-                    return (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        title={!showText ? item.name : ''}
-                        className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                          isActive
-                            ? 'bg-teal-600 text-white font-semibold shadow-xs'
-                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                        } ${!showText ? 'justify-center' : ''}`}
-                      >
-                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                        {showText && <span className="truncate">{item.name}</span>}
-                      </NavLink>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          title={!showText ? item.name : ''}
+                          className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? 'bg-teal-600 text-white font-semibold shadow-xs'
+                              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                          } ${!showText ? 'justify-center' : ''}`}
+                        >
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                          {showText && <span className="truncate">{item.name}</span>}
+                        </NavLink>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
 
           {/* HRM SECTION */}
-          <div>
-            {showText ? (
-              <div className="flex items-center justify-between px-2.5 mb-1.5">
-                <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
-                  HRM
-                </span>
-                <button
-                  onClick={toggleHrmOpen}
-                  className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
-                >
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      isHrmOpen ? 'transform rotate-180 text-teal-400' : ''
-                    }`}
-                  />
-                </button>
-              </div>
-            ) : null}
+          {(!hasPermission || hasPermission('hrm.view')) && (
+            <div>
+              {showText ? (
+                <div className="flex items-center justify-between px-2.5 mb-1.5">
+                  <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                    HRM
+                  </span>
+                  <button
+                    onClick={toggleHrmOpen}
+                    className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isHrmOpen ? 'transform rotate-180 text-teal-400' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              ) : null}
 
-            <AnimatePresence initial={false}>
-              {(isHrmOpen || !showText) && (
-                <motion.div
-                  initial={showText ? { opacity: 0, height: 0 } : false}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="space-y-0.5 overflow-hidden"
-                >
-                  {hrmItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = item.end
-                      ? location.pathname === item.path
-                      : location.pathname === item.path || (item.path !== '/app/hrm' && location.pathname.startsWith(item.path));
+              <AnimatePresence initial={false}>
+                {(isHrmOpen || !showText) && (
+                  <motion.div
+                    initial={showText ? { opacity: 0, height: 0 } : false}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-0.5 overflow-hidden"
+                  >
+                    {hrmItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = item.end
+                        ? location.pathname === item.path
+                        : location.pathname === item.path || (item.path !== '/app/hrm' && location.pathname.startsWith(item.path));
 
-                    return (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        title={!showText ? item.name : ''}
-                        className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                          isActive
-                            ? 'bg-teal-600 text-white font-semibold shadow-xs'
-                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          title={!showText ? item.name : ''}
+                          className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? 'bg-teal-600 text-white font-semibold shadow-xs'
+                              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                          } ${!showText ? 'justify-center' : ''}`}
+                        >
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                          {showText && <span className="truncate">{item.name}</span>}
+                        </NavLink>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* POS SECTION */}
+          {(!hasPermission || hasPermission('pos.view')) && (
+            <div>
+              {showText ? (
+                <div className="flex items-center justify-between px-2.5 mb-1.5">
+                  <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                    POS
+                  </span>
+                  <button
+                    onClick={togglePosOpen}
+                    className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isPosOpen ? 'transform rotate-180 text-teal-400' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              ) : null}
+
+              <AnimatePresence initial={false}>
+                {(isPosOpen || !showText) && (
+                  <motion.div
+                    initial={showText ? { opacity: 0, height: 0 } : false}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-0.5 overflow-hidden"
+                  >
+                    {posItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          title={!showText ? item.name : ''}
+                          className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? 'bg-teal-600 text-white font-semibold shadow-xs'
+                              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                          } ${!showText ? 'justify-center' : ''}`}
+                        >
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                          {showText && <span className="truncate">{item.name}</span>}
+                        </NavLink>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* ASSETS SECTION */}
+          {(!hasPermission || hasPermission('assets.view')) && (
+            <div>
+              {showText ? (
+                <div className="flex items-center justify-between px-2.5 mb-1.5">
+                  <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                    Assets
+                  </span>
+                  <button
+                    onClick={toggleAssetsOpen}
+                    className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isAssetsOpen ? 'transform rotate-180 text-teal-400' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              ) : null}
+
+              <AnimatePresence initial={false}>
+                {(isAssetsOpen || !showText) && (
+                  <motion.div
+                    initial={showText ? { opacity: 0, height: 0 } : false}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-0.5 overflow-hidden"
+                  >
+                    {assetItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          title={!showText ? item.name : ''}
+                          className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? 'bg-teal-600 text-white font-semibold shadow-xs'
+                              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                          } ${!showText ? 'justify-center' : ''}`}
+                        >
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                          {showText && <span className="truncate">{item.name}</span>}
+                        </NavLink>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* DOCUMENTS SECTION */}
+          {(!hasPermission || hasPermission('documents.view')) && (
+            <div>
+              {showText ? (
+                <div className="flex items-center justify-between px-2.5 mb-1.5">
+                  <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                    Documents
+                  </span>
+                  <button
+                    onClick={toggleDocumentsOpen}
+                    className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isDocumentsOpen ? 'transform rotate-180 text-teal-400' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              ) : null}
+
+              <AnimatePresence initial={false}>
+                {(isDocumentsOpen || !showText) && (
+                  <motion.div
+                    initial={showText ? { opacity: 0, height: 0 } : false}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-0.5 overflow-hidden"
+                  >
+                    {documentItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          title={!showText ? item.name : ''}
+                          className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? 'bg-teal-600 text-white font-semibold shadow-xs'
+                              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                          } ${!showText ? 'justify-center' : ''}`}
+                        >
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                          {showText && <span className="truncate">{item.name}</span>}
+                        </NavLink>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* SUPPORT SECTION */}
+          {(!hasPermission || hasPermission('support.view')) && (
+            <div>
+              {showText ? (
+                <div className="flex items-center justify-between px-2.5 mb-1.5 mt-3">
+                  <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                    Support
+                  </span>
+                  <button
+                    onClick={toggleSupportOpen}
+                    className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isSupportOpen ? 'transform rotate-180 text-teal-400' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              ) : null}
+
+              <AnimatePresence initial={false}>
+                {(isSupportOpen || !showText) && (
+                  <motion.div
+                    initial={showText ? { opacity: 0, height: 0 } : false}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-0.5 overflow-hidden"
+                  >
+                    {supportItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          title={!showText ? item.name : ''}
+                          className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? 'bg-slate-800 text-white font-semibold shadow-xs border-l-2 border-teal-400'
+                              : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
+                          } ${!showText ? 'justify-center' : ''}`}
+                        >
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-teal-400' : 'text-slate-400'}`} />
+                          {showText && <span className="truncate">{item.name}</span>}
+                        </NavLink>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* MEMBERSHIP SECTION */}
+          {(!hasPermission || hasPermission('membership.view')) && (
+            <div>
+              {showText ? (
+                <div className="flex items-center justify-between px-2.5 mb-1.5 mt-3">
+                  <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                    Membership
+                  </span>
+                  <button
+                    onClick={toggleMembershipOpen}
+                    className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isMembershipOpen ? 'transform rotate-180 text-teal-400' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              ) : null}
+
+              <AnimatePresence initial={false}>
+                {(isMembershipOpen || !showText) && (
+                  <motion.div
+                    initial={showText ? { opacity: 0, height: 0 } : false}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-0.5 overflow-hidden"
+                  >
+                    {membershipItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          title={!showText ? item.name : ''}
+                          className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? 'bg-slate-800 text-white font-semibold shadow-xs border-l-2 border-teal-400'
+                              : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
+                          } ${!showText ? 'justify-center' : ''}`}
+                        >
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-teal-400' : 'text-slate-400'}`} />
+                          {showText && <span className="truncate">{item.name}</span>}
+                        </NavLink>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* SYSTEM SECTION */}
+          {(!hasPermission || hasPermission('users.view')) && (
+            <div>
+              {showText ? (
+                <div className="flex items-center justify-between px-2.5 mb-1.5 mt-3">
+                  <span className="text-[11px] font-semibold text-slate-400 tracking-wider uppercase">
+                    System
+                  </span>
+                  <button
+                    onClick={toggleSystemOpen}
+                    className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+                  >
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isSystemOpen ? 'transform rotate-180 text-teal-400' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              ) : null}
+
+              <AnimatePresence initial={false}>
+                {(isSystemOpen || !showText) && (
+                  <motion.div
+                    initial={showText ? { opacity: 0, height: 0 } : false}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-0.5 overflow-hidden"
+                  >
+                    {systemItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+
+                      return (
+                        <NavLink
+                          key={item.path}
+                          to={item.path}
+                          title={!showText ? item.name : ''}
+                          className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? 'bg-slate-800 text-white font-semibold shadow-xs border-l-2 border-teal-400'
+                              : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
+                          } ${!showText ? 'justify-center' : ''}`}
+                        >
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-teal-400' : 'text-slate-400'}`} />
+                          {showText && <span className="truncate">{item.name}</span>}
+                        </NavLink>
+                      );
+                    })}
+
+                    {/* Nested Expandable Settings Menu */}
+                    <div>
+                      <button
+                        onClick={toggleSettingsOpen}
+                        title={!showText ? 'Settings' : ''}
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                          isAnySettingsActive
+                            ? 'text-white bg-slate-800/90 font-semibold'
+                            : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
                         } ${!showText ? 'justify-center' : ''}`}
                       >
-                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                        {showText && <span className="truncate">{item.name}</span>}
-                      </NavLink>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Sliders className={`w-4 h-4 shrink-0 ${isAnySettingsActive ? 'text-teal-400' : 'text-slate-400'}`} />
+                          {showText && <span className="truncate">Settings</span>}
+                        </div>
+                        {showText && (
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${
+                              isSettingsOpen ? 'transform rotate-180 text-teal-400' : ''
+                            }`}
+                          />
+                        )}
+                      </button>
+
+                      <AnimatePresence initial={false}>
+                        {isSettingsOpen && showText && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="pl-4 pr-1 py-1 space-y-0.5 overflow-hidden"
+                          >
+                            {settingsSubItems.map((sub) => {
+                              const SubIcon = sub.icon;
+                              const isSubActive = location.pathname === sub.path;
+
+                              return (
+                                <NavLink
+                                  key={sub.path}
+                                  to={sub.path}
+                                  className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all ${
+                                    isSubActive
+                                      ? 'bg-teal-600 text-white font-semibold shadow-xs'
+                                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                                  }`}
+                                >
+                                  <SubIcon className={`w-3.5 h-3.5 shrink-0 ${isSubActive ? 'text-white' : 'text-slate-400'}`} />
+                                  <span className="truncate">{sub.name}</span>
+                                </NavLink>
+                              );
+                            })}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* PAGES & AUTHENTICATION SECTION */}
+          <AuthenticationSection showText={showText} />
+
+          {/* UI INTERFACE SECTION */}
+          <UIInterfaceSection showText={showText} />
+
+          {/* HELP SECTION */}
+          <HelpSection showText={showText} />
 
           {/* ADMINISTRATION SECTION */}
           <div>

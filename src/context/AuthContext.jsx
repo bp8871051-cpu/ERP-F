@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem('erp_token'));
   const [companies, setCompanies] = useState([]);
   const [currentCompany, setCurrentCompany] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
           setCurrentCompany({ id: 1, name: 'Falcon LLP' });
         }
 
-        if (token) {
+        if (token && !user) {
           const userData = await authService.getCurrentUser();
           if (userData?.user) {
             setUser(userData.user);
@@ -38,9 +38,6 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (err) {
         console.error('Auth initialization error:', err);
-        logout();
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -55,15 +52,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('erp_token');
+    localStorage.removeItem('erp_user');
+    localStorage.removeItem('erp_company_id');
     try {
       await authService.logout();
     } catch {
       // Ignored
-    } finally {
-      setUser(null);
-      setToken(null);
-      localStorage.removeItem('erp_token');
-      localStorage.removeItem('erp_user');
     }
   };
 
@@ -76,9 +73,11 @@ export const AuthProvider = ({ children }) => {
 
   const hasPermission = (permission) => {
     if (!user) return false;
-    if (user.role === 'Super Admin') return true;
-    // Granular permissions or role match
-    return true;
+    if (user.role === 'Super Admin' || user.role === 'Admin') return true;
+    if (Array.isArray(user.permissions)) {
+      return user.permissions.includes(permission);
+    }
+    return false;
   };
 
   return (

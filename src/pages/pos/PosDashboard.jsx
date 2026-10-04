@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Store,
   DollarSign,
@@ -6,10 +7,16 @@ import {
   CreditCard,
   RotateCcw,
   Printer,
-  PlusCircle,
-  Clock,
+  QrCode,
+  Barcode,
+  Sliders,
+  AlertTriangle,
   TrendingUp,
   Banknote,
+  Smartphone,
+  Package,
+  Layers,
+  ArrowRight,
   Receipt,
 } from 'lucide-react';
 import posService from '../../services/posService';
@@ -24,6 +31,7 @@ import BarMetricChart from '../../components/charts/BarMetricChart';
 import DonutMetricChart from '../../components/charts/DonutMetricChart';
 
 export const PosDashboard = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -50,48 +58,86 @@ export const PosDashboard = () => {
   if (error || !data) return <ErrorState message={error} onRetry={fetchPos} />;
 
   const {
-    metrics,
-    hourlySales,
-    dailySales,
-    paymentMethods,
-    recentOrders,
-    topSellingProducts,
-    recentTransactions,
+    metrics = {},
+    hourlySales = [],
+    dailySales = [],
+    paymentMethods = [],
+    topSellingProducts = [],
+    categorySales = [],
+    refundTrend = [],
+    lowStockProducts = [],
+    activeSession = null,
   } = data;
 
   return (
     <div className="space-y-6">
-      {/* Header & POS Quick Actions */}
+      {/* Header & POS Quick Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/60">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Point of Sale (POS)</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Point of Sale (POS)</h1>
+            {activeSession ? (
+              <Badge variant="success" dot={true}>Register Open</Badge>
+            ) : (
+              <Badge variant="neutral">Shift Standby</Badge>
+            )}
+          </div>
           <p className="text-xs text-slate-500 mt-1">
-            Terminal register telemetry, hourly transaction velocity, tender methods, and receipts.
+            Real-time retail register telemetry, hourly velocity, multi-tender transactions, and print hubs.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="secondary" size="sm" icon={RotateCcw}>
-            Refund
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={Printer}
+            onClick={() => navigate('/app/pos/barcode-print')}
+          >
+            Barcode Print
           </Button>
-          <Button variant="secondary" size="sm" icon={Printer}>
-            Print Receipt
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={QrCode}
+            onClick={() => navigate('/app/pos/qr-print')}
+          >
+            QR Print
           </Button>
-          <Button variant="teal" size="sm" icon={PlusCircle}>
-            New Order
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={Sliders}
+            onClick={() => navigate('/app/pos/print-settings')}
+          >
+            Settings
           </Button>
-          <Button variant="primary" size="sm" icon={Store}>
-            Open POS Register
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={Receipt}
+            onClick={() => navigate('/app/pos/orders')}
+          >
+            Orders & Refunds
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={Store}
+            onClick={() => navigate('/app/pos/terminal')}
+            className="bg-teal-700 hover:bg-teal-800 text-white shadow-sm"
+          >
+            Launch POS Screen
           </Button>
         </div>
       </div>
 
-      {/* 6 Key POS Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+      {/* 8 POS KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
         <StatCard
           title="Today's Sales"
-          value={`$${metrics.todaySales.toLocaleString()}`}
-          change="+8.4%"
+          value={`₹${Number(metrics.todaySales || 0).toLocaleString()}`}
+          change="+12.4%"
           isPositive={true}
           changeLabel="vs yesterday"
           icon={DollarSign}
@@ -100,148 +146,248 @@ export const PosDashboard = () => {
         />
         <StatCard
           title="Today's Orders"
-          value={metrics.todayOrders}
-          subtitle="Processed at terminals"
+          value={metrics.todayOrders || 0}
+          change="+4"
+          isPositive={true}
+          changeLabel="orders"
           icon={ShoppingCart}
           iconColor="text-blue-600"
           iconBg="bg-blue-50"
         />
         <StatCard
           title="Avg Order Value"
-          value={`$${metrics.averageOrderValue.toFixed(2)}`}
-          change="+3.1%"
-          isPositive={true}
-          icon={Receipt}
+          value={`₹${Number(metrics.averageOrderValue || 0).toLocaleString()}`}
+          subtitle="Ticket Size"
+          icon={TrendingUp}
+          iconColor="text-indigo-600"
+          iconBg="bg-indigo-50"
+        />
+        <StatCard
+          title="Cash Sales"
+          value={`₹${Number(metrics.cashSales || 0).toLocaleString()}`}
+          subtitle="Tendered"
+          icon={Banknote}
           iconColor="text-emerald-600"
           iconBg="bg-emerald-50"
         />
         <StatCard
-          title="Refunds"
-          value={`$${metrics.refunds.toFixed(2)}`}
-          change="0.8% return rate"
-          isPositive={false}
-          icon={RotateCcw}
-          iconColor="text-rose-600"
-          iconBg="bg-rose-50"
+          title="Card Sales"
+          value={`₹${Number(metrics.cardSales || 0).toLocaleString()}`}
+          subtitle="Credit/Debit"
+          icon={CreditCard}
+          iconColor="text-sky-600"
+          iconBg="bg-sky-50"
         />
         <StatCard
-          title="Cash Tendered"
-          value={`$${metrics.cashPayments.toLocaleString()}`}
-          subtitle="Verified in drawer"
-          icon={Banknote}
+          title="UPI Sales"
+          value={`₹${Number(metrics.upiSales || 0).toLocaleString()}`}
+          subtitle="Digital QR"
+          icon={Smartphone}
+          iconColor="text-purple-600"
+          iconBg="bg-purple-50"
+        />
+        <StatCard
+          title="Pending Orders"
+          value={metrics.pendingOrders || 0}
+          subtitle="Hold / Draft"
+          icon={Store}
           iconColor="text-amber-600"
           iconBg="bg-amber-50"
         />
         <StatCard
-          title="Card Payments"
-          value={`$${metrics.cardPayments.toLocaleString()}`}
-          subtitle="Visa, Mastercard, Amex"
-          icon={CreditCard}
-          iconColor="text-indigo-600"
-          iconBg="bg-indigo-50"
+          title="Refunds"
+          value={`₹${Number(metrics.refunds || 0).toLocaleString()}`}
+          subtitle="Today's Returns"
+          icon={RotateCcw}
+          iconColor="text-rose-600"
+          iconBg="bg-rose-50"
         />
       </div>
 
-      {/* Charts Row 1: Hourly Sales + Payment Methods */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card
-          title="Hourly Sales Velocity (Today)"
-          subtitle="Transaction throughput across peak retail and trading hours"
-          className="lg:col-span-2"
-        >
-          <BarMetricChart
-            data={hourlySales}
-            dataKeyX="hour"
-            bars={[
-              { key: 'sales', name: 'Revenue ($)', color: '#0F8B7A' },
-            ]}
-            formatY={(v) => `$${v}`}
-          />
-        </Card>
+      {/* Row 2: Charts (Hourly Sales, Daily Sales, Payment Method Distribution) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Hourly Sales Velocity */}
+        <div className="lg:col-span-4">
+          <Card
+            title="Hourly Sales Velocity"
+            subtitle="Today's turnover across operating store hours"
+          >
+            <div className="h-64">
+              <TrendAreaChart
+                data={hourlySales}
+                dataKey="sales"
+                xAxisKey="hour"
+                color="#0F8B7A"
+                tooltipFormatter={(val) => [`₹${Number(val).toLocaleString()}`, 'Sales']}
+              />
+            </div>
+          </Card>
+        </div>
 
-        <Card title="Tender / Payment Methods" subtitle="Breakdown of checkout payment channels">
-          <DonutMetricChart
-            data={paymentMethods}
-            dataKey="value"
-            nameKey="name"
-          />
-        </Card>
+        {/* Daily Sales 7-Day Trend */}
+        <div className="lg:col-span-5">
+          <Card
+            title="7-Day Daily Turnover"
+            subtitle="Trailing 7 days revenue trajectory"
+          >
+            <div className="h-64">
+              <BarMetricChart
+                data={dailySales}
+                dataKey="sales"
+                xAxisKey="day"
+                color="#2563EB"
+                tooltipFormatter={(val) => [`₹${Number(val).toLocaleString()}`, 'Turnover']}
+              />
+            </div>
+          </Card>
+        </div>
+
+        {/* Payment Methods Distribution */}
+        <div className="lg:col-span-3">
+          <Card
+            title="Payment Distribution"
+            subtitle="Share of tenders received"
+          >
+            <div className="h-64">
+              <DonutMetricChart
+                data={paymentMethods}
+                dataKey="value"
+                nameKey="name"
+                innerRadius={50}
+                outerRadius={75}
+              />
+            </div>
+          </Card>
+        </div>
       </div>
 
-      {/* Charts Row 2: Daily Sales Trend (7 Days) */}
-      <Card
-        title="7-Day Daily Revenue Trend"
-        subtitle="Weekly retail consistency and weekend volume surges"
-      >
-        <TrendAreaChart
-          data={dailySales}
-          dataKeyX="day"
-          series={[
-            { key: 'sales', name: 'Daily Gross Receipts ($)', color: '#1E293B' },
-          ]}
-          formatY={(v) => `$${(v / 1000).toFixed(1)}k`}
-        />
-      </Card>
+      {/* Row 3: Sales by Category & Refund Trend */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Sales by Category */}
+        <div className="lg:col-span-6">
+          <Card
+            title="Sales by Category"
+            subtitle="Category-wise gross merchandise volume"
+          >
+            <div className="h-64">
+              <BarMetricChart
+                data={categorySales}
+                dataKey="amount"
+                xAxisKey="category"
+                color="#8B5CF6"
+                tooltipFormatter={(val) => [`₹${Number(val).toLocaleString()}`, 'Gross Volume']}
+              />
+            </div>
+          </Card>
+        </div>
 
-      {/* Tables Row: Recent Orders + Top Selling Products + Transactions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Orders Table */}
-        <Card title="Recent Terminal Orders" subtitle="Live stream of completed ticket sales" noPadding>
-          <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto">
-            {recentOrders.map((o) => (
-              <div key={o.id} className="p-3 hover:bg-slate-50/60 flex items-center justify-between text-xs">
-                <div>
-                  <span className="font-semibold text-slate-900 block">{o.orderNumber}</span>
-                  <span className="text-[10px] text-slate-400">{o.customer} • {o.time}</span>
-                </div>
-                <div className="text-right">
-                  <span className="font-bold text-slate-800 block">{o.total}</span>
-                  <Badge variant={o.paymentMethod === 'CARD' ? 'info' : 'teal'} size="sm">
-                    {o.paymentMethod}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+        {/* Refund Trend */}
+        <div className="lg:col-span-6">
+          <Card
+            title="Refund Trend (7 Days)"
+            subtitle="Returned merchandise and refund outflow"
+          >
+            <div className="h-64">
+              <TrendAreaChart
+                data={refundTrend}
+                dataKey="amount"
+                xAxisKey="day"
+                color="#EF4444"
+                tooltipFormatter={(val) => [`₹${Number(val).toLocaleString()}`, 'Refunds']}
+              />
+            </div>
+          </Card>
+        </div>
+      </div>
 
+      {/* Row 4: Top Selling Products & Low Stock Alerts */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Top Selling Products */}
-        <Card title="Top Selling SKUs Today" subtitle="Highest units moved through registers" noPadding>
-          <div className="divide-y divide-slate-100">
-            {topSellingProducts.map((p) => (
-              <div key={p.id} className="p-3 hover:bg-slate-50/60 flex items-center justify-between text-xs">
-                <div>
-                  <span className="font-semibold text-slate-900 block truncate max-w-[150px]">{p.name}</span>
-                  <span className="text-[10px] text-slate-400">{p.category} • Price: {p.price}</span>
-                </div>
-                <div className="text-right">
-                  <span className="font-bold text-emerald-700 block">{p.revenue}</span>
-                  <span className="text-[10px] text-slate-500 font-semibold">{p.soldUnits} units</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+        <div className="lg:col-span-7">
+          <Card
+            title="Top Selling POS Products"
+            subtitle="Highest volume inventory items checked out at terminals"
+            headerAction={
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={() => navigate('/app/pos/terminal')}
+              >
+                Go to POS <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </Button>
+            }
+          >
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-400 font-medium">
+                    <th className="pb-2.5">Product Name</th>
+                    <th className="pb-2.5">Category</th>
+                    <th className="pb-2.5 text-right">Unit Price</th>
+                    <th className="pb-2.5 text-right">Sold Units</th>
+                    <th className="pb-2.5 text-right">Gross Revenue</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {topSellingProducts.map((p) => (
+                    <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-2.5 font-medium text-slate-900 flex items-center gap-2">
+                        <Package className="w-3.5 h-3.5 text-teal-600" />
+                        {p.name}
+                      </td>
+                      <td className="py-2.5 text-slate-500">{p.category}</td>
+                      <td className="py-2.5 text-right font-medium">₹{Number(p.price).toLocaleString()}</td>
+                      <td className="py-2.5 text-right">
+                        <Badge variant="teal" size="sm">{p.soldUnits} sold</Badge>
+                      </td>
+                      <td className="py-2.5 text-right font-semibold text-slate-900">
+                        ₹{Number(p.revenue).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
 
-        {/* Recent Settlement Transactions */}
-        <Card title="Recent Terminal Settlements" subtitle="Merchant batch audit log" noPadding>
-          <div className="divide-y divide-slate-100">
-            {recentTransactions.map((t) => (
-              <div key={t.id} className="p-3 hover:bg-slate-50/60 flex items-center justify-between text-xs">
-                <div>
-                  <span className="font-semibold text-slate-800 block truncate max-w-[150px]">{t.reference}</span>
-                  <span className="text-[10px] text-slate-400">{t.time}</span>
-                </div>
-                <div className="text-right">
-                  <span className="font-bold text-slate-900 block">{t.amount}</span>
-                  <Badge variant="success" size="sm">
-                    {t.status}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+        {/* Low Stock Products */}
+        <div className="lg:col-span-5">
+          <Card
+            title="Low Stock Watchlist"
+            subtitle="Products reaching reorder threshold"
+            headerAction={
+              <Badge variant="warning" dot={true}>
+                {lowStockProducts.length} Items
+              </Badge>
+            }
+          >
+            <div className="space-y-3">
+              {lowStockProducts.length === 0 ? (
+                <p className="text-xs text-slate-400 py-6 text-center">All inventory items are sufficiently stocked.</p>
+              ) : (
+                lowStockProducts.map((prod) => (
+                  <div
+                    key={prod.id}
+                    className="flex items-center justify-between p-2.5 bg-amber-50/40 rounded-lg border border-amber-200/60"
+                  >
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span className="text-xs font-semibold text-slate-900">{prod.name}</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 font-mono pl-5.5">SKU: {prod.sku} • {prod.category}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-rose-600">{prod.availableStock} in stock</span>
+                      <p className="text-[10px] text-slate-400">Alert: {prod.alertQuantity}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );
