@@ -5,14 +5,36 @@ export const projectService = {
     const response = await api.get('/projects/dashboard');
     return response.data;
   },
+
   getProjects: async (params) => {
-    const response = await api.get('/projects/list', { params });
+    const response = await api.get('/projects', { params });
     return response.data;
   },
-  getTasks: async (params) => {
-    const response = await api.get('/projects/tasks', { params });
+
+  getProject: async (id) => {
+    const response = await api.get(`/projects/${id}`);
     return response.data;
-  }
+  },
+
+  createProject: async (projectData) => {
+    const response = await api.post('/projects', projectData);
+    return response.data;
+  },
+
+  updateProject: async (id, projectData) => {
+    const response = await api.put(`/projects/${id}`, projectData);
+    return response.data;
+  },
+
+  deleteProject: async (id) => {
+    const response = await api.delete(`/projects/${id}`);
+    return response.data;
+  },
+
+  getMeta: async () => {
+    const response = await api.get('/projects/meta');
+    return response.data;
+  },
 };
 
 export default projectService;

@@ -425,18 +425,6 @@ export const Topbar = ({ isCollapsed, setIsCollapsed }) => {
           )}
         </div>
 
-        {/* Filament Admin Portal shortcut button */}
-        <a
-          href="http://localhost:8000/admin"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-amber-200 bg-amber-50/80 text-amber-800 hover:bg-amber-100 text-xs font-medium transition-colors"
-          title="Open Filament Admin Panel"
-        >
-          <Shield className="w-3.5 h-3.5 text-amber-600" />
-          <span>Admin</span>
-        </a>
-
         {/* User Profile Menu */}
         <div className="relative pl-1" ref={profileRef}>
           <button
@@ -464,18 +452,6 @@ export const Topbar = ({ isCollapsed, setIsCollapsed }) => {
                 <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-teal-50 text-teal-700">
                   {user?.role || 'Super Admin'}
                 </span>
-              </div>
-
-              <div className="py-1">
-                <a
-                  href="http://localhost:8000/admin"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 text-xs text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                >
-                  <Shield className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Filament Admin Panel</span>
-                </a>
               </div>
 
               <div className="pt-1 border-t border-slate-100">

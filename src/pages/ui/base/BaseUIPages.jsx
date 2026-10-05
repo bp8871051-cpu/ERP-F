@@ -175,7 +175,7 @@ export const AccordionPage = () => {
   };
 
   const faq = [
-    { id: 1, title: 'What is Falcon ERP Architecture?', content: 'Falcon ERP uses a decoupled React 19 frontend, Laravel 12 API backend, MySQL 8 database, and FilamentPHP v5 administration panel with Sanctum token authentication.' },
+    { id: 1, title: 'What is Falcon ERP Architecture?', content: 'Falcon ERP uses a decoupled React 19 frontend, Laravel 12 high-performance REST API backend, MySQL 8 database, and unified multi-company isolation with Sanctum token authentication.' },
     { id: 2, title: 'How does Multi-Tenant Company Isolation work?', content: 'Each company record is scoped by company_id foreign key constraints and validated across all service-layer repositories and audit logging handlers.' },
     { id: 3, title: 'Can multiple accordions remain open at once?', content: 'Yes! The independent state array permits multiple items to remain expanded simultaneously without closing sibling sections.' },
     { id: 4, title: 'How do I export Data Table records?', content: 'Click the Export CSV button in the Data Table header to trigger the backend streaming CSV generator directly from MySQL.' },

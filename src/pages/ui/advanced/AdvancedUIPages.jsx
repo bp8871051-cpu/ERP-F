@@ -30,7 +30,7 @@ export const DragulaPage = () => {
     ],
     in_progress: [
       { id: 4, title: 'Data Table CSV Export', priority: 'High', tag: 'Backend' },
-      { id: 5, title: 'Filament v5 Resource Upgrades', priority: 'Medium', tag: 'DevOps' },
+      { id: 5, title: 'REST API Performance Optimizations', priority: 'Medium', tag: 'DevOps' },
     ],
     done: [
       { id: 6, title: 'MySQL MariaDB Engine Configuration', priority: 'Urgent', tag: 'Database' },

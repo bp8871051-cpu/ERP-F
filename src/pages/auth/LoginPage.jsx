@@ -182,21 +182,9 @@ export const LoginPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Admin Panel Direct Link */}
-      <div className="mt-6 text-center">
-        <a
-          href="http://localhost:8000/admin"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors"
-        >
-          <Shield className="w-3.5 h-3.5 text-amber-600" />
-          <span>Access Filament Master Admin Panel (/admin)</span>
-        </a>
-      </div>
     </div>
   );
 };
 
 export default LoginPage;
+
