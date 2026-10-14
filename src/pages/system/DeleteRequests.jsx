@@ -6,6 +6,8 @@ import {
   FileText, CornerDownRight
 } from 'lucide-react';
 import systemService from '../../services/systemService';
+import SearchableSelect from '../../components/ui/SearchableSelect';
+import Button from '../../components/ui/Button';
 
 const statusBadges = {
   pending: 'bg-amber-100 text-amber-800 border-amber-200',
@@ -127,12 +129,14 @@ export default function DeleteRequests() {
           </p>
         </div>
 
-        <button
+        <Button
+          variant="teal"
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl shadow-xs transition cursor-pointer"
+          icon={Plus}
+          className="shadow-xs"
         >
-          <Plus className="w-4 h-4" /> Request Record Deletion
-        </button>
+          Request Record Deletion
+        </Button>
       </div>
 
       {notification && (
@@ -162,16 +166,19 @@ export default function DeleteRequests() {
         </form>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          >
-            <option value="all">All Request Statuses</option>
-            <option value="pending">Pending Admin Review</option>
-            <option value="approved">Approved & Soft Deleted</option>
-            <option value="rejected">Rejected</option>
-          </select>
+          <div className="w-48 z-10">
+            <SearchableSelect
+              options={[
+                { value: 'all', label: 'All Request Statuses' },
+                { value: 'pending', label: 'Pending Admin Review' },
+                { value: 'approved', label: 'Approved & Soft Deleted' },
+                { value: 'rejected', label: 'Rejected' },
+              ]}
+              value={statusFilter}
+              onChange={(val) => setStatusFilter(val)}
+              searchable={false}
+            />
+          </div>
 
           <button
             onClick={fetchDeleteRequests}
@@ -260,15 +267,16 @@ export default function DeleteRequests() {
 
                     <td className="p-3.5 text-right">
                       {req.status === 'pending' ? (
-                        <button
+                        <Button
+                          variant="teal"
+                          size="xs"
                           onClick={() => {
                             setSelectedRequest(req);
                             setShowReviewModal(true);
                           }}
-                          className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-semibold transition"
                         >
                           Review & Decide
-                        </button>
+                        </Button>
                       ) : (
                         <span className="text-[11px] text-slate-400 font-medium">
                           {req.reviewed_by_user?.name ? `By ${req.reviewed_by_user.name}` : 'Reviewed'}
@@ -286,12 +294,12 @@ export default function DeleteRequests() {
       {/* Create Delete Request Modal */}
       <AnimatePresence>
         {showCreateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 flex flex-col"
+              className="bg-white rounded-2xl max-w-lg w-full !overflow-visible shadow-2xl border border-slate-200 flex flex-col m-auto"
             >
               <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -314,22 +322,23 @@ export default function DeleteRequests() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
+                  <div className="z-20">
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Target ERP Module *</label>
-                    <select
+                    <SearchableSelect
+                      options={[
+                        { value: 'Sales', label: 'Sales & Invoicing' },
+                        { value: 'CRM', label: 'CRM & Customers' },
+                        { value: 'Inventory', label: 'Inventory & Products' },
+                        { value: 'Finance', label: 'Finance & Ledger' },
+                        { value: 'HRM', label: 'HRM & Employees' },
+                        { value: 'Documents', label: 'Documents Vault' },
+                        { value: 'Support', label: 'Support Tickets' },
+                        { value: 'Membership', label: 'Membership Subscriptions' },
+                      ]}
                       value={form.module}
-                      onChange={(e) => setForm({ ...form, module: e.target.value })}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-                    >
-                      <option value="Sales">Sales & Invoicing</option>
-                      <option value="CRM">CRM & Customers</option>
-                      <option value="Inventory">Inventory & Products</option>
-                      <option value="Finance">Finance & Ledger</option>
-                      <option value="HRM">HRM & Employees</option>
-                      <option value="Documents">Documents Vault</option>
-                      <option value="Support">Support Tickets</option>
-                      <option value="Membership">Membership Subscriptions</option>
-                    </select>
+                      onChange={(val) => setForm({ ...form, module: val })}
+                      searchable={false}
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Record Type *</label>
@@ -381,20 +390,20 @@ export default function DeleteRequests() {
                 </div>
 
                 <div className="pt-4 border-t border-slate-200 flex justify-end gap-3">
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
                     onClick={() => setShowCreateModal(false)}
-                    className="px-4 py-2 rounded-lg border border-slate-300 text-xs font-medium text-slate-700 hover:bg-slate-50 transition"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="submit"
-                    disabled={submitting}
-                    className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-md transition disabled:opacity-50"
+                    variant="teal"
+                    loading={submitting}
                   >
-                    {submitting ? 'Submitting...' : 'Submit Delete Request'}
-                  </button>
+                    Submit Delete Request
+                  </Button>
                 </div>
               </form>
             </motion.div>
@@ -405,12 +414,12 @@ export default function DeleteRequests() {
       {/* Review Modal */}
       <AnimatePresence>
         {showReviewModal && selectedRequest && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-slate-200 flex flex-col"
+              className="bg-white rounded-2xl max-w-md w-full !overflow-visible shadow-2xl border border-slate-200 flex flex-col m-auto"
             >
               <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -484,22 +493,20 @@ export default function DeleteRequests() {
                 </div>
 
                 <div className="pt-4 border-t border-slate-200 flex justify-end gap-3">
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
                     onClick={() => setShowReviewModal(false)}
-                    className="px-4 py-2 rounded-lg border border-slate-300 text-xs font-medium text-slate-700 hover:bg-slate-50 transition"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="submit"
-                    disabled={submitting}
-                    className={`px-4 py-2 rounded-lg text-white text-xs font-semibold shadow-md transition disabled:opacity-50 ${
-                      reviewAction === 'approve' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'
-                    }`}
+                    variant="teal"
+                    loading={submitting}
                   >
-                    {submitting ? 'Processing...' : (reviewAction === 'approve' ? 'Confirm Approval' : 'Confirm Rejection')}
-                  </button>
+                    {reviewAction === 'approve' ? 'Confirm Approval' : 'Confirm Rejection'}
+                  </Button>
                 </div>
               </form>
             </motion.div>

@@ -27,6 +27,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export const AssetRegister = () => {
   const navigate = useNavigate();
@@ -249,8 +250,8 @@ export const AssetRegister = () => {
       </div>
 
       {/* Filters Bar */}
-      <Card className="p-4 bg-white border border-slate-200 shadow-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+      <Card className="p-4 bg-white border border-slate-200 shadow-xs !overflow-visible">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 !overflow-visible">
           {/* Search */}
           <div className="relative md:col-span-2">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -267,62 +268,60 @@ export const AssetRegister = () => {
           </div>
 
           {/* Category */}
-          <div>
-            <select
+          <div className="z-30">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Categories' },
+                ...categories.map(c => ({ value: c.id, label: c.name }))
+              ]}
               value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
+              onChange={(val) => {
+                setSelectedCategory(val);
                 setPage(1);
               }}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-teal-500 font-medium text-slate-700"
-            >
-              <option value="">All Categories</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              searchable={false}
+            />
           </div>
 
           {/* Department */}
-          <div>
-            <select
+          <div className="z-20">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Departments' },
+                ...departments.map(d => {
+                  const val = typeof d === 'string' ? d : d.name;
+                  return { value: val, label: val };
+                })
+              ]}
               value={selectedDepartment}
-              onChange={(e) => {
-                setSelectedDepartment(e.target.value);
+              onChange={(val) => {
+                setSelectedDepartment(val);
                 setPage(1);
               }}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-teal-500 font-medium text-slate-700"
-            >
-              <option value="">All Departments</option>
-              {departments.map((d, i) => (
-                <option key={i} value={typeof d === 'string' ? d : d.name}>
-                  {typeof d === 'string' ? d : d.name}
-                </option>
-              ))}
-            </select>
+              searchable={false}
+            />
           </div>
 
           {/* Status */}
-          <div>
-            <select
+          <div className="z-10">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'available', label: 'Available' },
+                { value: 'assigned', label: 'Assigned' },
+                { value: 'under maintenance', label: 'Under Maintenance' },
+                { value: 'lost', label: 'Lost' },
+                { value: 'damaged', label: 'Damaged' },
+                { value: 'disposed', label: 'Disposed' },
+                { value: 'retired', label: 'Retired' }
+              ]}
               value={selectedStatus}
-              onChange={(e) => {
-                setSelectedStatus(e.target.value);
+              onChange={(val) => {
+                setSelectedStatus(val);
                 setPage(1);
               }}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-teal-500 font-medium text-slate-700"
-            >
-              <option value="">All Statuses</option>
-              <option value="available">Available</option>
-              <option value="assigned">Assigned</option>
-              <option value="under maintenance">Under Maintenance</option>
-              <option value="lost">Lost</option>
-              <option value="damaged">Damaged</option>
-              <option value="disposed">Disposed</option>
-              <option value="retired">Retired</option>
-            </select>
+              searchable={false}
+            />
           </div>
         </div>
       </Card>
@@ -468,8 +467,8 @@ export const AssetRegister = () => {
 
       {/* Register Asset Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl flex flex-col my-8">
             <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-900 text-white">
               <h3 className="text-sm font-bold flex items-center gap-2">
                 <Boxes className="w-4 h-4 text-teal-400" />
@@ -483,7 +482,7 @@ export const AssetRegister = () => {
               </button>
             </div>
 
-            <form onSubmit={handleCreateSubmit} className="p-5 overflow-y-auto space-y-4 text-xs">
+            <form onSubmit={handleCreateSubmit} className="p-5 space-y-4 text-xs">
               {formError && (
                 <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 flex items-center gap-2">
                   <AlertCircle className="w-4 h-4" /> {formError}
@@ -518,20 +517,17 @@ export const AssetRegister = () => {
                     />
                   </div>
 
-                  <div>
+                  <div className="z-30">
                     <label className="block font-semibold text-slate-700 mb-1">Category</label>
-                    <select
+                    <SearchableSelect
+                      options={[
+                        { value: '', label: 'Select Category' },
+                        ...categories.map(c => ({ value: c.id, label: c.name }))
+                      ]}
                       value={newAsset.category_id}
-                      onChange={(e) => setNewAsset({ ...newAsset, category_id: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500"
-                    >
-                      <option value="">Select Category</option>
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => setNewAsset({ ...newAsset, category_id: val })}
+                      searchable={false}
+                    />
                   </div>
 
                   <div>
@@ -663,18 +659,19 @@ export const AssetRegister = () => {
                     />
                   </div>
 
-                  <div>
+                  <div className="z-20">
                     <label className="block font-semibold text-slate-700 mb-1">Depreciation Method</label>
-                    <select
+                    <SearchableSelect
+                      options={[
+                        { value: 'straight_line', label: 'Straight Line (SLM)' },
+                        { value: 'declining_balance', label: 'Declining Balance (WDV)' },
+                        { value: 'double_declining', label: 'Double Declining Balance' },
+                        { value: 'units_of_production', label: 'Units of Production' }
+                      ]}
                       value={newAsset.depreciation_method}
-                      onChange={(e) => setNewAsset({ ...newAsset, depreciation_method: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500"
-                    >
-                      <option value="straight_line">Straight Line (SLM)</option>
-                      <option value="declining_balance">Declining Balance (WDV)</option>
-                      <option value="double_declining">Double Declining Balance</option>
-                      <option value="units_of_production">Units of Production</option>
-                    </select>
+                      onChange={(val) => setNewAsset({ ...newAsset, depreciation_method: val })}
+                      searchable={false}
+                    />
                   </div>
 
                   <div>
@@ -719,17 +716,18 @@ export const AssetRegister = () => {
                     />
                   </div>
 
-                  <div>
+                  <div className="z-10">
                     <label className="block font-semibold text-slate-700 mb-1">Initial Status</label>
-                    <select
+                    <SearchableSelect
+                      options={[
+                        { value: 'available', label: 'Available' },
+                        { value: 'assigned', label: 'Assigned' },
+                        { value: 'under maintenance', label: 'Under Maintenance' }
+                      ]}
                       value={newAsset.status}
-                      onChange={(e) => setNewAsset({ ...newAsset, status: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500 capitalize"
-                    >
-                      <option value="available">Available</option>
-                      <option value="assigned">Assigned</option>
-                      <option value="under maintenance">Under Maintenance</option>
-                    </select>
+                      onChange={(val) => setNewAsset({ ...newAsset, status: val })}
+                      searchable={false}
+                    />
                   </div>
 
                   <div>

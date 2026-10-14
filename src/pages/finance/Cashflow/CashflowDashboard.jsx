@@ -34,6 +34,7 @@ import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
 import ErrorState from '../../../components/ui/ErrorState';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const CashflowDashboard = () => {
   const [cashflowData, setCashflowData] = useState(null);
@@ -117,8 +118,10 @@ export const CashflowDashboard = () => {
     total_outflow = 0,
     closing_balance = 0,
     trend = [],
-    transactions = [],
+    transactions: rawTransactions,
   } = cashflowData || {};
+
+  const transactions = Array.isArray(rawTransactions) ? rawTransactions : (rawTransactions?.data || []);
 
   return (
     <div className="space-y-6">
@@ -399,8 +402,8 @@ export const CashflowDashboard = () => {
 
       {/* New Account Modal */}
       {isAccountModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md border border-slate-200 overflow-hidden animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md border border-slate-200 !overflow-visible animate-fadeIn my-8">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2">
                 <Landmark className="w-5 h-5 text-teal-600" />
@@ -414,7 +417,7 @@ export const CashflowDashboard = () => {
               </button>
             </div>
 
-            <form onSubmit={handleCreateAccount} className="p-5 space-y-4 text-xs">
+            <form onSubmit={handleCreateAccount} className="p-5 space-y-4 text-xs !overflow-visible">
               <div>
                 <label className="block font-medium text-slate-700 mb-1">
                   Account Name <span className="text-rose-500">*</span>
@@ -430,18 +433,19 @@ export const CashflowDashboard = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className="z-10">
                   <label className="block font-medium text-slate-700 mb-1">Account Type *</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'bank', label: 'Bank Account' },
+                      { value: 'cash', label: 'Cash Vault' },
+                      { value: 'upi', label: 'UPI / Virtual Account' },
+                      { value: 'credit_card', label: 'Corporate Credit Card' }
+                    ]}
                     value={newAccount.account_type}
-                    onChange={(e) => setNewAccount({ ...newAccount, account_type: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white text-xs"
-                  >
-                    <option value="bank">Bank Account</option>
-                    <option value="cash">Cash Vault</option>
-                    <option value="upi">UPI / Virtual Account</option>
-                    <option value="credit_card">Corporate Credit Card</option>
-                  </select>
+                    onChange={(val) => setNewAccount({ ...newAccount, account_type: val })}
+                    searchable={false}
+                  />
                 </div>
 
                 <div>

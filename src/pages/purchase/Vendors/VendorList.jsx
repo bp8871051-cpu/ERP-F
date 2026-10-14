@@ -19,6 +19,7 @@ import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 import VendorModal from './VendorModal';
 
 export const VendorList = () => {
@@ -122,12 +123,12 @@ export const VendorList = () => {
             <Download className="w-4 h-4" /> Export CSV
           </Button>
           <Button
-            variant="primary"
+            variant="teal"
             onClick={() => {
               setEditingVendor(null);
               setShowModal(true);
             }}
-            className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="gap-2"
           >
             <Plus className="w-4 h-4" /> Add Vendor
           </Button>
@@ -135,7 +136,7 @@ export const VendorList = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 !overflow-visible">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
@@ -151,25 +152,26 @@ export const VendorList = () => {
             />
           </div>
 
-          <div className="relative">
-            <Filter className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-            <select
+          <div className="relative z-30">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'active', label: 'Active' },
+                { value: 'inactive', label: 'Inactive' }
+              ]}
               value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
+              onChange={(val) => {
+                setStatus(val);
                 setPage(1);
               }}
-              className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
-            >
-              <option value="">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+              placeholder="All Statuses"
+              searchable={false}
+            />
           </div>
 
           <div className="flex items-center justify-end">
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => {
                 setSearch('');
@@ -185,7 +187,7 @@ export const VendorList = () => {
       </Card>
 
       {/* Table */}
-      <Card className="overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+      <Card className="!overflow-visible border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         {loading ? (
           <div className="p-8">
             <LoadingSkeleton count={6} />
@@ -195,12 +197,12 @@ export const VendorList = () => {
             <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
             <p className="font-semibold text-slate-800 dark:text-white">No Vendors Found</p>
             <Button
-              variant="primary"
+              variant="teal"
               onClick={() => {
                 setEditingVendor(null);
                 setShowModal(true);
               }}
-              className="mt-4 bg-indigo-600 text-white"
+              className="mt-4"
             >
               Add Vendor
             </Button>

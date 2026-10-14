@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Target, Building2, Mail, Phone, Tag, Calendar, DollarSign, Globe, Briefcase } from 'lucide-react';
 import crmService from '../../../services/crmService';
 import Button from '../../../components/ui/Button';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const LeadModal = ({ isOpen, onClose, onSuccess, lead = null }) => {
   const [formData, setFormData] = useState({
@@ -104,8 +105,8 @@ export const LeadModal = ({ isOpen, onClose, onSuccess, lead = null }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 my-8">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl border border-slate-200 my-8 !overflow-visible">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-2">
             <Target className="w-5 h-5 text-teal-600" />
@@ -118,7 +119,7 @@ export const LeadModal = ({ isOpen, onClose, onSuccess, lead = null }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs !overflow-visible">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Lead / Contact Name *</label>
@@ -207,33 +208,27 @@ export const LeadModal = ({ isOpen, onClose, onSuccess, lead = null }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Lead Acquisition Source</label>
-              <select
-                value={formData.lead_source_id}
-                onChange={(e) => setFormData({ ...formData, lead_source_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                <option value="">-- Direct / Inbound Website --</option>
-                {leadSources.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={[
+                  { value: '', label: '-- Direct / Inbound Website --' },
+                  ...leadSources.map((s) => ({ value: String(s.id), label: s.name }))
+                ]}
+                value={String(formData.lead_source_id)}
+                onChange={(val) => setFormData({ ...formData, lead_source_id: val })}
+                placeholder="-- Direct / Inbound Website --"
+              />
             </div>
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Marketing Campaign</label>
-              <select
-                value={formData.campaign_id}
-                onChange={(e) => setFormData({ ...formData, campaign_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                <option value="">-- No Direct Campaign --</option>
-                {campaigns.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={[
+                  { value: '', label: '-- No Direct Campaign --' },
+                  ...campaigns.map((c) => ({ value: String(c.id), label: c.name }))
+                ]}
+                value={String(formData.campaign_id)}
+                onChange={(val) => setFormData({ ...formData, campaign_id: val })}
+                placeholder="-- No Direct Campaign --"
+              />
             </div>
           </div>
 
@@ -272,17 +267,19 @@ export const LeadModal = ({ isOpen, onClose, onSuccess, lead = null }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Initial Status</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: 'new', label: 'New' },
+                  { value: 'contacted', label: 'Contacted' },
+                  { value: 'qualified', label: 'Qualified' },
+                  { value: 'unqualified', label: 'Unqualified' },
+                  { value: 'lost', label: 'Lost' }
+                ]}
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                <option value="new">New</option>
-                <option value="contacted">Contacted</option>
-                <option value="qualified">Qualified</option>
-                <option value="unqualified">Unqualified</option>
-                <option value="lost">Lost</option>
-              </select>
+                onChange={(val) => setFormData({ ...formData, status: val })}
+                placeholder="Initial Status"
+                searchable={false}
+              />
             </div>
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Industry</label>

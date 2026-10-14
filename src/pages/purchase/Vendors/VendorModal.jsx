@@ -9,6 +9,7 @@ import {
   FileText,
 } from 'lucide-react';
 import Button from '../../../components/ui/Button';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const VendorModal = ({ isOpen, onClose, onSave, vendor }) => {
   const [activeTab, setActiveTab] = useState('general');
@@ -126,8 +127,8 @@ export const VendorModal = ({ isOpen, onClose, onSave, vendor }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm overflow-y-auto flex items-start justify-center p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col my-8 !overflow-visible">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div>
@@ -170,7 +171,7 @@ export const VendorModal = ({ isOpen, onClose, onSave, vendor }) => {
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="flex-1 p-6 space-y-4 text-xs !overflow-visible">
           {error && (
             <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -393,19 +394,19 @@ export const VendorModal = ({ isOpen, onClose, onSave, vendor }) => {
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                <div>
+                <div className="z-20">
                   <label className="block font-semibold mb-1">Payment Terms</label>
-                  <select
-                    name="payment_terms"
+                  <SearchableSelect
+                    options={[
+                      { value: 'Immediate', label: 'Immediate' },
+                      { value: 'Net 15', label: 'Net 15' },
+                      { value: 'Net 30', label: 'Net 30' },
+                      { value: 'Net 60', label: 'Net 60' }
+                    ]}
                     value={formData.payment_terms}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
-                  >
-                    <option value="Immediate">Immediate</option>
-                    <option value="Net 15">Net 15</option>
-                    <option value="Net 30">Net 30</option>
-                    <option value="Net 60">Net 60</option>
-                  </select>
+                    onChange={(val) => handleChange({ target: { name: 'payment_terms', value: val }})}
+                    searchable={false}
+                  />
                 </div>
                 <div>
                   <label className="block font-semibold mb-1">Credit Limit (₹)</label>
@@ -417,17 +418,17 @@ export const VendorModal = ({ isOpen, onClose, onSave, vendor }) => {
                     className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
                   />
                 </div>
-                <div>
+                <div className="z-10">
                   <label className="block font-semibold mb-1">Status</label>
-                  <select
-                    name="status"
+                  <SearchableSelect
+                    options={[
+                      { value: 'active', label: 'Active' },
+                      { value: 'inactive', label: 'Inactive' }
+                    ]}
                     value={formData.status}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
+                    onChange={(val) => handleChange({ target: { name: 'status', value: val }})}
+                    searchable={false}
+                  />
                 </div>
               </div>
             </div>
@@ -435,14 +436,14 @@ export const VendorModal = ({ isOpen, onClose, onSave, vendor }) => {
 
           {/* Footer actions */}
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
             </Button>
             <Button
               type="submit"
-              variant="primary"
+              variant="teal"
               disabled={submitting}
-              className="gap-2 bg-indigo-600 text-white"
+              className="gap-2"
             >
               <Save className="w-4 h-4" />
               {submitting ? 'Saving...' : 'Save Vendor'}

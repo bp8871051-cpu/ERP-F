@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 import UIPageHeader from '../../../components/ui/interface/UIPageHeader';
 import UIDemoCard from '../../../components/ui/interface/UIDemoCard';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
+import Button from '../../../components/ui/Button';
 
 // 1. BASIC TABLES PAGE
 export const BasicTablesPage = () => {
@@ -287,32 +289,38 @@ export const DataTablePage = () => {
           {/* Filters & Options */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Status Filter */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-2.5 py-1.5 text-xs rounded-xl border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none"
-            >
-              <option value="all">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="pending">Pending</option>
-              <option value="inactive">Inactive</option>
-              <option value="suspended">Suspended</option>
-            </select>
+            <div className="w-36 z-20">
+              <SearchableSelect
+                options={[
+                  { value: 'all', label: 'All Statuses' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'pending', label: 'Pending' },
+                  { value: 'inactive', label: 'Inactive' },
+                  { value: 'suspended', label: 'Suspended' },
+                ]}
+                value={statusFilter}
+                onChange={setStatusFilter}
+                searchable={false}
+              />
+            </div>
 
             {/* Department Filter */}
-            <select
-              value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
-              className="px-2.5 py-1.5 text-xs rounded-xl border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none"
-            >
-              <option value="all">All Departments</option>
-              <option value="Engineering">Engineering</option>
-              <option value="UI/UX Design">UI/UX Design</option>
-              <option value="Cloud Ops">Cloud Ops</option>
-              <option value="Finance">Finance</option>
-              <option value="Inventory">Inventory</option>
-              <option value="Sales">Sales</option>
-            </select>
+            <div className="w-48 z-10">
+              <SearchableSelect
+                options={[
+                  { value: 'all', label: 'All Departments' },
+                  { value: 'Engineering', label: 'Engineering' },
+                  { value: 'UI/UX Design', label: 'UI/UX Design' },
+                  { value: 'Cloud Ops', label: 'Cloud Ops' },
+                  { value: 'Finance', label: 'Finance' },
+                  { value: 'Inventory', label: 'Inventory' },
+                  { value: 'Sales', label: 'Sales' },
+                ]}
+                value={departmentFilter}
+                onChange={setDepartmentFilter}
+                searchable={false}
+              />
+            </div>
 
             {/* Column Visibility Trigger */}
             <button
@@ -566,8 +574,8 @@ export const DataTablePage = () => {
 
       {/* View Modal */}
       {viewModalRecord && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 border border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 border border-slate-200 flex flex-col !overflow-visible m-auto">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
               <h3 className="font-bold text-sm text-slate-900">Record #{viewModalRecord.id}</h3>
               <button type="button" onClick={() => setViewModalRecord(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
@@ -601,9 +609,9 @@ export const DataTablePage = () => {
               </div>
             </div>
             <div className="flex justify-end pt-3 border-t border-slate-100">
-              <button type="button" onClick={() => setViewModalRecord(null)} className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold cursor-pointer">
+              <Button type="button" variant="secondary" onClick={() => setViewModalRecord(null)}>
                 Close
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -611,8 +619,8 @@ export const DataTablePage = () => {
 
       {/* Edit Modal */}
       {editModalRecord && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 border border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 border border-slate-200 flex flex-col !overflow-visible m-auto">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
               <h3 className="font-bold text-sm text-slate-900">Edit Record #{editModalRecord.id}</h3>
               <button type="button" onClick={() => setEditModalRecord(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
@@ -649,26 +657,27 @@ export const DataTablePage = () => {
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200"
                 />
               </div>
-              <div>
+              <div className="z-10">
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
-                <select
+                <SearchableSelect
+                  options={[
+                    { value: 'active', label: 'Active' },
+                    { value: 'pending', label: 'Pending' },
+                    { value: 'inactive', label: 'Inactive' },
+                    { value: 'suspended', label: 'Suspended' },
+                  ]}
                   value={editModalRecord.status}
-                  onChange={(e) => setEditModalRecord({ ...editModalRecord, status: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200"
-                >
-                  <option value="active">Active</option>
-                  <option value="pending">Pending</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="suspended">Suspended</option>
-                </select>
+                  onChange={(val) => setEditModalRecord({ ...editModalRecord, status: val })}
+                  searchable={false}
+                />
               </div>
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                <button type="button" onClick={() => setEditModalRecord(null)} className="px-3 py-1.5 border rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 mt-4">
+                <Button type="button" variant="secondary" onClick={() => setEditModalRecord(null)}>
                   Cancel
-                </button>
-                <button type="submit" className="px-4 py-1.5 bg-teal-600 text-white rounded-lg text-xs font-semibold hover:bg-teal-700 cursor-pointer">
+                </Button>
+                <Button type="submit" variant="teal">
                   Save Changes
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -677,8 +686,8 @@ export const DataTablePage = () => {
 
       {/* Create Modal */}
       {createModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 border border-slate-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 border border-slate-200 flex flex-col !overflow-visible m-auto">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
               <h3 className="font-bold text-sm text-slate-900">Create New Entity Record</h3>
               <button type="button" onClick={() => setCreateModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
@@ -708,20 +717,21 @@ export const DataTablePage = () => {
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200"
                 />
               </div>
-              <div>
+              <div className="z-10">
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Department</label>
-                <select
+                <SearchableSelect
+                  options={[
+                    { value: 'Engineering', label: 'Engineering' },
+                    { value: 'UI/UX Design', label: 'UI/UX Design' },
+                    { value: 'Cloud Ops', label: 'Cloud Ops' },
+                    { value: 'Finance', label: 'Finance' },
+                    { value: 'Inventory', label: 'Inventory' },
+                    { value: 'Sales', label: 'Sales' },
+                  ]}
                   value={newRecord.department}
-                  onChange={(e) => setNewRecord({ ...newRecord, department: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200"
-                >
-                  <option value="Engineering">Engineering</option>
-                  <option value="UI/UX Design">UI/UX Design</option>
-                  <option value="Cloud Ops">Cloud Ops</option>
-                  <option value="Finance">Finance</option>
-                  <option value="Inventory">Inventory</option>
-                  <option value="Sales">Sales</option>
-                </select>
+                  onChange={(val) => setNewRecord({ ...newRecord, department: val })}
+                  searchable={false}
+                />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Role Title</label>
@@ -732,13 +742,13 @@ export const DataTablePage = () => {
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200"
                 />
               </div>
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                <button type="button" onClick={() => setCreateModal(false)} className="px-3 py-1.5 border rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 mt-4">
+                <Button type="button" variant="secondary" onClick={() => setCreateModal(false)}>
                   Cancel
-                </button>
-                <button type="submit" className="px-4 py-1.5 bg-teal-600 text-white rounded-lg text-xs font-semibold hover:bg-teal-700 cursor-pointer">
+                </Button>
+                <Button type="submit" variant="teal">
                   Create Record
-                </button>
+                </Button>
               </div>
             </form>
           </div>

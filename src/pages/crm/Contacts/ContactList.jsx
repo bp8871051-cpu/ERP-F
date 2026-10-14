@@ -25,6 +25,7 @@ import Card from '../../../components/ui/Card';
 import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 import ContactModal from './ContactModal';
 
 export const ContactList = () => {
@@ -92,12 +93,12 @@ export const ContactList = () => {
         page,
         per_page: 15,
       });
-      const payload = res.data;
+      const payload = res;
       setContacts(payload.data || payload || []);
       setMeta({
-        current_page: payload.current_page || 1,
-        last_page: payload.last_page || 1,
-        total: payload.total || 0,
+        current_page: payload.meta?.current_page || payload.current_page || 1,
+        last_page: payload.meta?.last_page || payload.last_page || 1,
+        total: payload.meta?.total || payload.total || 0,
       });
     } catch (err) {
       console.error('Error fetching CRM contacts:', err);
@@ -224,7 +225,7 @@ export const ContactList = () => {
       </div>
 
       {/* Search & Filters Card */}
-      <Card className="p-4">
+      <Card className="p-4 !overflow-visible">
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
           <div className="relative w-full sm:w-80">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -241,34 +242,38 @@ export const ContactList = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <select
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
-                setPage(1);
-              }}
-              className="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden"
-            >
-              <option value="">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+            <div className="w-40 relative z-10">
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'All Statuses' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'inactive', label: 'Inactive' }
+                ]}
+                value={status}
+                onChange={(val) => {
+                  setStatus(val);
+                  setPage(1);
+                }}
+                placeholder="All Statuses"
+                searchable={false}
+              />
+            </div>
 
-            <select
-              value={leadSourceId}
-              onChange={(e) => {
-                setLeadSourceId(e.target.value);
-                setPage(1);
-              }}
-              className="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden"
-            >
-              <option value="">All Sources</option>
-              {leadSources.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+            <div className="w-40 relative z-10">
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'All Sources' },
+                  ...leadSources.map((s) => ({ value: String(s.id), label: s.name }))
+                ]}
+                value={String(leadSourceId)}
+                onChange={(val) => {
+                  setLeadSourceId(val);
+                  setPage(1);
+                }}
+                placeholder="All Sources"
+                searchable={false}
+              />
+            </div>
 
             {/* Column toggle */}
             <div className="relative">

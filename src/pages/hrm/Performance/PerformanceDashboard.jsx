@@ -17,6 +17,7 @@ import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
 import ErrorState from '../../../components/ui/ErrorState';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const PerformanceDashboard = () => {
   const [performanceData, setPerformanceData] = useState([]);
@@ -30,6 +31,7 @@ export const PerformanceDashboard = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   const [formData, setFormData] = useState({
+    cycle_id: '',
     employee_id: '',
     rating: 4,
     goals: 'Deliver enterprise microservices, optimize MySQL query response latency',
@@ -45,10 +47,18 @@ export const PerformanceDashboard = () => {
         hrmService.getPerformance(),
         hrmService.getEmployees(),
       ]);
-      setPerformanceData(perfRes || []);
-      setEmployees(empRes || []);
-      if (empRes && empRes.length > 0 && !formData.employee_id) {
-        setFormData((prev) => ({ ...prev, employee_id: empRes[0].id }));
+      const pData = Array.isArray(perfRes) ? perfRes : (perfRes?.data?.data || perfRes?.data || []);
+      setPerformanceData(Array.isArray(pData) ? pData : []);
+
+      const eData = Array.isArray(empRes) ? empRes : (empRes?.data?.data || empRes?.data || []);
+      setEmployees(Array.isArray(eData) ? eData : []);
+
+      if (Array.isArray(pData) && pData.length > 0 && !formData.cycle_id) {
+        setFormData((prev) => ({ ...prev, cycle_id: pData[0].id }));
+      }
+      
+      if (Array.isArray(eData) && eData.length > 0 && !formData.employee_id) {
+        setFormData((prev) => ({ ...prev, employee_id: eData[0].id }));
       }
     } catch (err) {
       console.error('Error fetching performance:', err);
@@ -165,8 +175,8 @@ export const PerformanceDashboard = () => {
 
       {/* Review Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md border border-slate-200 overflow-hidden animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md border border-slate-200 !overflow-visible animate-fadeIn my-8">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2">
                 <Award className="w-5 h-5 text-teal-600" />
@@ -180,36 +190,46 @@ export const PerformanceDashboard = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSubmitReview} className="p-5 space-y-4 text-xs">
-              <div>
-                <label className="block font-medium text-slate-700 mb-1">Staff Member *</label>
-                <select
-                  required
-                  value={formData.employee_id}
-                  onChange={(e) => setFormData({ ...formData, employee_id: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white text-xs"
-                >
-                  {employees.map((e) => (
-                    <option key={e.id} value={e.id}>
-                      {e.first_name} {e.last_name} ({e.employee_code})
-                    </option>
-                  ))}
-                </select>
+            <form onSubmit={handleSubmitReview} className="p-5 space-y-4 text-xs !overflow-visible">
+              <div className="z-30">
+                <label className="block font-medium text-slate-700 mb-1">Appraisal Cycle *</label>
+                <SearchableSelect
+                  options={performanceData.map((cycle) => ({
+                    value: String(cycle.id),
+                    label: cycle.name || 'Annual Appraisal Cycle'
+                  }))}
+                  value={String(formData.cycle_id)}
+                  onChange={(val) => setFormData({ ...formData, cycle_id: val })}
+                  searchable={false}
+                />
               </div>
 
-              <div>
+              <div className="z-20">
+                <label className="block font-medium text-slate-700 mb-1">Staff Member *</label>
+                <SearchableSelect
+                  options={employees.map((e) => ({
+                    value: String(e.id),
+                    label: `${e.first_name} ${e.last_name} (${e.employee_code})`
+                  }))}
+                  value={String(formData.employee_id)}
+                  onChange={(val) => setFormData({ ...formData, employee_id: val })}
+                />
+              </div>
+
+              <div className="z-10">
                 <label className="block font-medium text-slate-700 mb-1">Standardized Performance Rating *</label>
-                <select
-                  value={formData.rating}
-                  onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white text-xs font-semibold"
-                >
-                  <option value={5}>5 - Outstanding (Top 5% Performer)</option>
-                  <option value={4}>4 - Exceeds Expectations (Consistently Delivers Above Target)</option>
-                  <option value={3}>3 - Meets Expectations (Solid Core Contributor)</option>
-                  <option value={2}>2 - Developing (Shows Potential with Gaps)</option>
-                  <option value={1}>1 - Needs Improvement (Performance Plan Required)</option>
-                </select>
+                <SearchableSelect
+                  options={[
+                    { value: '5', label: '5 - Outstanding (Top 5% Performer)' },
+                    { value: '4', label: '4 - Exceeds Expectations (Consistently Delivers Above Target)' },
+                    { value: '3', label: '3 - Meets Expectations (Solid Core Contributor)' },
+                    { value: '2', label: '2 - Developing (Shows Potential with Gaps)' },
+                    { value: '1', label: '1 - Needs Improvement (Performance Plan Required)' }
+                  ]}
+                  value={String(formData.rating)}
+                  onChange={(val) => setFormData({ ...formData, rating: parseInt(val, 10) })}
+                  searchable={false}
+                />
               </div>
 
               <div>

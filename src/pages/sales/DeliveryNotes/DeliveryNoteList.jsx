@@ -18,6 +18,7 @@ import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const DeliveryNoteList = () => {
   const [deliveryNotes, setDeliveryNotes] = useState([]);
@@ -165,7 +166,7 @@ export const DeliveryNoteList = () => {
             Dispatch shipments and fulfill orders. Marking delivered permanently deducts reserved inventory.
           </p>
         </div>
-        <Button variant="primary" onClick={handleOpenModal} className="gap-2 bg-indigo-600 text-white">
+        <Button variant="teal" onClick={handleOpenModal} className="gap-2">
           <Plus className="w-4 h-4" /> Create Delivery Note
         </Button>
       </div>
@@ -245,7 +246,7 @@ export const DeliveryNoteList = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4 !overflow-visible">
             <div className="flex justify-between items-center border-b pb-3">
               <h3 className="font-bold text-slate-900 dark:text-white">Create Delivery Note</h3>
               <button onClick={() => setShowModal(false)}>✕</button>
@@ -254,33 +255,31 @@ export const DeliveryNoteList = () => {
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold mb-1">Sales Order *</label>
-                <select
-                  required
-                  value={selectedOrderId}
-                  onChange={(e) => setSelectedOrderId(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
-                >
-                  <option value="">Select Confirmed Order</option>
-                  {orders.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.order_number} ({o.customer?.name})
-                    </option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={[
+                    { value: '', label: 'Select Confirmed Order' },
+                    ...orders.map((o) => ({
+                      value: String(o.id),
+                      label: `${o.order_number} (${o.customer?.name})`
+                    }))
+                  ]}
+                  value={String(selectedOrderId)}
+                  onChange={(val) => setSelectedOrderId(val)}
+                  placeholder="Select Confirmed Order"
+                />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold mb-1">Warehouse Depot</label>
-                <select
-                  value={selectedWarehouseId}
-                  onChange={(e) => setSelectedWarehouseId(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
-                >
-                  <option value="">Default Warehouse</option>
-                  {warehouses.map((w) => (
-                    <option key={w.id} value={w.id}>{w.name}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={[
+                    { value: '', label: 'Default Warehouse' },
+                    ...warehouses.map((w) => ({ value: String(w.id), label: w.name }))
+                  ]}
+                  value={String(selectedWarehouseId)}
+                  onChange={(val) => setSelectedWarehouseId(val)}
+                  placeholder="Default Warehouse"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -307,8 +306,8 @@ export const DeliveryNoteList = () => {
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary" disabled={submitting} className="bg-indigo-600 text-white">
+                <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+                <Button type="submit" variant="teal" disabled={submitting}>
                   {submitting ? 'Creating...' : 'Generate Delivery Note'}
                 </Button>
               </div>

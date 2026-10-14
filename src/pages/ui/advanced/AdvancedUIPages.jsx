@@ -16,6 +16,7 @@ import {
   Code2,
   FileText,
   AlertCircle,
+  Maximize2
 } from 'lucide-react';
 import UIPageHeader from '../../../components/ui/interface/UIPageHeader';
 import UIDemoCard from '../../../components/ui/interface/UIDemoCard';

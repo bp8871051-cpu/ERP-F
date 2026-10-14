@@ -22,6 +22,7 @@ import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
 import ErrorState from '../../../components/ui/ErrorState';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 import DealModal from '../Deals/DealModal';
 import PipelineSettingsModal from './PipelineSettingsModal';
 
@@ -52,7 +53,8 @@ export const PipelineBoard = () => {
     try {
       setLoading(true);
       const res = await crmService.getPipelines();
-      const list = res.data || [];
+      const payload = res.data?.data || res.data;
+      const list = payload?.all_pipelines || (Array.isArray(payload) ? payload : []);
       setPipelines(list);
       if (list.length > 0) {
         setSelectedPipelineId(list[0].id);
@@ -204,18 +206,14 @@ export const PipelineBoard = () => {
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Pipeline Selector */}
-          <div className="relative">
-            <select
-              value={selectedPipelineId}
-              onChange={(e) => setSelectedPipelineId(e.target.value)}
-              className="text-xs font-semibold px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-            >
-              {pipelines.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+          <div className="relative w-64 z-10">
+            <SearchableSelect
+              options={pipelines.map((p) => ({ value: String(p.id), label: p.name }))}
+              value={String(selectedPipelineId)}
+              onChange={(val) => setSelectedPipelineId(val)}
+              placeholder="Select Pipeline"
+              searchable={false}
+            />
           </div>
 
           <Button
@@ -420,7 +418,7 @@ export const PipelineBoard = () => {
                           {deal.expected_close_date && (
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
-                              {deal.expected_close_date}
+                              {new Date(deal.expected_close_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                             </span>
                           )}
                         </div>

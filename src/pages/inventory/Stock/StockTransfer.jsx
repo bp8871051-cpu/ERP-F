@@ -16,6 +16,7 @@ import warehouseService from '../../../services/warehouseService';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import StockTransferModal from '../../../components/inventory/StockTransferModal';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const StockTransfer = () => {
   const [transfers, setTransfers] = useState([]);
@@ -145,7 +146,7 @@ export const StockTransfer = () => {
       </div>
 
       {/* Filter Bar */}
-      <Card className="p-3.5 shadow-sm border border-slate-200/80">
+      <Card className="p-3.5 shadow-sm border border-slate-200/80 !overflow-visible">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -161,52 +162,54 @@ export const StockTransfer = () => {
             />
           </div>
 
-          <select
-            value={fromWarehouseId}
-            onChange={(e) => {
-              setFromWarehouseId(e.target.value);
-              setPage(1);
-            }}
-            className="text-xs px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white text-slate-700 min-w-[140px]"
-          >
-            <option value="">Origin Warehouse</option>
-            {warehouses.map((w) => (
-              <option key={w.id} value={w.id}>
-                From: {w.name}
-              </option>
-            ))}
-          </select>
+          <div className="w-52">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'Origin Warehouse' },
+                ...warehouses.map((w) => ({ value: String(w.id), label: `From: ${w.name}` }))
+              ]}
+              value={String(fromWarehouseId)}
+              onChange={(val) => {
+                setFromWarehouseId(val);
+                setPage(1);
+              }}
+              placeholder="Origin Warehouse"
+            />
+          </div>
 
-          <select
-            value={toWarehouseId}
-            onChange={(e) => {
-              setToWarehouseId(e.target.value);
-              setPage(1);
-            }}
-            className="text-xs px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white text-slate-700 min-w-[140px]"
-          >
-            <option value="">Destination Warehouse</option>
-            {warehouses.map((w) => (
-              <option key={w.id} value={w.id}>
-                To: {w.name}
-              </option>
-            ))}
-          </select>
+          <div className="w-56">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'Destination Warehouse' },
+                ...warehouses.map((w) => ({ value: String(w.id), label: `To: ${w.name}` }))
+              ]}
+              value={String(toWarehouseId)}
+              onChange={(val) => {
+                setToWarehouseId(val);
+                setPage(1);
+              }}
+              placeholder="Destination Warehouse"
+            />
+          </div>
 
-          <select
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value);
-              setPage(1);
-            }}
-            className="text-xs px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white text-slate-700"
-          >
-            <option value="">All Statuses</option>
-            <option value="draft">Draft</option>
-            <option value="in_transit">In Transit</option>
-            <option value="received">Received</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+          <div className="w-40">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'draft', label: 'Draft' },
+                { value: 'in_transit', label: 'In Transit' },
+                { value: 'received', label: 'Received' },
+                { value: 'cancelled', label: 'Cancelled' }
+              ]}
+              value={status}
+              onChange={(val) => {
+                setStatus(val);
+                setPage(1);
+              }}
+              placeholder="All Statuses"
+              searchable={false}
+            />
+          </div>
 
           {(search || fromWarehouseId || toWarehouseId || status) && (
             <Button

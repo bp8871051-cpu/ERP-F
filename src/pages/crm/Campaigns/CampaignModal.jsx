@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Tag, Calendar, DollarSign, Users, Layers, Mail } from 'lucide-react';
 import crmService from '../../../services/crmService';
 import Button from '../../../components/ui/Button';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const CampaignModal = ({ isOpen, onClose, onSuccess, campaign = null }) => {
   const [formData, setFormData] = useState({
@@ -81,8 +82,8 @@ export const CampaignModal = ({ isOpen, onClose, onSuccess, campaign = null }) =
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 my-8">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl border border-slate-200 my-8 !overflow-visible">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-2">
             <Tag className="w-5 h-5 text-teal-600" />
@@ -95,7 +96,7 @@ export const CampaignModal = ({ isOpen, onClose, onSuccess, campaign = null }) =
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs !overflow-visible">
           <div>
             <label className="font-semibold text-slate-700 block mb-1">Campaign Name *</label>
             <input
@@ -111,19 +112,21 @@ export const CampaignModal = ({ isOpen, onClose, onSuccess, campaign = null }) =
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Campaign Type</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: 'Email', label: 'Email Outreach' },
+                  { value: 'WhatsApp', label: 'WhatsApp Broadcast' },
+                  { value: 'SMS', label: 'SMS Campaign' },
+                  { value: 'Social Media', label: 'Social Media Ad' },
+                  { value: 'Event', label: 'Corporate Event / Webinar' },
+                  { value: 'Phone', label: 'Telemarketing / Cold Call' },
+                  { value: 'Other', label: 'Other Channel' }
+                ]}
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                <option value="Email">Email Outreach</option>
-                <option value="WhatsApp">WhatsApp Broadcast</option>
-                <option value="SMS">SMS Campaign</option>
-                <option value="Social Media">Social Media Ad</option>
-                <option value="Event">Corporate Event / Webinar</option>
-                <option value="Phone">Telemarketing / Cold Call</option>
-                <option value="Other">Other Channel</option>
-              </select>
+                onChange={(val) => setFormData({ ...formData, type: val })}
+                placeholder="Campaign Type"
+                searchable={false}
+              />
             </div>
 
             <div>
@@ -162,18 +165,20 @@ export const CampaignModal = ({ isOpen, onClose, onSuccess, campaign = null }) =
             </div>
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Status</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: 'draft', label: 'Draft' },
+                  { value: 'scheduled', label: 'Scheduled' },
+                  { value: 'running', label: 'Running (Active)' },
+                  { value: 'paused', label: 'Paused' },
+                  { value: 'completed', label: 'Completed' },
+                  { value: 'cancelled', label: 'Cancelled' }
+                ]}
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white"
-              >
-                <option value="draft">Draft</option>
-                <option value="scheduled">Scheduled</option>
-                <option value="running">Running (Active)</option>
-                <option value="paused">Paused</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+                onChange={(val) => setFormData({ ...formData, status: val })}
+                placeholder="Status"
+                searchable={false}
+              />
             </div>
           </div>
 

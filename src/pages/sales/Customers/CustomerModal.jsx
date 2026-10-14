@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Building2, MapPin, DollarSign, FileText } from 'lucide-react';
 import Button from '../../../components/ui/Button';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const CustomerModal = ({ isOpen, onClose, onSave, customer = null }) => {
   const [formData, setFormData] = useState({
@@ -28,6 +29,49 @@ export const CustomerModal = ({ isOpen, onClose, onSave, customer = null }) => {
   const [activeTab, setActiveTab] = useState('basic');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      const zip = formData.postal_code?.trim();
+      if (!zip) return;
+
+      try {
+        if (zip.length === 5) {
+          // Try US Zip
+          const res = await fetch(`https://api.zippopotam.us/us/${zip}`);
+          if (res.ok) {
+            const data = await res.json();
+            const place = data.places[0];
+            setFormData((prev) => ({
+              ...prev,
+              city: place['place name'],
+              state: place['state abbreviation'],
+              country: 'United States',
+            }));
+          }
+        } else if (zip.length === 6) {
+          // Try Indian PIN code
+          const res = await fetch(`https://api.postalpincode.in/pincode/${zip}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data[0].Status === 'Success' && data[0].PostOffice?.length > 0) {
+              const place = data[0].PostOffice[0];
+              setFormData((prev) => ({
+                ...prev,
+                city: place.District,
+                state: place.State,
+                country: 'India',
+              }));
+            }
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+    const timeoutId = setTimeout(fetchLocation, 600);
+    return () => clearTimeout(timeoutId);
+  }, [formData.postal_code]);
 
   useEffect(() => {
     if (customer) {
@@ -107,7 +151,7 @@ export const CustomerModal = ({ isOpen, onClose, onSave, customer = null }) => {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-3xl overflow-hidden border border-slate-200 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-3xl !overflow-visible border border-slate-200 dark:border-slate-800">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -159,7 +203,7 @@ export const CustomerModal = ({ isOpen, onClose, onSave, customer = null }) => {
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="p-6 max-h-[65vh] overflow-y-auto space-y-4">
+          <div className="p-6 max-h-[65vh] !overflow-visible space-y-4">
             {/* TAB 1: BASIC INFO */}
             {activeTab === 'basic' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -266,15 +310,16 @@ export const CustomerModal = ({ isOpen, onClose, onSave, customer = null }) => {
                   <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Status
                   </label>
-                  <select
-                    name="status"
+                  <SearchableSelect
+                    options={[
+                      { value: 'active', label: 'Active' },
+                      { value: 'inactive', label: 'Inactive' }
+                    ]}
                     value={formData.status}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
+                    onChange={(val) => handleChange({ target: { name: 'status', value: val } })}
+                    placeholder="Select Status"
+                    searchable={false}
+                  />
                 </div>
               </div>
             )}
@@ -408,18 +453,19 @@ export const CustomerModal = ({ isOpen, onClose, onSave, customer = null }) => {
                   <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Payment Terms
                   </label>
-                  <select
-                    name="payment_terms"
+                  <SearchableSelect
+                    options={[
+                      { value: 'immediate', label: 'Due Upon Receipt' },
+                      { value: 'net_15', label: 'Net 15 Days' },
+                      { value: 'net_30', label: 'Net 30 Days' },
+                      { value: 'net_60', label: 'Net 60 Days' },
+                      { value: 'net_90', label: 'Net 90 Days' }
+                    ]}
                     value={formData.payment_terms}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                  >
-                    <option value="immediate">Due Upon Receipt</option>
-                    <option value="net_15">Net 15 Days</option>
-                    <option value="net_30">Net 30 Days</option>
-                    <option value="net_60">Net 60 Days</option>
-                    <option value="net_90">Net 90 Days</option>
-                  </select>
+                    onChange={(val) => handleChange({ target: { name: 'payment_terms', value: val } })}
+                    placeholder="Select Terms"
+                    searchable={false}
+                  />
                 </div>
 
                 <div>

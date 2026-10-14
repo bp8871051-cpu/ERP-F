@@ -23,6 +23,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export const Assignments = () => {
   const navigate = useNavigate();
@@ -371,7 +372,7 @@ export const Assignments = () => {
       {/* New Custody Assignment Modal */}
       {showAssignModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg !overflow-visible">
             <div className="p-4 border-b border-slate-200 bg-teal-50 flex justify-between items-center">
               <h3 className="text-sm font-bold text-teal-900 flex items-center gap-2">
                 <UserCheck className="w-4 h-4 text-teal-600" />
@@ -380,21 +381,20 @@ export const Assignments = () => {
               <button onClick={() => setShowAssignModal(false)} className="text-slate-400 hover:text-slate-600">&times;</button>
             </div>
             <form onSubmit={handleAssignSubmit} className="p-4 space-y-3 text-xs">
-              <div>
+              <div className="z-20">
                 <label className="block font-semibold text-slate-700 mb-1">Select Available Asset *</label>
-                <select
-                  required
+                <SearchableSelect
+                  options={[
+                    { value: '', label: 'Choose an available asset' },
+                    ...availableAssets.map((a) => ({
+                      value: a.id,
+                      label: `${a.name} (${a.asset_code || `AST-${a.id}`}) — ${a.department || 'HQ'}`
+                    }))
+                  ]}
                   value={assignForm.asset_id}
-                  onChange={(e) => setAssignForm({ ...assignForm, asset_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500 font-medium"
-                >
-                  <option value="">Choose an available asset</option>
-                  {availableAssets.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.name} ({a.asset_code || `AST-${a.id}`}) — {a.department || 'HQ'}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setAssignForm({ ...assignForm, asset_id: val })}
+                  searchable={true}
+                />
                 {availableAssets.length === 0 && (
                   <p className="text-[10px] text-amber-600 mt-1">
                     No assets currently in 'Available' status. Register a new asset or process returns first.
@@ -456,17 +456,18 @@ export const Assignments = () => {
                 </div>
               </div>
 
-              <div>
+              <div className="z-10">
                 <label className="block font-semibold text-slate-700 mb-1">Checkout Condition</label>
-                <select
+                <SearchableSelect
+                  options={[
+                    { value: 'good', label: 'Brand New / Excellent' },
+                    { value: 'fair', label: 'Good / Operational' },
+                    { value: 'minor_wear', label: 'Minor Cosmetic Wear' }
+                  ]}
                   value={assignForm.condition}
-                  onChange={(e) => setAssignForm({ ...assignForm, condition: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500 capitalize"
-                >
-                  <option value="good">Brand New / Excellent</option>
-                  <option value="fair">Good / Operational</option>
-                  <option value="minor_wear">Minor Cosmetic Wear</option>
-                </select>
+                  onChange={(val) => setAssignForm({ ...assignForm, condition: val })}
+                  searchable={false}
+                />
               </div>
 
               <div>
@@ -494,7 +495,7 @@ export const Assignments = () => {
       {/* Return Asset Modal */}
       {showReturnModal && selectedAssignment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md !overflow-visible">
             <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
                 <RotateCcw className="w-4 h-4 text-teal-600" />
@@ -510,18 +511,19 @@ export const Assignments = () => {
                 </div>
               </div>
 
-              <div>
+              <div className="z-10">
                 <label className="block font-semibold text-slate-700 mb-1">Return Condition *</label>
-                <select
+                <SearchableSelect
+                  options={[
+                    { value: 'good', label: 'Good Condition (Return to Available Pool)' },
+                    { value: 'fair', label: 'Fair (Normal Wear & Tear)' },
+                    { value: 'damaged', label: 'Damaged (Move directly to Maintenance)' },
+                    { value: 'needs_repair', label: 'Needs Repair / Servicing' }
+                  ]}
                   value={returnForm.condition}
-                  onChange={(e) => setReturnForm({ ...returnForm, condition: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500 font-semibold"
-                >
-                  <option value="good">Good Condition (Return to Available Pool)</option>
-                  <option value="fair">Fair (Normal Wear & Tear)</option>
-                  <option value="damaged">Damaged (Move directly to Maintenance)</option>
-                  <option value="needs_repair">Needs Repair / Servicing</option>
-                </select>
+                  onChange={(val) => setReturnForm({ ...returnForm, condition: val })}
+                  searchable={false}
+                />
               </div>
 
               <div>

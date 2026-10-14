@@ -15,6 +15,7 @@ import productService from '../../../services/productService';
 import warehouseService from '../../../services/warehouseService';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const PurchaseCreate = () => {
   const navigate = useNavigate();
@@ -226,27 +227,26 @@ export const PurchaseCreate = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <Card className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm !overflow-visible">
           <h2 className="text-base font-semibold text-slate-900 dark:text-white mb-4">
             Vendor Invoice Information
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
+            <div className="z-30">
               <label className="block text-xs font-semibold mb-1">Vendor *</label>
-              <select
-                required
-                value={vendorId}
-                onChange={(e) => setVendorId(e.target.value)}
-                className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
-              >
-                <option value="">Select Vendor</option>
-                {vendors.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.name}
-                  </option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'Select Vendor' },
+                  ...vendors.map((v) => ({
+                    value: String(v.id),
+                    label: v.name
+                  }))
+                ]}
+                value={String(vendorId)}
+                onChange={(val) => setVendorId(val)}
+                placeholder="Select Vendor"
+              />
             </div>
 
             <div>
@@ -271,41 +271,43 @@ export const PurchaseCreate = () => {
               />
             </div>
 
-            <div>
+            <div className="z-10">
               <label className="block text-xs font-semibold mb-1">Warehouse Depot</label>
-              <select
-                value={warehouseId}
-                onChange={(e) => setWarehouseId(e.target.value)}
-                className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
-              >
-                <option value="">Default Warehouse</option>
-                {warehouses.map((w) => (
-                  <option key={w.id} value={w.id}>{w.name}</option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'Default Warehouse' },
+                  ...warehouses.map((w) => ({
+                    value: String(w.id),
+                    label: w.name
+                  }))
+                ]}
+                value={String(warehouseId)}
+                onChange={(val) => setWarehouseId(val)}
+                placeholder="Default Warehouse"
+              />
             </div>
           </div>
         </Card>
 
         {/* Items */}
-        <Card className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <Card className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm !overflow-visible">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-slate-900 dark:text-white">
               Received Products
             </h2>
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={addItemRow}
-              className="gap-1.5 text-xs text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+              className="gap-1.5 text-xs"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Product Line
             </Button>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="!overflow-visible">
             <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
               <thead className="bg-slate-50 dark:bg-slate-800 text-xs uppercase font-semibold text-slate-500">
                 <tr>
@@ -322,17 +324,18 @@ export const PurchaseCreate = () => {
                 {items.map((it, idx) => (
                   <tr key={idx} className="hover:bg-slate-50/50">
                     <td className="px-3 py-2">
-                      <select
-                        required
-                        value={it.product_id}
-                        onChange={(e) => handleProductChange(idx, e.target.value)}
-                        className="w-full px-2.5 py-1.5 text-xs rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
-                      >
-                        <option value="">Select Product</option>
-                        {productsList.map((p) => (
-                          <option key={p.id} value={p.id}>{p.name}</option>
-                        ))}
-                      </select>
+                      <SearchableSelect
+                        options={[
+                          { value: '', label: 'Select Product' },
+                          ...productsList.map((p) => ({
+                            value: String(p.id),
+                            label: p.name
+                          }))
+                        ]}
+                        value={String(it.product_id)}
+                        onChange={(val) => handleProductChange(idx, val)}
+                        placeholder="Select Product"
+                      />
                     </td>
                     <td className="px-3 py-2 text-right">
                       <input
@@ -422,10 +425,10 @@ export const PurchaseCreate = () => {
 
         {/* Submit */}
         <div className="flex items-center justify-end gap-3">
-          <Button type="button" variant="outline" onClick={() => navigate('/app/purchase/purchases')}>
+          <Button type="button" variant="secondary" onClick={() => navigate('/app/purchase/purchases')}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary" disabled={submitting} className="bg-indigo-600 text-white">
+          <Button type="submit" variant="teal" disabled={submitting}>
             <Save className="w-4 h-4" />
             {submitting ? 'Saving...' : 'Record Purchase'}
           </Button>

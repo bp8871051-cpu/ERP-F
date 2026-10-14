@@ -20,6 +20,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export const Depreciation = () => {
   const navigate = useNavigate();
@@ -40,10 +41,11 @@ export const Depreciation = () => {
     try {
       setLoading(true);
       const res = await assetService.getDepreciation({ frequency });
-      const list = res.data?.data || res.data || [];
-      setDepreciationData(list);
+      const list = res.data?.data?.data || res.data?.data || res.data || [];
+      setDepreciationData(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error('Failed to load depreciation schedule:', err);
+      setDepreciationData([]);
     } finally {
       setLoading(false);
     }
@@ -216,17 +218,20 @@ export const Depreciation = () => {
             placeholder="Search asset or code..."
             className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-teal-500 bg-white w-48"
           />
-          <select
-            value={selectedMethod}
-            onChange={(e) => setSelectedMethod(e.target.value)}
-            className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-teal-500 text-slate-700"
-          >
-            <option value="">All Methods</option>
-            <option value="straight_line">Straight Line</option>
-            <option value="declining_balance">Declining Balance</option>
-            <option value="double_declining">Double Declining</option>
-            <option value="units_of_production">Units of Production</option>
-          </select>
+          <div className="w-48 z-10">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Methods' },
+                { value: 'straight_line', label: 'Straight Line' },
+                { value: 'declining_balance', label: 'Declining Balance' },
+                { value: 'double_declining', label: 'Double Declining' },
+                { value: 'units_of_production', label: 'Units of Production' }
+              ]}
+              value={selectedMethod}
+              onChange={(val) => setSelectedMethod(val)}
+              searchable={false}
+            />
+          </div>
         </div>
       </div>
 

@@ -27,10 +27,10 @@ export const WorkflowsPage = () => {
   const [requests, setRequests] = useState([]);
   const [workflows, setWorkflows] = useState([]);
   const [metrics, setMetrics] = useState({
-    pending: 0,
+    pendingApprovals: 0,
     approved: 0,
     rejected: 0,
-    my_requests: 0,
+    myRequests: 0,
     overdue: 0,
   });
   const [loading, setLoading] = useState(true);
@@ -48,6 +48,7 @@ export const WorkflowsPage = () => {
 
   // Request Details & Audit Log drawer
   const [activeRequestDetails, setActiveRequestDetails] = useState(null);
+  const [activePipelineDetails, setActivePipelineDetails] = useState(null);
   const [newComment, setNewComment] = useState('');
 
   // New Request Modal state
@@ -178,7 +179,7 @@ export const WorkflowsPage = () => {
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Pending</span>
             <Clock className="w-4 h-4" />
           </div>
-          <span className="text-2xl font-bold text-slate-900">{metrics.pending}</span>
+          <span className="text-2xl font-bold text-slate-900">{metrics.pendingApprovals}</span>
           <span className="text-[10px] text-amber-600 block mt-0.5">Awaiting decision</span>
         </div>
 
@@ -205,7 +206,7 @@ export const WorkflowsPage = () => {
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">My Requests</span>
             <User className="w-4 h-4" />
           </div>
-          <span className="text-2xl font-bold text-slate-900">{metrics.my_requests}</span>
+          <span className="text-2xl font-bold text-slate-900">{metrics.myRequests}</span>
           <span className="text-[10px] text-blue-600 block mt-0.5">Submitted by you</span>
         </div>
 
@@ -319,7 +320,7 @@ export const WorkflowsPage = () => {
                         <span className="font-bold text-slate-900 block truncate">{req.title}</span>
                         <span className="text-[10px] text-slate-400 font-mono">
                           {req.reference_no || `#REQ-${req.id}`} •{' '}
-                          {new Date(req.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                          {req.createdDate || 'Unknown'}
                         </span>
                       </td>
 
@@ -379,28 +380,43 @@ export const WorkflowsPage = () => {
 
                       {/* Actions */}
                       <td className="py-3.5 px-4 text-right">
-                        {req.status === 'pending' ? (
-                          <div className="inline-flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() =>
-                                setActionModal({ open: true, type: 'approve', request: req, comments: '' })
-                              }
-                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-semibold cursor-pointer shadow-2xs"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() =>
-                                setActionModal({ open: true, type: 'reject', request: req, comments: '' })
-                              }
-                              className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[11px] font-semibold cursor-pointer"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="text-[11px] text-slate-400">Archived</span>
-                        )}
+                        {(() => {
+                          // Check if user has already approved the current step
+                          const hasApprovedCurrentStep = req.approvals?.some(app => app.stepName === req.currentStep?.name && app.approver === user?.name);
+                          // Check if user is authorized to act on the current step
+                          const isAuthorized = req.currentStep?.role === user?.role || req.currentStep?.approver?.name === user?.name;
+                          // Determine if user can act
+                          const canAct = req.status === 'pending' && !hasApprovedCurrentStep && isAuthorized;
+                          
+                          if (canAct) {
+                            return (
+                              <div className="inline-flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                                <button
+                                  onClick={() =>
+                                    setActionModal({ open: true, type: 'approve', request: req, comments: '' })
+                                  }
+                                  className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-semibold cursor-pointer shadow-2xs"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    setActionModal({ open: true, type: 'reject', request: req, comments: '' })
+                                  }
+                                  className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[11px] font-semibold cursor-pointer"
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <span className="text-[11px] text-slate-400 font-semibold bg-slate-50 px-2 py-1 rounded">
+                                {req.status === 'pending' ? `Waiting on ${req.currentStep?.role || 'Next Step'}` : 'Archived'}
+                              </span>
+                            );
+                          }
+                        })()}
                       </td>
                     </tr>
                   ))
@@ -437,7 +453,12 @@ export const WorkflowsPage = () => {
                   <span className="text-[11px] text-slate-400 font-semibold">
                     {wf.steps?.length || 3} sequential steps
                   </span>
-                  <span className="text-teal-600 font-semibold text-[11px]">View Pipeline →</span>
+                  <button 
+                    onClick={() => setActivePipelineDetails(wf)}
+                    className="text-teal-600 font-semibold text-[11px] hover:text-teal-700 cursor-pointer"
+                  >
+                    View Pipeline →
+                  </button>
                 </div>
               </div>
             ))}
@@ -576,6 +597,64 @@ export const WorkflowsPage = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Pipeline Details Modal */}
+      {activePipelineDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 relative flex flex-col !overflow-visible m-auto">
+            <button
+              onClick={() => setActivePipelineDetails(null)}
+              className="absolute top-4 right-4 p-1 text-slate-400 hover:bg-slate-100 rounded-full cursor-pointer transition-colors"
+            >
+              <XCircle className="w-5 h-5" />
+            </button>
+            
+            <h3 className="text-lg font-bold text-slate-900 mb-1 pr-6">{activePipelineDetails.name}</h3>
+            <p className="text-xs text-slate-500 mb-6 border-b border-slate-100 pb-4">
+              {activePipelineDetails.description}
+            </p>
+
+            <div className="flex-1 overflow-y-auto pr-2">
+              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-4">Pipeline Steps</h4>
+              <div className="space-y-6">
+                {activePipelineDetails.steps?.map((step, idx) => (
+                  <div key={step.id} className="relative pl-6">
+                    {idx !== activePipelineDetails.steps.length - 1 && (
+                      <div className="absolute left-2.5 top-6 w-0.5 h-full bg-slate-200" />
+                    )}
+                    <div className="absolute left-1 top-1 w-3.5 h-3.5 rounded-full bg-teal-100 border-2 border-teal-500 flex items-center justify-center z-10" />
+                    
+                    <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg shadow-sm">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="text-xs font-bold text-slate-800">Step {step.step_order}: {step.name}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 bg-slate-200 text-slate-600 rounded font-semibold uppercase">{step.type}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 flex flex-col gap-1 mt-2">
+                        <div className="flex items-center gap-1.5">
+                          <User className="w-3 h-3 text-slate-400" />
+                          <span>Approver Role: <span className="font-semibold">{step.approver_role || 'Specific User'}</span></span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="w-3 h-3 text-slate-400" />
+                          <span>SLA Time: <span className="font-semibold">{step.sla_hours} hours</span></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+              <button 
+                onClick={() => setActivePipelineDetails(null)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

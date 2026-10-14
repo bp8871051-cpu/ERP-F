@@ -45,6 +45,7 @@ export const ChatPage = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [callingState, setCallingState] = useState({ active: false, type: null });
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -85,7 +86,7 @@ export const ChatPage = () => {
         if (res && res.data) {
           setMessages(res.data);
           // Mark conversation as read
-          chatService.markRead(activeConversation.id).catch(() => {});
+          chatService.markAsRead(activeConversation.id).catch(() => {});
           // Update unread count in conversations state
           setConversations((prev) =>
             prev.map((c) => (c.id === activeConversation.id ? { ...c, unread_count: 0 } : c))
@@ -417,12 +418,14 @@ export const ChatPage = () => {
               {/* Action buttons */}
               <div className="flex items-center gap-1 sm:gap-2 text-slate-600">
                 <button
+                  onClick={() => setCallingState({ active: true, type: 'voice' })}
                   title="Voice Call"
                   className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition-colors"
                 >
                   <Phone className="w-4 h-4" />
                 </button>
                 <button
+                  onClick={() => setCallingState({ active: true, type: 'video' })}
                   title="Video Call"
                   className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition-colors"
                 >
@@ -863,11 +866,17 @@ export const ChatPage = () => {
 
           {/* Quick Actions */}
           <div className="p-4 border-b border-slate-200 grid grid-cols-2 gap-2 text-center text-xs">
-            <button className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 font-medium text-slate-700 flex flex-col items-center gap-1">
+            <button 
+              onClick={() => setCallingState({ active: true, type: 'voice' })}
+              className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 font-medium text-slate-700 flex flex-col items-center gap-1 transition-colors"
+            >
               <Phone className="w-4 h-4 text-teal-600" />
               <span>Voice</span>
             </button>
-            <button className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 font-medium text-slate-700 flex flex-col items-center gap-1">
+            <button 
+              onClick={() => setCallingState({ active: true, type: 'video' })}
+              className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 font-medium text-slate-700 flex flex-col items-center gap-1 transition-colors"
+            >
               <Video className="w-4 h-4 text-teal-600" />
               <span>Video</span>
             </button>
@@ -885,11 +894,11 @@ export const ChatPage = () => {
                 <div key={p.id} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <img
-                      src={p.user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
-                      alt={p.user?.name}
+                      src={p.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
+                      alt={p.name || 'User'}
                       className="w-6 h-6 rounded-full object-cover"
                     />
-                    <span className="text-slate-700 font-medium">{p.user?.name || 'User'}</span>
+                    <span className="text-slate-700 font-medium">{p.name || 'User'}</span>
                   </div>
                   <span className="text-[10px] text-slate-400 capitalize">{p.role || 'Member'}</span>
                 </div>
@@ -903,16 +912,63 @@ export const ChatPage = () => {
               Shared Media & Files
             </span>
             <div className="space-y-2">
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 text-xs text-slate-700 border border-slate-100">
-                <FileText className="w-4 h-4 text-teal-600 shrink-0" />
-                <span className="truncate flex-1">Q3_Financial_Review.pdf</span>
-                <span className="text-[10px] text-slate-400">2.4MB</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 text-xs text-slate-700 border border-slate-100">
-                <ImageIcon className="w-4 h-4 text-blue-600 shrink-0" />
-                <span className="truncate flex-1">Sprint_Board_Mockup.png</span>
-                <span className="text-[10px] text-slate-400">1.1MB</span>
-              </div>
+              {messages.flatMap(m => m.attachments || []).length === 0 ? (
+                <div className="text-[11px] text-slate-400 text-center py-4 bg-slate-50 rounded-lg border border-slate-100/50">
+                  No files shared yet
+                </div>
+              ) : (
+                messages.flatMap(m => m.attachments || []).map(att => (
+                  <div key={att.id} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 text-xs text-slate-700 border border-slate-100">
+                    {att.file_type?.includes('image') ? (
+                      <ImageIcon className="w-4 h-4 text-blue-600 shrink-0" />
+                    ) : (
+                      <FileText className="w-4 h-4 text-teal-600 shrink-0" />
+                    )}
+                    <a href={att.file_path} target="_blank" rel="noreferrer" className="truncate flex-1 hover:text-teal-600 transition-colors">
+                      {att.file_name}
+                    </a>
+                    <span className="text-[10px] text-slate-400">
+                      {att.file_size ? (att.file_size / 1024).toFixed(0) + 'KB' : ''}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Calling Simulation Modal */}
+      {callingState.active && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+          <div className="bg-slate-800 text-white p-8 rounded-3xl w-full max-w-sm mx-4 flex flex-col items-center shadow-2xl relative overflow-hidden">
+            {/* Pulse animation for ringing */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-32 h-32 rounded-full border-4 border-teal-500/20 animate-ping absolute" />
+              <div className="w-48 h-48 rounded-full border-2 border-teal-500/10 animate-ping absolute" style={{ animationDelay: '0.5s' }} />
+            </div>
+            
+            <h3 className="text-sm font-semibold text-slate-300 mb-6 relative z-10 uppercase tracking-widest">
+              {callingState.type === 'video' ? 'Video Calling' : 'Voice Calling'}
+            </h3>
+            
+            <img 
+              src={activeConversation?.avatar || 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=200'}
+              alt={activeConversation?.title}
+              className="w-24 h-24 rounded-full object-cover shadow-lg relative z-10 mb-4 ring-4 ring-slate-700"
+            />
+            
+            <h2 className="text-xl font-bold mb-1 relative z-10 text-center">{activeConversation?.title}</h2>
+            <p className="text-teal-400 text-sm mb-12 relative z-10 animate-pulse">Ringing...</p>
+            
+            <div className="flex items-center gap-6 relative z-10">
+              <button 
+                onClick={() => setCallingState({ active: false, type: null })}
+                title="End Call"
+                className="w-14 h-14 bg-rose-600 hover:bg-rose-700 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
             </div>
           </div>
         </div>

@@ -14,6 +14,7 @@ import salesService from '../../../services/salesService';
 import productService from '../../../services/productService';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const QuoteCreate = () => {
   const navigate = useNavigate();
@@ -204,7 +205,7 @@ export const QuoteCreate = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => navigate('/app/sales/quotes')}
             className="p-2 text-slate-500 hover:text-slate-800"
@@ -231,7 +232,7 @@ export const QuoteCreate = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <Card className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm !overflow-visible">
           <h2 className="text-base font-semibold text-slate-900 dark:text-white mb-4">
             Quotation Details
           </h2>
@@ -241,19 +242,18 @@ export const QuoteCreate = () => {
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                 Prospective Customer *
               </label>
-              <select
-                required
-                value={customerId}
-                onChange={(e) => setCustomerId(e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="">Select Customer</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} {c.company_name ? `(${c.company_name})` : ''}
-                  </option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'Select Customer' },
+                  ...customers.map((c) => ({
+                    value: String(c.id),
+                    label: `${c.name} ${c.company_name ? `(${c.company_name})` : ''}`
+                  }))
+                ]}
+                value={String(customerId)}
+                onChange={(val) => setCustomerId(val)}
+                placeholder="Select Customer"
+              />
             </div>
 
             <div>
@@ -284,14 +284,14 @@ export const QuoteCreate = () => {
         </Card>
 
         {/* Quotation Line Items */}
-        <Card className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <Card className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm !overflow-visible">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-semibold text-slate-900 dark:text-white">
               Quotation Line Items
             </h2>
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={addItemRow}
               className="gap-1.5 text-xs text-indigo-600 border-indigo-200 hover:bg-indigo-50"
@@ -301,7 +301,7 @@ export const QuoteCreate = () => {
             </Button>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="!overflow-visible">
             <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
               <thead className="bg-slate-50 dark:bg-slate-800/80 text-xs uppercase font-semibold text-slate-500 dark:text-slate-400">
                 <tr>
@@ -318,19 +318,18 @@ export const QuoteCreate = () => {
                 {items.map((it, idx) => (
                   <tr key={idx} className="hover:bg-slate-50/50">
                     <td className="px-3 py-2">
-                      <select
-                        required
-                        value={it.product_id}
-                        onChange={(e) => handleProductChange(idx, e.target.value)}
-                        className="w-full px-2.5 py-1.5 text-xs rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-1 focus:ring-indigo-500"
-                      >
-                        <option value="">Select a Product</option>
-                        {productsList.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name}
-                          </option>
-                        ))}
-                      </select>
+                      <SearchableSelect
+                        options={[
+                          { value: '', label: 'Select a Product' },
+                          ...productsList.map((p) => ({
+                            value: String(p.id),
+                            label: p.name
+                          }))
+                        ]}
+                        value={String(it.product_id)}
+                        onChange={(val) => handleProductChange(idx, val)}
+                        placeholder="Select a Product"
+                      />
                     </td>
                     <td className="px-3 py-2 text-right">
                       <input
@@ -450,16 +449,16 @@ export const QuoteCreate = () => {
         <div className="flex items-center justify-end gap-3">
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={() => navigate('/app/sales/quotes')}
           >
             Cancel
           </Button>
           <Button
             type="submit"
-            variant="primary"
+            variant="teal"
             disabled={submitting}
-            className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="gap-2"
           >
             <Save className="w-4 h-4" />
             {submitting ? 'Creating Quote...' : 'Save Quotation'}

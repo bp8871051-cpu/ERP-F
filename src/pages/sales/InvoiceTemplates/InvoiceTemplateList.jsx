@@ -129,7 +129,7 @@ export const InvoiceTemplateList = () => {
             Customize typography, corporate colors, headers, and payment terms for generated customer documents.
           </p>
         </div>
-        <Button variant="primary" onClick={() => handleOpenModal()} className="gap-2 bg-indigo-600 text-white">
+        <Button variant="teal" onClick={() => handleOpenModal()} className="gap-2">
           <Plus className="w-4 h-4" /> Create Template
         </Button>
       </div>
@@ -142,7 +142,7 @@ export const InvoiceTemplateList = () => {
         <Card className="py-16 text-center">
           <Palette className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <p className="font-semibold text-slate-800 dark:text-white">No Templates Found</p>
-          <Button variant="primary" onClick={() => handleOpenModal()} className="mt-4 bg-indigo-600 text-white">
+          <Button variant="teal" onClick={() => handleOpenModal()} className="mt-4">
             Create First Template
           </Button>
         </Card>
@@ -291,8 +291,8 @@ export const InvoiceTemplateList = () => {
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary" disabled={submitting} className="bg-indigo-600 text-white">
+                <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+                <Button type="submit" variant="teal" disabled={submitting}>
                   {submitting ? 'Saving...' : 'Save Template'}
                 </Button>
               </div>

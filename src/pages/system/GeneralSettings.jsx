@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import systemService from '../../services/systemService';
 import { Link, useLocation } from 'react-router-dom';
+import SearchableSelect from '../../components/ui/SearchableSelect';
+import Button from '../../components/ui/Button';
 
 export default function GeneralSettings() {
   const [loading, setLoading] = useState(true);
@@ -251,58 +253,62 @@ export default function GeneralSettings() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
+            <div className="z-40">
               <label className="block text-xs font-semibold text-slate-700 mb-1">Primary Currency</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: 'USD', label: 'USD ($) - US Dollar' },
+                  { value: 'EUR', label: 'EUR (€) - Euro' },
+                  { value: 'GBP', label: 'GBP (£) - British Pound' },
+                  { value: 'INR', label: 'INR (₹) - Indian Rupee' },
+                  { value: 'AED', label: 'AED (د.إ) - UAE Dirham' },
+                ]}
                 value={form.currency}
-                onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-              >
-                <option value="USD">USD ($) - US Dollar</option>
-                <option value="EUR">EUR (€) - Euro</option>
-                <option value="GBP">GBP (£) - British Pound</option>
-                <option value="INR">INR (₹) - Indian Rupee</option>
-                <option value="AED">AED (د.إ) - UAE Dirham</option>
-              </select>
+                onChange={(val) => setForm({ ...form, currency: val })}
+                searchable={false}
+              />
             </div>
-            <div>
+            <div className="z-30">
               <label className="block text-xs font-semibold text-slate-700 mb-1">Default Timezone</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: 'America/Los_Angeles', label: 'America/Los_Angeles (PST/PDT)' },
+                  { value: 'America/New_York', label: 'America/New_York (EST/EDT)' },
+                  { value: 'Europe/London', label: 'Europe/London (GMT/BST)' },
+                  { value: 'Asia/Kolkata', label: 'Asia/Kolkata (IST)' },
+                  { value: 'Asia/Dubai', label: 'Asia/Dubai (GST)' },
+                ]}
                 value={form.timezone}
-                onChange={(e) => setForm({ ...form, timezone: e.target.value })}
-                className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-              >
-                <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
-                <option value="America/New_York">America/New_York (EST/EDT)</option>
-                <option value="Europe/London">Europe/London (GMT/BST)</option>
-                <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
-                <option value="Asia/Dubai">Asia/Dubai (GST)</option>
-              </select>
+                onChange={(val) => setForm({ ...form, timezone: val })}
+                searchable={false}
+              />
             </div>
-            <div>
+            <div className="z-20">
               <label className="block text-xs font-semibold text-slate-700 mb-1">Date Format</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD (2026-10-01)' },
+                  { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY (01/10/2026)' },
+                  { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY (10/01/2026)' },
+                ]}
                 value={form.date_format}
-                onChange={(e) => setForm({ ...form, date_format: e.target.value })}
-                className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-              >
-                <option value="YYYY-MM-DD">YYYY-MM-DD (2026-10-01)</option>
-                <option value="DD/MM/YYYY">DD/MM/YYYY (01/10/2026)</option>
-                <option value="MM/DD/YYYY">MM/DD/YYYY (10/01/2026)</option>
-              </select>
+                onChange={(val) => setForm({ ...form, date_format: val })}
+                searchable={false}
+              />
             </div>
-            <div>
+            <div className="z-10">
               <label className="block text-xs font-semibold text-slate-700 mb-1">Financial Year Start</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: '01-01', label: 'January 1st (Calendar Year)' },
+                  { value: '04-01', label: 'April 1st (Fiscal Standard)' },
+                  { value: '07-01', label: 'July 1st' },
+                  { value: '10-01', label: 'October 1st' },
+                ]}
                 value={form.financial_year_start}
-                onChange={(e) => setForm({ ...form, financial_year_start: e.target.value })}
-                className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-              >
-                <option value="01-01">January 1st (Calendar Year)</option>
-                <option value="04-01">April 1st (Fiscal Standard)</option>
-                <option value="07-01">July 1st</option>
-                <option value="10-01">October 1st</option>
-              </select>
+                onChange={(val) => setForm({ ...form, financial_year_start: val })}
+                searchable={false}
+              />
             </div>
           </div>
         </div>
@@ -379,13 +385,14 @@ export default function GeneralSettings() {
 
         {/* Submit Bar */}
         <div className="flex justify-end pt-2">
-          <button
+          <Button
             type="submit"
-            disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition disabled:opacity-50 cursor-pointer"
+            variant="teal"
+            loading={saving}
+            icon={Save}
           >
-            <Save className="w-4 h-4" /> {saving ? 'Saving to Database...' : 'Save General Settings'}
-          </button>
+            Save General Settings
+          </Button>
         </div>
       </form>
     </div>

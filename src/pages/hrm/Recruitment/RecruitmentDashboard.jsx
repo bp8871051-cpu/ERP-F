@@ -78,7 +78,8 @@ export const RecruitmentDashboard = () => {
         hrmService.getDepartments(),
       ]);
       setJobs(jobsRes || []);
-      setCandidates(candRes || []);
+      const cands = candRes?.pipeline ? Object.values(candRes.pipeline).flat() : (candRes || []);
+      setCandidates(cands);
       setDepartments(depRes || []);
       if (depRes && depRes.length > 0 && !jobFormData.department_id) {
         setJobFormData((prev) => ({ ...prev, department_id: depRes[0].id }));

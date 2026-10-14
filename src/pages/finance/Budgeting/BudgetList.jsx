@@ -29,6 +29,7 @@ import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
 import ErrorState from '../../../components/ui/ErrorState';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const BudgetList = () => {
   const [budgets, setBudgets] = useState([]);
@@ -59,10 +60,14 @@ export const BudgetList = () => {
         financeService.getBudgets(),
         financeService.getExpenseCategories(),
       ]);
-      setBudgets(bRes || []);
-      setCategories(cRes || []);
-      if (cRes && cRes.length > 0 && !formData.category_id) {
-        setFormData((prev) => ({ ...prev, category_id: cRes[0].id }));
+      const bData = Array.isArray(bRes) ? bRes : (bRes?.data?.data || bRes?.data || []);
+      setBudgets(Array.isArray(bData) ? bData : []);
+      
+      const cData = Array.isArray(cRes) ? cRes : (cRes?.data?.data || cRes?.data || []);
+      setCategories(Array.isArray(cData) ? cData : []);
+      
+      if (Array.isArray(cData) && cData.length > 0 && !formData.category_id) {
+        setFormData((prev) => ({ ...prev, category_id: cData[0].id }));
       }
     } catch (err) {
       console.error('Error fetching budgets:', err);
@@ -283,8 +288,8 @@ export const BudgetList = () => {
 
       {/* Create Budget Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md border border-slate-200 overflow-hidden animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md border border-slate-200 !overflow-visible animate-fadeIn my-8">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-teal-600" />
@@ -298,7 +303,7 @@ export const BudgetList = () => {
               </button>
             </div>
 
-            <form onSubmit={handleCreateBudget} className="p-5 space-y-4 text-xs">
+            <form onSubmit={handleCreateBudget} className="p-5 space-y-4 text-xs !overflow-visible">
               <div>
                 <label className="block font-medium text-slate-700 mb-1">
                   Budget Envelope Name <span className="text-rose-500">*</span>
@@ -336,20 +341,20 @@ export const BudgetList = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className="z-10">
                   <label className="block font-medium text-slate-700 mb-1">Expense Category</label>
-                  <select
-                    value={formData.category_id}
-                    onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white text-xs"
-                  >
-                    <option value="">All Categories</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={[
+                      { value: '', label: 'All Categories' },
+                      ...categories.map((c) => ({
+                        value: String(c.id),
+                        label: c.name
+                      }))
+                    ]}
+                    value={String(formData.category_id)}
+                    onChange={(val) => setFormData({ ...formData, category_id: val })}
+                    placeholder="All Categories"
+                  />
                 </div>
 
                 <div>

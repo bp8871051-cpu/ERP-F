@@ -6,6 +6,7 @@ import {
   TrendingUp, Users, Building, Activity
 } from 'lucide-react';
 import supportService from '../../services/supportService';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 const priorityColors = {
   urgent: 'bg-rose-100 text-rose-800 border-rose-200',
@@ -306,12 +307,12 @@ export default function SlaManagement() {
       {/* Create SLA Policy Modal */}
       <AnimatePresence>
         {showCreateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-start justify-center p-4 overflow-y-auto bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-slate-200 flex flex-col"
+              className="bg-white rounded-2xl max-w-xl w-full flex flex-col my-8 !overflow-visible shadow-2xl border border-slate-200"
             >
               <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -339,18 +340,19 @@ export default function SlaManagement() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
+                  <div className="z-10">
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Priority Level *</label>
-                    <select
+                    <SearchableSelect
+                      options={[
+                        { value: 'urgent', label: 'Urgent' },
+                        { value: 'high', label: 'High' },
+                        { value: 'medium', label: 'Medium' },
+                        { value: 'low', label: 'Low' }
+                      ]}
                       value={form.priority}
-                      onChange={(e) => setForm({ ...form, priority: e.target.value })}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-                    >
-                      <option value="urgent">Urgent</option>
-                      <option value="high">High</option>
-                      <option value="medium">Medium</option>
-                      <option value="low">Low</option>
-                    </select>
+                      onChange={(val) => setForm({ ...form, priority: val })}
+                      searchable={false}
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Department</label>

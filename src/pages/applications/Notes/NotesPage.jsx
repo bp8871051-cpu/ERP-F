@@ -56,7 +56,7 @@ export const NotesPage = () => {
       setLoading(true);
       const res = await noteService.getNotes();
       if (res && res.data) {
-        setNotes(res.data);
+        setNotes(res.data.notes || []);
       }
     } catch (err) {
       console.error('Failed to load notes', err);
@@ -91,8 +91,8 @@ export const NotesPage = () => {
       content: note.content || '',
       color: note.color || '#FFFFFF',
       tags: note.tags?.map((t) => t.name).join(', ') || '',
-      is_pinned: !!note.is_pinned,
-      is_favorite: !!note.is_favorite,
+      is_pinned: !!note.isPinned,
+      is_favorite: !!note.isFavorite,
     });
     setIsModalOpen(true);
   };
@@ -129,7 +129,7 @@ export const NotesPage = () => {
     try {
       await noteService.togglePin(id);
       setNotes((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_pinned: !n.is_pinned } : n))
+        prev.map((n) => (n.id === id ? { ...n, isPinned: !n.isPinned } : n))
       );
     } catch (err) {
       console.error(err);
@@ -142,7 +142,7 @@ export const NotesPage = () => {
     try {
       await noteService.toggleFavorite(id);
       setNotes((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_favorite: !n.is_favorite } : n))
+        prev.map((n) => (n.id === id ? { ...n, isFavorite: !n.isFavorite } : n))
       );
     } catch (err) {
       console.error(err);
@@ -188,10 +188,10 @@ export const NotesPage = () => {
 
     if (!matchesSearch) return false;
 
-    if (activeTab === 'pinned') return n.is_pinned;
-    if (activeTab === 'favorites') return n.is_favorite;
-    if (activeTab === 'archive') return n.is_archived;
-    if (activeTab === 'all' && n.is_archived) return false; // don't show archived in 'all'
+    if (activeTab === 'pinned') return n.isPinned;
+    if (activeTab === 'favorites') return n.isFavorite;
+    if (activeTab === 'archive') return n.isArchived;
+    if (activeTab === 'all' && n.isArchived) return false; // don't show archived in 'all'
 
     if (selectedTag !== 'all') {
       return n.tags?.some((t) => t.name === selectedTag);
@@ -200,8 +200,8 @@ export const NotesPage = () => {
     return true;
   });
 
-  const pinnedNotes = filteredNotes.filter((n) => n.is_pinned && activeTab === 'all');
-  const otherNotes = filteredNotes.filter((n) => !n.is_pinned || activeTab !== 'all');
+  const pinnedNotes = filteredNotes.filter((n) => n.isPinned && activeTab === 'all');
+  const otherNotes = filteredNotes.filter((n) => !n.isPinned || activeTab !== 'all');
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
@@ -488,18 +488,18 @@ export const NotesPage = () => {
             <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={(e) => handleTogglePin(note.id, e)}
-                title={note.is_pinned ? 'Unpin' : 'Pin'}
+                title={note.isPinned ? 'Unpin' : 'Pin'}
                 className={`p-1 rounded cursor-pointer ${
-                  note.is_pinned ? 'text-amber-500 fill-amber-500' : 'text-slate-300 hover:text-slate-500'
+                  note.isPinned ? 'text-amber-500 fill-amber-500' : 'text-slate-300 hover:text-slate-500'
                 }`}
               >
                 <Pin className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={(e) => handleToggleFavorite(note.id, e)}
-                title={note.is_favorite ? 'Unfavorite' : 'Favorite'}
+                title={note.isFavorite ? 'Unfavorite' : 'Favorite'}
                 className={`p-1 rounded cursor-pointer ${
-                  note.is_favorite ? 'text-amber-400 fill-amber-400' : 'text-slate-300 hover:text-slate-500'
+                  note.isFavorite ? 'text-amber-400 fill-amber-400' : 'text-slate-300 hover:text-slate-500'
                 }`}
               >
                 <Star className="w-3.5 h-3.5" />
@@ -529,10 +529,7 @@ export const NotesPage = () => {
         {/* Footer info & action buttons */}
         <div className="mt-4 pt-3 border-t border-slate-200/50 flex items-center justify-between text-[10px] text-slate-400">
           <span>
-            {new Date(note.updated_at || note.created_at).toLocaleDateString([], {
-              month: 'short',
-              day: 'numeric',
-            })}
+            {note.createdAt || note.updatedAt || 'Unknown'}
           </span>
 
           <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity">

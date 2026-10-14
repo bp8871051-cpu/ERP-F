@@ -46,7 +46,8 @@ export const LeadConvertModal = ({ isOpen, onClose, onSuccess, lead }) => {
       ]);
       const cPayload = custRes.data?.data || custRes.data;
       setExistingCustomers(cPayload.data || cPayload || []);
-      const pipeList = pipeRes.data || [];
+      const payload = pipeRes.data?.data || pipeRes.data;
+      const pipeList = payload?.all_pipelines || (Array.isArray(payload) ? payload : []);
       setPipelines(pipeList);
       if (pipeList.length > 0) {
         setFormData((prev) => ({

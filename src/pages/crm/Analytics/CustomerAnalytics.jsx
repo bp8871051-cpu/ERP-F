@@ -132,17 +132,17 @@ export const CustomerAnalytics = () => {
       </div>
 
       {/* Top Key Metrics Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
         <StatCard
           title="Total Customers"
-          value={metrics.total_customers?.toLocaleString()}
-          subtitle={`${metrics.active_customers} active accounts`}
+          value={metrics.total_customers?.toLocaleString() || '0'}
+          subtitle={`${metrics.active_customers || 0} active accounts`}
           icon={Users}
           iconColor="text-teal-600"
           iconBg="bg-teal-50"
         />
         <StatCard
-          title="Lifetime Value (CLV)"
+          title="Lifetime Value"
           value={formatCurrency(metrics.clv)}
           subtitle="Estimated value per client"
           icon={TrendingUp}
@@ -159,7 +159,7 @@ export const CustomerAnalytics = () => {
         />
         <StatCard
           title="Sales Cycle"
-          value={`${metrics.average_sales_cycle_days} Days`}
+          value={`${Math.abs(metrics.average_sales_cycle_days || 0)} Days`}
           subtitle="Inquiry to Close velocity"
           icon={Clock}
           iconColor="text-purple-600"
@@ -167,14 +167,14 @@ export const CustomerAnalytics = () => {
         />
         <StatCard
           title="Retention Rate"
-          value={`${metrics.retention_rate}%`}
+          value={`${metrics.retention_rate || 0}%`}
           subtitle="Repeat buying accounts"
           icon={Award}
           iconColor="text-emerald-600"
           iconBg="bg-emerald-50"
         />
         <StatCard
-          title="ARPU (Revenue/User)"
+          title="ARPU"
           value={formatCurrency(metrics.arpu)}
           subtitle="Annualized per customer"
           icon={DollarSign}
@@ -188,7 +188,7 @@ export const CustomerAnalytics = () => {
         title="Automated Customer Segmentation"
         subtitle="Rule-based tiering evaluated server-side (VIP, High Value, Repeat, At Risk, Inactive)"
       >
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
           {segments.map((seg, idx) => (
             <div
               key={idx}
@@ -204,7 +204,7 @@ export const CustomerAnalytics = () => {
                 </span>
               </div>
               <span className="font-bold text-slate-800 text-xs block truncate">
-                {seg.name}
+                {seg.name || seg.tier || `Segment ${idx + 1}`}
               </span>
               <span className="text-xl font-extrabold text-slate-900 mt-1 block">
                 {seg.count || 0}

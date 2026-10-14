@@ -5,6 +5,7 @@ import warehouseService from '../../../services/warehouseService';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import StockAdjustmentModal from '../../../components/inventory/StockAdjustmentModal';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const StockAdjustment = () => {
   const [adjustments, setAdjustments] = useState([]);
@@ -103,7 +104,7 @@ export const StockAdjustment = () => {
       </div>
 
       {/* Filter Bar */}
-      <Card className="p-3.5 shadow-sm border border-slate-200/80">
+      <Card className="p-3.5 shadow-sm border border-slate-200/80 !overflow-visible">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -119,36 +120,39 @@ export const StockAdjustment = () => {
             />
           </div>
 
-          <select
-            value={warehouseId}
-            onChange={(e) => {
-              setWarehouseId(e.target.value);
-              setPage(1);
-            }}
-            className="text-xs px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white text-slate-700 min-w-[140px]"
-          >
-            <option value="">All Warehouses</option>
-            {warehouses.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name}
-              </option>
-            ))}
-          </select>
+          <div className="w-56">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Warehouses' },
+                ...warehouses.map((w) => ({ value: String(w.id), label: w.name }))
+              ]}
+              value={String(warehouseId)}
+              onChange={(val) => {
+                setWarehouseId(val);
+                setPage(1);
+              }}
+              placeholder="All Warehouses"
+            />
+          </div>
 
-          <select
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value);
-              setPage(1);
-            }}
-            className="text-xs px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white text-slate-700"
-          >
-            <option value="">All Statuses</option>
-            <option value="draft">Draft</option>
-            <option value="pending">Pending Approval</option>
-            <option value="applied">Applied / Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
+          <div className="w-48">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'draft', label: 'Draft' },
+                { value: 'pending', label: 'Pending Approval' },
+                { value: 'applied', label: 'Applied / Approved' },
+                { value: 'rejected', label: 'Rejected' }
+              ]}
+              value={status}
+              onChange={(val) => {
+                setStatus(val);
+                setPage(1);
+              }}
+              placeholder="All Statuses"
+              searchable={false}
+            />
+          </div>
 
           {(search || warehouseId || status) && (
             <Button

@@ -16,6 +16,7 @@ import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
 import ErrorState from '../../../components/ui/ErrorState';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const TaxList = () => {
   const [taxes, setTaxes] = useState([]);
@@ -42,7 +43,8 @@ export const TaxList = () => {
       setLoading(true);
       setError(null);
       const data = await financeService.getTaxes();
-      setTaxes(data || []);
+      const taxesData = Array.isArray(data) ? data : (data?.data?.data || data?.data || []);
+      setTaxes(Array.isArray(taxesData) ? taxesData : []);
     } catch (err) {
       console.error('Error fetching taxes:', err);
       setError('Unable to load statutory tax rates.');
@@ -209,8 +211,8 @@ export const TaxList = () => {
 
       {/* New Tax Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md border border-slate-200 overflow-hidden animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md border border-slate-200 !overflow-visible animate-fadeIn my-8">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2">
                 <Percent className="w-5 h-5 text-teal-600" />
@@ -224,7 +226,7 @@ export const TaxList = () => {
               </button>
             </div>
 
-            <form onSubmit={handleCreateTax} className="p-5 space-y-4 text-xs">
+            <form onSubmit={handleCreateTax} className="p-5 space-y-4 text-xs !overflow-visible">
               <div>
                 <label className="block font-medium text-slate-700 mb-1">
                   Tax Name <span className="text-rose-500">*</span>
@@ -267,20 +269,21 @@ export const TaxList = () => {
                 </div>
               </div>
 
-              <div>
+              <div className="z-10">
                 <label className="block font-medium text-slate-700 mb-1">Tax Type</label>
-                <select
+                <SearchableSelect
+                  options={[
+                    { value: 'percentage', label: 'Percentage (%)' },
+                    { value: 'gst', label: 'GST (General)' },
+                    { value: 'cgst', label: 'CGST (Central)' },
+                    { value: 'sgst', label: 'SGST (State)' },
+                    { value: 'igst', label: 'IGST (Integrated)' },
+                    { value: 'vat', label: 'VAT' }
+                  ]}
                   value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white text-xs"
-                >
-                  <option value="percentage">Percentage (%)</option>
-                  <option value="gst">GST (General)</option>
-                  <option value="cgst">CGST (Central)</option>
-                  <option value="sgst">SGST (State)</option>
-                  <option value="igst">IGST (Integrated)</option>
-                  <option value="vat">VAT</option>
-                </select>
+                  onChange={(val) => setFormData({ ...formData, type: val })}
+                  searchable={false}
+                />
               </div>
 
               <div className="flex items-center gap-2 pt-1">

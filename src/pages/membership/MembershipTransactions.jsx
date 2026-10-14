@@ -6,6 +6,7 @@ import {
   ChevronLeft, ChevronRight, FileSpreadsheet, Eye, Receipt
 } from 'lucide-react';
 import membershipService from '../../services/membershipService';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 const statusBadges = {
   paid: 'bg-emerald-100 text-emerald-800 border-emerald-200',
@@ -128,7 +129,7 @@ export default function MembershipTransactions() {
       </div>
 
       {/* Filters Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4 !overflow-visible">
         <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
           <input
@@ -141,29 +142,35 @@ export default function MembershipTransactions() {
         </form>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          >
-            <option value="all">All Statuses</option>
-            <option value="paid">Paid</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Failed</option>
-            <option value="refunded">Refunded</option>
-          </select>
+          <div className="w-32 z-20">
+            <SearchableSelect
+              options={[
+                { value: 'all', label: 'All Statuses' },
+                { value: 'paid', label: 'Paid' },
+                { value: 'pending', label: 'Pending' },
+                { value: 'failed', label: 'Failed' },
+                { value: 'refunded', label: 'Refunded' }
+              ]}
+              value={statusFilter}
+              onChange={(val) => setStatusFilter(val)}
+              searchable={false}
+            />
+          </div>
 
-          <select
-            value={methodFilter}
-            onChange={(e) => setMethodFilter(e.target.value)}
-            className="px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          >
-            <option value="all">All Payment Methods</option>
-            <option value="card">Credit / Debit Card</option>
-            <option value="bank_transfer">Bank Transfer</option>
-            <option value="upi">UPI</option>
-            <option value="cash">Cash</option>
-          </select>
+          <div className="w-40 z-10">
+            <SearchableSelect
+              options={[
+                { value: 'all', label: 'All Payment Methods' },
+                { value: 'card', label: 'Credit / Debit Card' },
+                { value: 'bank_transfer', label: 'Bank Transfer' },
+                { value: 'upi', label: 'UPI' },
+                { value: 'cash', label: 'Cash' }
+              ]}
+              value={methodFilter}
+              onChange={(val) => setMethodFilter(val)}
+              searchable={false}
+            />
+          </div>
 
           <button
             onClick={fetchTransactions}

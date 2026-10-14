@@ -91,30 +91,6 @@ export const PosDashboard = () => {
           <Button
             variant="secondary"
             size="sm"
-            icon={Printer}
-            onClick={() => navigate('/app/pos/barcode-print')}
-          >
-            Barcode Print
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={QrCode}
-            onClick={() => navigate('/app/pos/qr-print')}
-          >
-            QR Print
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={Sliders}
-            onClick={() => navigate('/app/pos/print-settings')}
-          >
-            Settings
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
             icon={Receipt}
             onClick={() => navigate('/app/pos/orders')}
           >
@@ -133,7 +109,7 @@ export const PosDashboard = () => {
       </div>
 
       {/* 8 POS KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
         <StatCard
           title="Today's Sales"
           value={`₹${Number(metrics.todaySales || 0).toLocaleString()}`}

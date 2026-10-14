@@ -19,6 +19,7 @@ import productService from '../../../services/productService';
 import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const CashSale = () => {
   const [products, setProducts] = useState([]);
@@ -218,7 +219,7 @@ export const CashSale = () => {
 
         {/* Register / Cart Panel */}
         <div className="space-y-4">
-          <Card className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-full justify-between">
+          <Card className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-full justify-between !overflow-visible">
             <div>
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-3">
                 <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
@@ -237,16 +238,15 @@ export const CashSale = () => {
                 <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
                   Customer
                 </label>
-                <select
-                  value={selectedCustomerId}
-                  onChange={(e) => setSelectedCustomerId(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
-                >
-                  <option value="">Walk-in Retail Customer</option>
-                  {customers.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={[
+                    { value: '', label: 'Walk-in Retail Customer' },
+                    ...customers.map((c) => ({ value: String(c.id), label: c.name }))
+                  ]}
+                  value={String(selectedCustomerId)}
+                  onChange={(val) => setSelectedCustomerId(val)}
+                  placeholder="Walk-in Retail Customer"
+                />
               </div>
 
               {/* Cart Items List */}
@@ -334,10 +334,10 @@ export const CashSale = () => {
               </div>
 
               <Button
-                variant="primary"
+                variant="teal"
                 disabled={cart.length === 0 || processing}
                 onClick={handleCheckout}
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2"
+                className="w-full py-3 font-bold gap-2"
               >
                 <CheckCircle className="w-5 h-5" />
                 {processing ? 'Processing Sale...' : `Charge ₹${grandTotal.toLocaleString('en-IN')}`}
@@ -395,10 +395,10 @@ export const CashSale = () => {
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1 gap-2" onClick={() => window.print()}>
+              <Button variant="secondary" className="flex-1 gap-2" onClick={() => window.print()}>
                 <Printer className="w-4 h-4" /> Print
               </Button>
-              <Button variant="primary" className="flex-1 bg-emerald-600 text-white" onClick={() => setCompletedSale(null)}>
+              <Button variant="teal" className="flex-1" onClick={() => setCompletedSale(null)}>
                 Next Sale
               </Button>
             </div>

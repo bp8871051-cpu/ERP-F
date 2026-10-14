@@ -16,6 +16,7 @@ import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const RecurringInvoiceList = () => {
   const [profiles, setProfiles] = useState([]);
@@ -114,7 +115,7 @@ export const RecurringInvoiceList = () => {
             Automate recurring billing schedules for retainer agreements, SaaS, or maintenance contracts.
           </p>
         </div>
-        <Button variant="primary" onClick={handleOpenModal} className="gap-2 bg-indigo-600 text-white">
+        <Button variant="teal" onClick={handleOpenModal} className="gap-2">
           <Plus className="w-4 h-4" /> Setup Recurring Schedule
         </Button>
       </div>
@@ -186,32 +187,32 @@ export const RecurringInvoiceList = () => {
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold mb-1">Customer *</label>
-                <select
-                  required
-                  value={customerId}
-                  onChange={(e) => setCustomerId(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
-                >
-                  <option value="">Select Customer</option>
-                  {customers.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={[
+                    { value: '', label: 'Select Customer' },
+                    ...customers.map(c => ({ value: String(c.id), label: c.name }))
+                  ]}
+                  value={String(customerId)}
+                  onChange={(val) => setCustomerId(val)}
+                  placeholder="Select Customer"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold mb-1">Billing Frequency</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'weekly', label: 'Weekly' },
+                      { value: 'monthly', label: 'Monthly' },
+                      { value: 'quarterly', label: 'Quarterly' },
+                      { value: 'yearly', label: 'Yearly' }
+                    ]}
                     value={frequency}
-                    onChange={(e) => setFrequency(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
-                  >
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                    <option value="yearly">Yearly</option>
-                  </select>
+                    onChange={(val) => setFrequency(val)}
+                    placeholder="Billing Frequency"
+                    searchable={false}
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1">Recurring Amount (₹) *</label>
@@ -249,8 +250,8 @@ export const RecurringInvoiceList = () => {
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary" disabled={submitting} className="bg-indigo-600 text-white">
+                <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+                <Button type="submit" variant="teal" disabled={submitting}>
                   {submitting ? 'Creating...' : 'Activate Schedule'}
                 </Button>
               </div>

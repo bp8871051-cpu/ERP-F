@@ -24,6 +24,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export const ComplianceDocs = () => {
   const navigate = useNavigate();
@@ -268,8 +269,8 @@ export const ComplianceDocs = () => {
       </div>
 
       {/* Filters Bar */}
-      <Card className="p-4 bg-white border border-slate-200 shadow-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <Card className="p-4 bg-white border border-slate-200 shadow-xs !overflow-visible">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 !overflow-visible">
           <div className="relative sm:col-span-2">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
@@ -281,24 +282,25 @@ export const ComplianceDocs = () => {
             />
           </div>
 
-          <div>
-            <select
+          <div className="z-10">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Compliance Types' },
+                { value: 'GST', label: 'GST Registration & Filings' },
+                { value: 'Tax', label: 'Income Tax & TDS' },
+                { value: 'Legal', label: 'Legal & Incorporation' },
+                { value: 'ISO', label: 'ISO 9001 / 27001 Certifications' },
+                { value: 'Licenses', label: 'Trade & Factory Licenses' },
+                { value: 'Certifications', label: 'Industry Certifications' },
+                { value: 'Contracts', label: 'Commercial Contracts' },
+                { value: 'Government Documents', label: 'Government Documents' },
+                { value: 'Employee Compliance', label: 'Employee Labor Compliance' },
+                { value: 'Vendor Compliance', label: 'Vendor Due Diligence' }
+              ]}
               value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-teal-500 text-slate-700"
-            >
-              <option value="">All Compliance Types</option>
-              <option value="GST">GST Registration & Filings</option>
-              <option value="Tax">Income Tax & TDS</option>
-              <option value="Legal">Legal & Incorporation</option>
-              <option value="ISO">ISO 9001 / 27001 Certifications</option>
-              <option value="Licenses">Trade & Factory Licenses</option>
-              <option value="Certifications">Industry Certifications</option>
-              <option value="Contracts">Commercial Contracts</option>
-              <option value="Government Documents">Government Documents</option>
-              <option value="Employee Compliance">Employee Labor Compliance</option>
-              <option value="Vendor Compliance">Vendor Due Diligence</option>
-            </select>
+              onChange={(val) => setSelectedType(val)}
+              searchable={false}
+            />
           </div>
         </div>
       </Card>
@@ -379,8 +381,8 @@ export const ComplianceDocs = () => {
 
       {/* Add Compliance Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col my-8 !overflow-visible">
             <div className="p-4 border-b border-slate-200 bg-slate-900 text-white flex justify-between items-center">
               <h3 className="text-sm font-bold flex items-center gap-2">
                 <Scale className="w-4 h-4 text-teal-400" />
@@ -388,7 +390,7 @@ export const ComplianceDocs = () => {
               </h3>
               <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-white">&times;</button>
             </div>
-            <form onSubmit={handleCreateSubmit} className="p-4 overflow-y-auto space-y-4 text-xs">
+            <form onSubmit={handleCreateSubmit} className="p-4 space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
                   <label className="block font-semibold text-slate-700 mb-1">Document / Filing Name *</label>
@@ -416,24 +418,25 @@ export const ComplianceDocs = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
+                <div className="z-10">
                   <label className="block font-semibold text-slate-700 mb-1">Compliance Type</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'GST', label: 'GST Registration & Filings' },
+                      { value: 'Tax', label: 'Income Tax & TDS' },
+                      { value: 'Legal', label: 'Legal & Incorporation' },
+                      { value: 'ISO', label: 'ISO 9001 / 27001 Certifications' },
+                      { value: 'Licenses', label: 'Trade & Factory Licenses' },
+                      { value: 'Certifications', label: 'Industry Certifications' },
+                      { value: 'Contracts', label: 'Commercial Contracts' },
+                      { value: 'Government Documents', label: 'Government Documents' },
+                      { value: 'Employee Compliance', label: 'Employee Labor Compliance' },
+                      { value: 'Vendor Compliance', label: 'Vendor Due Diligence' }
+                    ]}
                     value={complianceForm.compliance_type}
-                    onChange={(e) => setComplianceForm({ ...complianceForm, compliance_type: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500"
-                  >
-                    <option value="GST">GST Registration & Filings</option>
-                    <option value="Tax">Income Tax & TDS</option>
-                    <option value="Legal">Legal & Incorporation</option>
-                    <option value="ISO">ISO 9001 / 27001 Certifications</option>
-                    <option value="Licenses">Trade & Factory Licenses</option>
-                    <option value="Certifications">Industry Certifications</option>
-                    <option value="Contracts">Commercial Contracts</option>
-                    <option value="Government Documents">Government Documents</option>
-                    <option value="Employee Compliance">Employee Labor Compliance</option>
-                    <option value="Vendor Compliance">Vendor Due Diligence</option>
-                  </select>
+                    onChange={(val) => setComplianceForm({ ...complianceForm, compliance_type: val })}
+                    searchable={false}
+                  />
                 </div>
 
                 <div>

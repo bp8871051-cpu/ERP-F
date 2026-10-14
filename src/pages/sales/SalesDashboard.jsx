@@ -106,7 +106,7 @@ export const SalesDashboard = () => {
       </div>
 
       {/* 8 KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-4">
         <StatCard
           title="Total Sales"
           value={`$${Number(cards.totalSales || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}

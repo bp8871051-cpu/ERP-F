@@ -25,6 +25,7 @@ import StatCard from '../../../components/ui/StatCard';
 import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 import CampaignModal from './CampaignModal';
 
 export const CampaignList = () => {
@@ -57,12 +58,12 @@ export const CampaignList = () => {
         page,
         per_page: 15,
       });
-      const payload = res.data;
+      const payload = res;
       setCampaigns(payload.data || payload || []);
       setMeta({
-        current_page: payload.current_page || 1,
-        last_page: payload.last_page || 1,
-        total: payload.total || 0,
+        current_page: payload.meta?.current_page || payload.current_page || 1,
+        last_page: payload.meta?.last_page || payload.last_page || 1,
+        total: payload.meta?.total || payload.total || 0,
       });
     } catch (err) {
       console.error('Error fetching campaigns:', err);
@@ -134,7 +135,7 @@ export const CampaignList = () => {
       </div>
 
       {/* Filters Card */}
-      <Card className="p-4">
+      <Card className="p-4 !overflow-visible">
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
           <div className="relative w-full sm:w-80">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -151,36 +152,44 @@ export const CampaignList = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <select
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
-                setPage(1);
-              }}
-              className="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden"
-            >
-              <option value="">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="running">Running</option>
-              <option value="paused">Paused</option>
-              <option value="completed">Completed</option>
-            </select>
+            <div className="w-40 z-10">
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'All Statuses' },
+                  { value: 'draft', label: 'Draft' },
+                  { value: 'running', label: 'Running' },
+                  { value: 'paused', label: 'Paused' },
+                  { value: 'completed', label: 'Completed' }
+                ]}
+                value={status}
+                onChange={(val) => {
+                  setStatus(val);
+                  setPage(1);
+                }}
+                placeholder="All Statuses"
+                searchable={false}
+              />
+            </div>
 
-            <select
-              value={type}
-              onChange={(e) => {
-                setType(e.target.value);
-                setPage(1);
-              }}
-              className="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden"
-            >
-              <option value="">All Channels</option>
-              <option value="Email">Email</option>
-              <option value="WhatsApp">WhatsApp</option>
-              <option value="SMS">SMS</option>
-              <option value="Social Media">Social Media</option>
-              <option value="Event">Event</option>
-            </select>
+            <div className="w-40 z-10">
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'All Channels' },
+                  { value: 'Email', label: 'Email' },
+                  { value: 'WhatsApp', label: 'WhatsApp' },
+                  { value: 'SMS', label: 'SMS' },
+                  { value: 'Social Media', label: 'Social Media' },
+                  { value: 'Event', label: 'Event' }
+                ]}
+                value={type}
+                onChange={(val) => {
+                  setType(val);
+                  setPage(1);
+                }}
+                placeholder="All Channels"
+                searchable={false}
+              />
+            </div>
 
             <Button variant="secondary" size="sm" icon={RefreshCw} onClick={fetchCampaigns}>
               Refresh
@@ -190,7 +199,7 @@ export const CampaignList = () => {
       </Card>
 
       {/* Campaigns Table */}
-      <Card className="overflow-hidden" noPadding>
+      <Card className="!overflow-visible" noPadding>
         {loading ? (
           <div className="p-6">
             <LoadingSkeleton type="table" />
@@ -231,7 +240,7 @@ export const CampaignList = () => {
                             {c.name}
                           </button>
                           <span className="text-[10px] text-slate-400 font-normal">
-                            {c.start_date} to {c.end_date}
+                            {new Date(c.start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} to {new Date(c.end_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </span>
                         </td>
                         <td className="py-3 px-4">

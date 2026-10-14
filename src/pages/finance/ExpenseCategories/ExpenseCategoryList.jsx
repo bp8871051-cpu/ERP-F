@@ -18,6 +18,7 @@ import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
 import ErrorState from '../../../components/ui/ErrorState';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const ExpenseCategoryList = () => {
   const [categories, setCategories] = useState([]);
@@ -236,7 +237,7 @@ export const ExpenseCategoryList = () => {
       {/* New Category Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md border border-slate-200 overflow-hidden animate-fadeIn">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md border border-slate-200 !overflow-visible animate-fadeIn">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2">
                 <FolderTree className="w-5 h-5 text-teal-600" />
@@ -290,22 +291,22 @@ export const ExpenseCategoryList = () => {
                 </div>
               </div>
 
-              <div>
+              <div className="z-10">
                 <label className="block font-medium text-slate-700 mb-1">Parent Category (Optional)</label>
-                <select
-                  value={formData.parent_id}
-                  onChange={(e) => setFormData({ ...formData, parent_id: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white text-xs"
-                >
-                  <option value="">None (Top-Level Category)</option>
-                  {categories
-                    .filter((c) => !c.parent_id)
-                    .map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                </select>
+                <SearchableSelect
+                  options={[
+                    { value: '', label: 'None (Top-Level Category)' },
+                    ...categories
+                      .filter((c) => !c.parent_id)
+                      .map((c) => ({
+                        value: String(c.id),
+                        label: c.name
+                      }))
+                  ]}
+                  value={String(formData.parent_id)}
+                  onChange={(val) => setFormData({ ...formData, parent_id: val })}
+                  placeholder="None (Top-Level Category)"
+                />
               </div>
 
               <div>

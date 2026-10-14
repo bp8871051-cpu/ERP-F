@@ -23,6 +23,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export const Policies = () => {
   const navigate = useNavigate();
@@ -187,8 +188,8 @@ export const Policies = () => {
       </div>
 
       {/* Filters Bar */}
-      <Card className="p-4 bg-white border border-slate-200 shadow-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+      <Card className="p-4 bg-white border border-slate-200 shadow-xs !overflow-visible">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 !overflow-visible">
           <div className="relative sm:col-span-2">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
@@ -200,37 +201,39 @@ export const Policies = () => {
             />
           </div>
 
-          <div>
-            <select
+          <div className="z-20">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Policy Types' },
+                { value: 'Company Policies', label: 'Company Policies' },
+                { value: 'HR Policies', label: 'HR Policies' },
+                { value: 'IT Policies', label: 'IT Policies' },
+                { value: 'Security Policies', label: 'Security Policies' },
+                { value: 'Finance Policies', label: 'Finance Policies' },
+                { value: 'Operations Manuals', label: 'Operations Manuals' },
+                { value: 'Employee Handbooks', label: 'Employee Handbooks' }
+              ]}
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-teal-500 text-slate-700"
-            >
-              <option value="">All Policy Types</option>
-              <option value="Company Policies">Company Policies</option>
-              <option value="HR Policies">HR Policies</option>
-              <option value="IT Policies">IT Policies</option>
-              <option value="Security Policies">Security Policies</option>
-              <option value="Finance Policies">Finance Policies</option>
-              <option value="Operations Manuals">Operations Manuals</option>
-              <option value="Employee Handbooks">Employee Handbooks</option>
-            </select>
+              onChange={(val) => setSelectedCategory(val)}
+              searchable={false}
+            />
           </div>
 
-          <div>
-            <select
+          <div className="z-10">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'published', label: 'Published' },
+                { value: 'review', label: 'Review' },
+                { value: 'approval', label: 'Approval' },
+                { value: 'draft', label: 'Draft' },
+                { value: 'review_due', label: 'Review Due' },
+                { value: 'archived', label: 'Archived' }
+              ]}
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-teal-500 text-slate-700 capitalize"
-            >
-              <option value="">All Statuses</option>
-              <option value="published">Published</option>
-              <option value="review">Review</option>
-              <option value="approval">Approval</option>
-              <option value="draft">Draft</option>
-              <option value="review_due">Review Due</option>
-              <option value="archived">Archived</option>
-            </select>
+              onChange={(val) => setSelectedStatus(val)}
+              searchable={false}
+            />
           </div>
         </div>
       </Card>
@@ -309,8 +312,8 @@ export const Policies = () => {
 
       {/* Create Policy Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl flex flex-col my-8 !overflow-visible">
             <div className="p-4 border-b border-slate-200 bg-slate-900 text-white flex justify-between items-center">
               <h3 className="text-sm font-bold flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-teal-400" />
@@ -318,7 +321,7 @@ export const Policies = () => {
               </h3>
               <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-white">&times;</button>
             </div>
-            <form onSubmit={handleCreateSubmit} className="p-4 overflow-y-auto space-y-4 text-xs">
+            <form onSubmit={handleCreateSubmit} className="p-4 space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
                   <label className="block font-semibold text-slate-700 mb-1">Policy Title *</label>
@@ -344,21 +347,22 @@ export const Policies = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
+                <div className="z-20">
                   <label className="block font-semibold text-slate-700 mb-1">Category</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'Company Policies', label: 'Company Policies' },
+                      { value: 'HR Policies', label: 'HR Policies' },
+                      { value: 'IT Policies', label: 'IT Policies' },
+                      { value: 'Security Policies', label: 'Security Policies' },
+                      { value: 'Finance Policies', label: 'Finance Policies' },
+                      { value: 'Operations Manuals', label: 'Operations Manuals' },
+                      { value: 'Employee Handbooks', label: 'Employee Handbooks' }
+                    ]}
                     value={policyForm.category}
-                    onChange={(e) => setPolicyForm({ ...policyForm, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500"
-                  >
-                    <option value="Company Policies">Company Policies</option>
-                    <option value="HR Policies">HR Policies</option>
-                    <option value="IT Policies">IT Policies</option>
-                    <option value="Security Policies">Security Policies</option>
-                    <option value="Finance Policies">Finance Policies</option>
-                    <option value="Operations Manuals">Operations Manuals</option>
-                    <option value="Employee Handbooks">Employee Handbooks</option>
-                  </select>
+                    onChange={(val) => setPolicyForm({ ...policyForm, category: val })}
+                    searchable={false}
+                  />
                 </div>
 
                 <div>
@@ -371,17 +375,18 @@ export const Policies = () => {
                   />
                 </div>
 
-                <div>
+                <div className="z-10">
                   <label className="block font-semibold text-slate-700 mb-1">Initial Status</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'draft', label: 'Draft' },
+                      { value: 'review', label: 'Review' },
+                      { value: 'published', label: 'Published' }
+                    ]}
                     value={policyForm.status}
-                    onChange={(e) => setPolicyForm({ ...policyForm, status: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="review">Review</option>
-                    <option value="published">Published</option>
-                  </select>
+                    onChange={(val) => setPolicyForm({ ...policyForm, status: val })}
+                    searchable={false}
+                  />
                 </div>
               </div>
 

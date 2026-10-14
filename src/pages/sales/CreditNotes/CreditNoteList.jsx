@@ -19,6 +19,7 @@ import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const CreditNoteList = () => {
   const navigate = useNavigate();
@@ -160,9 +161,9 @@ export const CreditNoteList = () => {
         </div>
         <div className="flex items-center gap-3">
           <Button
-            variant="primary"
+            variant="teal"
             onClick={handleOpenCreateModal}
-            className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="gap-2"
           >
             <Plus className="w-4 h-4" />
             Issue Credit Note
@@ -171,7 +172,7 @@ export const CreditNoteList = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 !overflow-visible">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
@@ -187,22 +188,23 @@ export const CreditNoteList = () => {
             />
           </div>
 
-          <div className="relative">
-            <Filter className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-            <select
+          <div className="relative z-10">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'draft', label: 'Draft' },
+                { value: 'issued', label: 'Issued' },
+                { value: 'applied', label: 'Applied' },
+                { value: 'cancelled', label: 'Cancelled' }
+              ]}
               value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
+              onChange={(val) => {
+                setStatus(val);
                 setPage(1);
               }}
-              className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
-            >
-              <option value="">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="issued">Issued</option>
-              <option value="applied">Applied</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+              placeholder="All Statuses"
+              searchable={false}
+            />
           </div>
         </div>
       </Card>
@@ -218,7 +220,7 @@ export const CreditNoteList = () => {
             <FileMinus className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
             <p className="text-base font-semibold text-slate-800 dark:text-slate-200">No Credit Notes Found</p>
             <p className="text-xs text-slate-500 mt-1 mb-4">Create a credit note for customer returns or price adjustments.</p>
-            <Button variant="primary" onClick={handleOpenCreateModal} className="bg-indigo-600 text-white">
+            <Button variant="teal" onClick={handleOpenCreateModal}>
               Create Credit Note
             </Button>
           </div>
@@ -278,7 +280,7 @@ export const CreditNoteList = () => {
       {/* Create Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full p-6 shadow-xl border border-slate-200 dark:border-slate-800 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full p-6 shadow-xl border border-slate-200 dark:border-slate-800 space-y-4 max-h-[90vh] !overflow-visible">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-base font-bold text-slate-900 dark:text-white">Create Credit Note</h3>
               <button onClick={() => setShowModal(false)} className="text-slate-400">✕</button>
@@ -288,31 +290,28 @@ export const CreditNoteList = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Customer *</label>
-                  <select
-                    required
-                    value={customerId}
-                    onChange={(e) => setCustomerId(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
-                  >
-                    <option value="">Select Customer</option>
-                    {customers.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={[
+                      { value: '', label: 'Select Customer' },
+                      ...customers.map((c) => ({ value: String(c.id), label: c.name }))
+                    ]}
+                    value={String(customerId)}
+                    onChange={(val) => setCustomerId(val)}
+                    placeholder="Select Customer"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Invoice (Optional)</label>
-                  <select
-                    value={invoiceId}
-                    onChange={(e) => setInvoiceId(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
-                  >
-                    <option value="">No Invoice</option>
-                    {invoices.map((inv) => (
-                      <option key={inv.id} value={inv.id}>{inv.invoice_number}</option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={[
+                      { value: '', label: 'No Invoice' },
+                      ...invoices.map((inv) => ({ value: String(inv.id), label: inv.invoice_number }))
+                    ]}
+                    value={String(invoiceId)}
+                    onChange={(val) => setInvoiceId(val)}
+                    placeholder="Select Invoice"
+                  />
                 </div>
               </div>
 
@@ -342,26 +341,27 @@ export const CreditNoteList = () => {
               </div>
 
               {/* Items */}
-              <div className="space-y-2">
+              <div className="space-y-2 !overflow-visible">
                 <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Returned Line Items</span>
                 {modalItems.map((it, idx) => (
                   <div key={idx} className="flex gap-2 items-center">
-                    <select
-                      value={it.product_id}
-                      onChange={(e) => {
-                        const prod = products.find((p) => String(p.id) === e.target.value);
-                        const n = [...modalItems];
-                        n[idx].product_id = e.target.value;
-                        if (prod) n[idx].amount = Number(prod.selling_price || prod.price || 0);
-                        setModalItems(n);
-                      }}
-                      className="flex-1 px-2.5 py-1.5 text-xs rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
-                    >
-                      <option value="">Select Product</option>
-                      {products.map((p) => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </select>
+                    <div className="flex-1">
+                      <SearchableSelect
+                        options={[
+                          { value: '', label: 'Select Product' },
+                          ...products.map((p) => ({ value: String(p.id), label: p.name }))
+                        ]}
+                        value={String(it.product_id)}
+                        onChange={(val) => {
+                          const prod = products.find((p) => String(p.id) === val);
+                          const n = [...modalItems];
+                          n[idx].product_id = val;
+                          if (prod) n[idx].amount = Number(prod.selling_price || prod.price || 0);
+                          setModalItems(n);
+                        }}
+                        placeholder="Select Product"
+                      />
+                    </div>
 
                     <input
                       type="number"
@@ -392,8 +392,8 @@ export const CreditNoteList = () => {
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary" disabled={submitting} className="bg-indigo-600 text-white">
+                <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+                <Button type="submit" variant="teal" disabled={submitting}>
                   {submitting ? 'Creating...' : 'Issue Credit Note'}
                 </Button>
               </div>

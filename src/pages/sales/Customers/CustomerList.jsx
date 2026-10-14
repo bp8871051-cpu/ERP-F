@@ -21,6 +21,7 @@ import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
 import CustomerModal from './CustomerModal';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const CustomerList = () => {
   const navigate = useNavigate();
@@ -140,7 +141,7 @@ export const CustomerList = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <Card className="p-4">
+      <Card className="p-4 !overflow-visible">
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
           <div className="relative w-full sm:w-80">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -157,18 +158,22 @@ export const CustomerList = () => {
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <select
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
-                setPage(1);
-              }}
-              className="text-xs px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-hidden"
-            >
-              <option value="">All Statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+            <div className="w-36">
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'All Statuses' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'inactive', label: 'Inactive' }
+                ]}
+                value={status}
+                onChange={(val) => {
+                  setStatus(val);
+                  setPage(1);
+                }}
+                placeholder="All Statuses"
+                searchable={false}
+              />
+            </div>
 
             <Button variant="secondary" size="sm" icon={RefreshCw} onClick={fetchCustomers}>
               Refresh

@@ -37,6 +37,7 @@ import StatCard from '../../../components/ui/StatCard';
 import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 import FeedbackModal from './FeedbackModal';
 
 export const FeedbackList = () => {
@@ -180,9 +181,8 @@ export const FeedbackList = () => {
         </div>
       </div>
 
-      {/* KPI Cards */}
       {dashboard && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <StatCard
             title="Avg Rating"
             value={`${Number(dashboard.average_rating || 0).toFixed(1)} ★`}
@@ -193,7 +193,7 @@ export const FeedbackList = () => {
           />
           <StatCard
             title="Total Feedback"
-            value={dashboard.total_feedback}
+            value={dashboard.total_feedback || 0}
             subtitle="Customer reviews"
             icon={MessageSquare}
             iconColor="text-teal-600"
@@ -201,7 +201,7 @@ export const FeedbackList = () => {
           />
           <StatCard
             title="Positive (4-5★)"
-            value={dashboard.positive_count}
+            value={dashboard.positive_count || 0}
             subtitle="Promoters"
             icon={ThumbsUp}
             iconColor="text-emerald-600"
@@ -209,7 +209,7 @@ export const FeedbackList = () => {
           />
           <StatCard
             title="Neutral (3★)"
-            value={dashboard.neutral_count}
+            value={dashboard.neutral_count || 0}
             subtitle="Passives"
             icon={Clock}
             iconColor="text-blue-600"
@@ -217,7 +217,7 @@ export const FeedbackList = () => {
           />
           <StatCard
             title="Negative (1-2★)"
-            value={dashboard.negative_count}
+            value={dashboard.negative_count || 0}
             subtitle="Detractors"
             icon={ThumbsDown}
             iconColor="text-rose-600"
@@ -225,7 +225,7 @@ export const FeedbackList = () => {
           />
           <StatCard
             title="Open Issues"
-            value={dashboard.open_issues}
+            value={dashboard.open_issues || 0}
             subtitle="Requires action"
             icon={Clock}
             iconColor="text-amber-600"
@@ -233,7 +233,7 @@ export const FeedbackList = () => {
           />
           <StatCard
             title="Resolved"
-            value={dashboard.resolved_count}
+            value={dashboard.resolved_count || 0}
             subtitle="Closed tickets"
             icon={CheckCircle}
             iconColor="text-teal-600"
@@ -241,7 +241,7 @@ export const FeedbackList = () => {
           />
           <StatCard
             title="Resolution Rate"
-            value={`${dashboard.resolution_rate}%`}
+            value={`${dashboard.resolution_rate || 0}%`}
             subtitle="SLA completion"
             icon={CheckSquare}
             iconColor="text-indigo-600"
@@ -305,7 +305,7 @@ export const FeedbackList = () => {
       )}
 
       {/* Filters Card */}
-      <Card className="p-4">
+      <Card className="p-4 !overflow-visible">
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
           <div className="relative w-full sm:w-80">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -322,53 +322,65 @@ export const FeedbackList = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <select
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
-                setPage(1);
-              }}
-              className="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden"
-            >
-              <option value="">All Statuses</option>
-              <option value="new">New</option>
-              <option value="reviewed">Reviewed</option>
-              <option value="resolved">Resolved</option>
-              <option value="closed">Closed</option>
-            </select>
+            <div className="w-36 z-30">
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'All Statuses' },
+                  { value: 'new', label: 'New' },
+                  { value: 'reviewed', label: 'Reviewed' },
+                  { value: 'resolved', label: 'Resolved' },
+                  { value: 'closed', label: 'Closed' }
+                ]}
+                value={status}
+                onChange={(val) => {
+                  setStatus(val);
+                  setPage(1);
+                }}
+                placeholder="All Statuses"
+                searchable={false}
+              />
+            </div>
 
-            <select
-              value={category}
-              onChange={(e) => {
-                setCategory(e.target.value);
-                setPage(1);
-              }}
-              className="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden"
-            >
-              <option value="">All Categories</option>
-              <option value="Product">Product</option>
-              <option value="Service">Service</option>
-              <option value="Support">Support</option>
-              <option value="Sales">Sales</option>
-              <option value="Delivery">Delivery</option>
-              <option value="Billing">Billing</option>
-            </select>
+            <div className="w-36 z-20">
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'All Categories' },
+                  { value: 'Product', label: 'Product' },
+                  { value: 'Service', label: 'Service' },
+                  { value: 'Support', label: 'Support' },
+                  { value: 'Sales', label: 'Sales' },
+                  { value: 'Delivery', label: 'Delivery' },
+                  { value: 'Billing', label: 'Billing' }
+                ]}
+                value={category}
+                onChange={(val) => {
+                  setCategory(val);
+                  setPage(1);
+                }}
+                placeholder="All Categories"
+                searchable={false}
+              />
+            </div>
 
-            <select
-              value={rating}
-              onChange={(e) => {
-                setRating(e.target.value);
-                setPage(1);
-              }}
-              className="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden"
-            >
-              <option value="">All Ratings</option>
-              <option value="5">5 Stars</option>
-              <option value="4">4 Stars</option>
-              <option value="3">3 Stars</option>
-              <option value="2">2 Stars</option>
-              <option value="1">1 Star</option>
-            </select>
+            <div className="w-36 z-10">
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'All Ratings' },
+                  { value: '5', label: '5 Stars' },
+                  { value: '4', label: '4 Stars' },
+                  { value: '3', label: '3 Stars' },
+                  { value: '2', label: '2 Stars' },
+                  { value: '1', label: '1 Star' }
+                ]}
+                value={rating}
+                onChange={(val) => {
+                  setRating(val);
+                  setPage(1);
+                }}
+                placeholder="All Ratings"
+                searchable={false}
+              />
+            </div>
 
             <Button variant="secondary" size="sm" icon={RefreshCw} onClick={fetchFeedback}>
               Refresh
@@ -378,7 +390,7 @@ export const FeedbackList = () => {
       </Card>
 
       {/* Feedback Table */}
-      <Card className="overflow-hidden" noPadding>
+      <Card className="!overflow-visible" noPadding>
         {loading ? (
           <div className="p-6">
             <LoadingSkeleton type="table" />

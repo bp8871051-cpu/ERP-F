@@ -17,6 +17,7 @@ import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const PurchaseReturnList = () => {
   const [returns, setReturns] = useState([]);
@@ -165,7 +166,7 @@ export const PurchaseReturnList = () => {
             Return damaged or non-conforming goods to suppliers. Deducts inventory stock and reduces payable balance.
           </p>
         </div>
-        <Button variant="primary" onClick={handleOpenModal} className="gap-2 bg-indigo-600 text-white">
+        <Button variant="teal" onClick={handleOpenModal} className="gap-2">
           <Plus className="w-4 h-4" /> Create Purchase Return
         </Button>
       </div>
@@ -245,8 +246,8 @@ export const PurchaseReturnList = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-xl w-full p-6 shadow-xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm overflow-y-auto flex items-start justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-xl w-full p-6 shadow-xl border border-slate-200 space-y-4 my-8 !overflow-visible">
             <div className="flex justify-between items-center border-b pb-3">
               <h3 className="font-bold text-slate-900 dark:text-white">Create Purchase Return</h3>
               <button onClick={() => setShowModal(false)}>✕</button>
@@ -254,33 +255,36 @@ export const PurchaseReturnList = () => {
 
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className="z-30">
                   <label className="block text-xs font-semibold mb-1">Vendor *</label>
-                  <select
-                    required
-                    value={vendorId}
-                    onChange={(e) => setVendorId(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
-                  >
-                    <option value="">Select Vendor</option>
-                    {vendors.map((v) => (
-                      <option key={v.id} value={v.id}>{v.name}</option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={[
+                      { value: '', label: 'Select Vendor' },
+                      ...vendors.map((v) => ({
+                        value: String(v.id),
+                        label: v.name
+                      }))
+                    ]}
+                    value={String(vendorId)}
+                    onChange={(val) => setVendorId(val)}
+                    placeholder="Select Vendor"
+                  />
                 </div>
 
-                <div>
+                <div className="z-20">
                   <label className="block text-xs font-semibold mb-1">Linked Purchase Bill</label>
-                  <select
-                    value={purchaseId}
-                    onChange={(e) => setPurchaseId(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
-                  >
-                    <option value="">Direct Return (No Bill)</option>
-                    {purchases.map((pc) => (
-                      <option key={pc.id} value={pc.id}>{pc.purchase_number}</option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={[
+                      { value: '', label: 'Direct Return (No Bill)' },
+                      ...purchases.map((pc) => ({
+                        value: String(pc.id),
+                        label: pc.purchase_number
+                      }))
+                    ]}
+                    value={String(purchaseId)}
+                    onChange={(val) => setPurchaseId(val)}
+                    placeholder="Direct Return (No Bill)"
+                  />
                 </div>
               </div>
 
@@ -296,26 +300,30 @@ export const PurchaseReturnList = () => {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 z-10">
                 <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Returned Products</span>
                 {modalItems.map((it, idx) => (
                   <div key={idx} className="flex gap-2 items-center">
-                    <select
-                      value={it.product_id}
-                      onChange={(e) => {
-                        const prod = products.find((p) => String(p.id) === e.target.value);
-                        const n = [...modalItems];
-                        n[idx].product_id = e.target.value;
-                        if (prod) n[idx].unit_cost = Number(prod.purchase_price || prod.cost_price || 0);
-                        setModalItems(n);
-                      }}
-                      className="flex-1 px-2.5 py-1.5 text-xs rounded border bg-white dark:bg-slate-800"
-                    >
-                      <option value="">Select Product</option>
-                      {products.map((p) => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </select>
+                    <div className="flex-1">
+                      <SearchableSelect
+                        options={[
+                          { value: '', label: 'Select Product' },
+                          ...products.map((p) => ({
+                            value: String(p.id),
+                            label: p.name
+                          }))
+                        ]}
+                        value={String(it.product_id)}
+                        onChange={(val) => {
+                          const prod = products.find((p) => String(p.id) === val);
+                          const n = [...modalItems];
+                          n[idx].product_id = val;
+                          if (prod) n[idx].unit_cost = Number(prod.purchase_price || prod.cost_price || 0);
+                          setModalItems(n);
+                        }}
+                        placeholder="Select Product"
+                      />
+                    </div>
 
                     <input
                       type="number"
@@ -346,8 +354,8 @@ export const PurchaseReturnList = () => {
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary" disabled={submitting} className="bg-indigo-600 text-white">
+                <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+                <Button type="submit" variant="teal" disabled={submitting}>
                   {submitting ? 'Creating...' : 'Record Return'}
                 </Button>
               </div>

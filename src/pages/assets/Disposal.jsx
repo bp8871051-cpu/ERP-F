@@ -21,6 +21,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export const Disposal = () => {
   const navigate = useNavigate();
@@ -198,8 +199,8 @@ export const Disposal = () => {
       </div>
 
       {/* Filters Bar */}
-      <Card className="p-4 bg-white border border-slate-200 shadow-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+      <Card className="p-4 bg-white border border-slate-200 shadow-xs !overflow-visible">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 !overflow-visible">
           <div className="relative sm:col-span-2">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
@@ -211,31 +212,33 @@ export const Disposal = () => {
             />
           </div>
 
-          <div>
-            <select
+          <div className="z-20">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Disposal Types' },
+                { value: 'sell', label: 'Sell (Liquidate)' },
+                { value: 'scrap', label: 'Scrap (Recycle)' },
+                { value: 'donate', label: 'Donate (CSR)' },
+                { value: 'write_off', label: 'Write Off' },
+                { value: 'lost', label: 'Lost / Stolen' }
+              ]}
               value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-teal-500 text-slate-700 capitalize"
-            >
-              <option value="">All Disposal Types</option>
-              <option value="sell">Sell (Liquidate)</option>
-              <option value="scrap">Scrap (Recycle)</option>
-              <option value="donate">Donate (CSR)</option>
-              <option value="write_off">Write Off</option>
-              <option value="lost">Lost / Stolen</option>
-            </select>
+              onChange={(val) => setSelectedType(val)}
+              searchable={false}
+            />
           </div>
 
-          <div>
-            <select
+          <div className="z-10">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Approval Statuses' },
+                { value: 'pending', label: 'Pending Approval' },
+                { value: 'approved', label: 'Approved & Retired' }
+              ]}
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-teal-500 text-slate-700 capitalize"
-            >
-              <option value="">All Approval Statuses</option>
-              <option value="pending">Pending Approval</option>
-              <option value="approved">Approved & Retired</option>
-            </select>
+              onChange={(val) => setSelectedStatus(val)}
+              searchable={false}
+            />
           </div>
         </div>
       </Card>
@@ -354,7 +357,7 @@ export const Disposal = () => {
       {/* Initiate Disposal Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg !overflow-visible">
             <div className="p-4 border-b border-slate-200 bg-rose-50 flex justify-between items-center">
               <h3 className="text-sm font-bold text-rose-900 flex items-center gap-2">
                 <Trash2 className="w-4 h-4 text-rose-600" />
@@ -363,36 +366,34 @@ export const Disposal = () => {
               <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600">&times;</button>
             </div>
             <form onSubmit={handleCreateSubmit} className="p-4 space-y-3 text-xs">
-              <div>
+              <div className="z-20">
                 <label className="block font-semibold text-slate-700 mb-1">Select Asset to Decommission *</label>
-                <select
-                  required
+                <SearchableSelect
+                  options={activeAssets.map((a) => ({
+                    value: a.id,
+                    label: `${a.name} (${a.asset_code || `AST-${a.id}`}) — Current Book Value: ₹${Number(a.current_book_value || a.book_value || a.purchase_cost || 0).toFixed(0)}`
+                  }))}
                   value={disposalForm.asset_id}
-                  onChange={(e) => setDisposalForm({ ...disposalForm, asset_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500 font-medium"
-                >
-                  {activeAssets.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.name} ({a.asset_code || `AST-${a.id}`}) — Current Book Value: ₹{Number(a.current_book_value || a.book_value || a.purchase_cost || 0).toFixed(0)}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setDisposalForm({ ...disposalForm, asset_id: val })}
+                  searchable={true}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className="z-10">
                   <label className="block font-semibold text-slate-700 mb-1">Disposal Method</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'sell', label: 'Sell (Liquidate to Buyer)' },
+                      { value: 'scrap', label: 'Scrap (Recycle & Salvage)' },
+                      { value: 'donate', label: 'Donate (Charity / CSR)' },
+                      { value: 'write_off', label: 'Write Off (Damaged / Obsolete)' },
+                      { value: 'lost', label: 'Lost / Stolen' }
+                    ]}
                     value={disposalForm.disposal_type}
-                    onChange={(e) => setDisposalForm({ ...disposalForm, disposal_type: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500"
-                  >
-                    <option value="sell">Sell (Liquidate to Buyer)</option>
-                    <option value="scrap">Scrap (Recycle & Salvage)</option>
-                    <option value="donate">Donate (Charity / CSR)</option>
-                    <option value="write_off">Write Off (Damaged / Obsolete)</option>
-                    <option value="lost">Lost / Stolen</option>
-                  </select>
+                    onChange={(val) => setDisposalForm({ ...disposalForm, disposal_type: val })}
+                    searchable={false}
+                  />
                 </div>
 
                 <div>

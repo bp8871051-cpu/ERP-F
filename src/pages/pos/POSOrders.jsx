@@ -24,6 +24,7 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export const POSOrders = () => {
   const navigate = useNavigate();
@@ -181,7 +182,7 @@ export const POSOrders = () => {
       )}
 
       {/* Filter Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3 !overflow-visible">
         <div className="flex items-center gap-3 flex-1 min-w-[280px]">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -194,28 +195,34 @@ export const POSOrders = () => {
             />
           </div>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-xs border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-500"
-          >
-            <option value="">All Order Status</option>
-            <option value="completed">Completed</option>
-            <option value="refunded">Refunded</option>
-            <option value="partially_refunded">Partially Refunded</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+          <div className="w-48 z-10">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Order Status' },
+                { value: 'completed', label: 'Completed' },
+                { value: 'refunded', label: 'Refunded' },
+                { value: 'partially_refunded', label: 'Partially Refunded' },
+                { value: 'cancelled', label: 'Cancelled' }
+              ]}
+              value={statusFilter}
+              onChange={(val) => setStatusFilter(val)}
+              searchable={false}
+            />
+          </div>
 
-          <select
-            value={paymentFilter}
-            onChange={(e) => setPaymentFilter(e.target.value)}
-            className="px-3 py-2 text-xs border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-500"
-          >
-            <option value="">All Payments</option>
-            <option value="paid">Paid</option>
-            <option value="pending">Pending</option>
-            <option value="refunded">Refunded</option>
-          </select>
+          <div className="w-40 z-10">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Payments' },
+                { value: 'paid', label: 'Paid' },
+                { value: 'pending', label: 'Pending' },
+                { value: 'refunded', label: 'Refunded' }
+              ]}
+              value={paymentFilter}
+              onChange={(val) => setPaymentFilter(val)}
+              searchable={false}
+            />
+          </div>
         </div>
 
         <span className="text-xs text-slate-500 font-medium">Total: {pagination.total} Orders</span>
@@ -340,7 +347,7 @@ export const POSOrders = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200"
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full !overflow-visible border border-slate-200"
             >
               <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
                 <div>
@@ -355,50 +362,53 @@ export const POSOrders = () => {
                 </button>
               </div>
 
-              <div className="p-5 space-y-4 text-xs">
+              <div className="p-5 space-y-4 text-xs !overflow-visible">
                 <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 space-y-1">
                   <p className="font-semibold">Refund Amount: ₹{Number(selectedOrderForRefund.total_amount).toLocaleString()}</p>
                   <p className="text-[11px] text-amber-700">Inventory items will automatically be restocked into the warehouse ledger.</p>
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1 z-30">
                   <label className="font-semibold text-slate-700">Refund Type:</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'full', label: 'Full Order Refund (100% Value + Restock)' },
+                      { value: 'partial', label: 'Partial / Customer Goodwill Refund' }
+                    ]}
                     value={refundType}
-                    onChange={(e) => setRefundType(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
-                  >
-                    <option value="full">Full Order Refund (100% Value + Restock)</option>
-                    <option value="partial">Partial / Customer Goodwill Refund</option>
-                  </select>
+                    onChange={(val) => setRefundType(val)}
+                    searchable={false}
+                  />
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1 z-20">
                   <label className="font-semibold text-slate-700">Refund Reason:</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'Customer changed mind', label: 'Customer changed mind' },
+                      { value: 'Defective or damaged product', label: 'Defective or damaged product' },
+                      { value: 'Wrong product billed', label: 'Wrong product billed' },
+                      { value: 'Pricing / billing discrepancy', label: 'Pricing / billing discrepancy' }
+                    ]}
                     value={refundReason}
-                    onChange={(e) => setRefundReason(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
-                  >
-                    <option value="Customer changed mind">Customer changed mind</option>
-                    <option value="Defective or damaged product">Defective or damaged product</option>
-                    <option value="Wrong product billed">Wrong product billed</option>
-                    <option value="Pricing / billing discrepancy">Pricing / billing discrepancy</option>
-                  </select>
+                    onChange={(val) => setRefundReason(val)}
+                    searchable={false}
+                  />
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1 z-10">
                   <label className="font-semibold text-slate-700">Refund Payout Tender:</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'cash', label: 'Cash Outflow from Register' },
+                      { value: 'card', label: 'Reverse to Card' },
+                      { value: 'upi', label: 'Direct UPI Reversal' },
+                      { value: 'credit', label: 'Store Credit Balance' }
+                    ]}
                     value={refundMethod}
-                    onChange={(e) => setRefundMethod(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
-                  >
-                    <option value="cash">Cash Outflow from Register</option>
-                    <option value="card">Reverse to Card</option>
-                    <option value="upi">Direct UPI Reversal</option>
-                    <option value="credit">Store Credit Balance</option>
-                  </select>
+                    onChange={(val) => setRefundMethod(val)}
+                    searchable={false}
+                  />
                 </div>
               </div>
 

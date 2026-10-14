@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Inbox,
   Send,
@@ -42,6 +42,7 @@ export const EmailPage = () => {
     bcc: '',
     subject: '',
     body: '',
+    attachments: [],
   });
   const [showCc, setShowCc] = useState(false);
 
@@ -63,17 +64,27 @@ export const EmailPage = () => {
   const loadEmails = async (folder = activeFolder) => {
     try {
       setLoading(true);
-      const res = await emailService.getEmails({ folder });
+      const res = await emailService.getEmails(folder);
       if (res && res.data) {
-        setEmails(res.data);
-        if (res.data.length > 0 && !selectedEmail) {
-          setSelectedEmail(res.data[0]);
-        } else if (res.data.length === 0) {
+        const emailList = (res.data.emails || []).map(e => ({
+          ...e,
+          sender_name: e.from?.name || e.sender_name,
+          sender_email: e.from?.email || e.sender_email,
+          created_at: e.date || e.created_at,
+          body: e.bodyText || e.bodyHtml || e.snippet || e.body,
+          is_starred: e.isStarred ?? e.is_starred,
+          is_read: e.isRead ?? e.is_read
+        }));
+        setEmails(emailList);
+        if (emailList.length > 0 && !selectedEmail) {
+          setSelectedEmail(emailList[0]);
+        } else if (emailList.length === 0) {
           setSelectedEmail(null);
         }
-      }
-      if (res && res.counts) {
-        setFolderCounts(res.counts);
+        
+        if (res.data.folderCounts) {
+          setFolderCounts(res.data.folderCounts);
+        }
       }
     } catch (err) {
       console.error('Failed to load emails', err);
@@ -129,6 +140,23 @@ export const EmailPage = () => {
     }
   };
 
+  const fileInputRef = useRef(null);
+
+  const handleAttachmentChange = (e) => {
+    if (!e.target.files?.length) return;
+    const files = Array.from(e.target.files);
+    const newAttachments = files.map((file) => ({
+      name: file.name,
+      size: file.size,
+      mime: file.type || 'application/octet-stream',
+      path: '/storage/simulated_path/' + file.name,
+    }));
+    setComposeData((prev) => ({
+      ...prev,
+      attachments: [...(prev.attachments || []), ...newAttachments],
+    }));
+  };
+
   // Send Email
   const handleSendEmail = async (e) => {
     e.preventDefault();
@@ -137,10 +165,12 @@ export const EmailPage = () => {
         to: composeData.to.split(',').map((s) => s.trim()),
         cc: composeData.cc ? composeData.cc.split(',').map((s) => s.trim()) : [],
         subject: composeData.subject,
+        body_text: composeData.body,
         body: composeData.body,
+        attachments: composeData.attachments || [],
       });
       setIsComposeOpen(false);
-      setComposeData({ to: '', cc: '', bcc: '', subject: '', body: '' });
+      setComposeData({ to: '', cc: '', bcc: '', subject: '', body: '', attachments: [] });
       loadEmails('sent');
       setActiveFolder('sent');
     } catch (err) {
@@ -152,7 +182,7 @@ export const EmailPage = () => {
   const handleQuickReply = async () => {
     if (!replyText.trim() || !selectedEmail) return;
     try {
-      await emailService.replyEmail(selectedEmail.id, { body: replyText });
+      await emailService.replyEmail(selectedEmail.id, { body_text: replyText, body: replyText });
       setReplyText('');
       alert('Reply transmitted successfully.');
     } catch (err) {
@@ -559,9 +589,38 @@ export const EmailPage = () => {
                 />
               </div>
 
+              {composeData.attachments?.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {composeData.attachments.map((att, i) => (
+                    <div key={i} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 rounded-lg text-xs text-slate-700">
+                      <Paperclip className="w-3.5 h-3.5 text-slate-400" />
+                      <span className="truncate max-w-[120px]">{att.name}</span>
+                      <button
+                        type="button"
+                        className="text-slate-400 hover:text-rose-500 cursor-pointer"
+                        onClick={() => setComposeData(prev => ({
+                          ...prev,
+                          attachments: prev.attachments.filter((_, index) => index !== i)
+                        }))}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <input 
+                  type="file" 
+                  multiple 
+                  className="hidden" 
+                  ref={fileInputRef} 
+                  onChange={handleAttachmentChange} 
+                />
                 <button
                   type="button"
+                  onClick={() => fileInputRef.current?.click()}
                   className="inline-flex items-center gap-1.5 px-3 py-2 text-slate-500 hover:text-slate-800 text-xs font-semibold rounded-lg cursor-pointer"
                 >
                   <Paperclip className="w-4 h-4" />

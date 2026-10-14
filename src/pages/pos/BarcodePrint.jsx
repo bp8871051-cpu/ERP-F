@@ -14,6 +14,7 @@ import {
 import posService from '../../services/posService';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export const BarcodePrint = () => {
   const [products, setProducts] = useState([]);
@@ -179,7 +180,7 @@ export const BarcodePrint = () => {
           </Card>
 
           {/* Barcode & Label Settings */}
-          <Card className="p-4 bg-white border border-slate-200 shadow-xs space-y-4">
+          <Card className="p-4 bg-white border border-slate-200 shadow-xs space-y-4 !overflow-visible">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">2. Label Specifications</h3>
 
             <div>
@@ -192,34 +193,36 @@ export const BarcodePrint = () => {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
+            <div className="grid grid-cols-2 gap-3 !overflow-visible">
+              <div className="z-20">
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Barcode Format</label>
-                <select
+                <SearchableSelect
+                  options={[
+                    { value: 'CODE128', label: 'Code 128 (Standard)' },
+                    { value: 'EAN13', label: 'EAN-13 (13 Digits)' },
+                    { value: 'EAN8', label: 'EAN-8 (8 Digits)' },
+                    { value: 'UPC', label: 'UPC-A (12 Digits)' }
+                  ]}
                   value={format}
-                  onChange={(e) => handleFormatChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-teal-500 font-semibold"
-                >
-                  <option value="CODE128">Code 128 (Standard)</option>
-                  <option value="EAN13">EAN-13 (13 Digits)</option>
-                  <option value="EAN8">EAN-8 (8 Digits)</option>
-                  <option value="UPC">UPC-A (12 Digits)</option>
-                </select>
+                  onChange={(val) => handleFormatChange(val)}
+                  searchable={false}
+                />
               </div>
 
-              <div>
+              <div className="z-10">
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Thermal Label Size</label>
-                <select
+                <SearchableSelect
+                  options={[
+                    { value: '50x25', label: '50mm x 25mm (Standard)' },
+                    { value: '40x30', label: '40mm x 30mm (Compact)' },
+                    { value: '35x25', label: '35mm x 25mm (Jewelry/Small)' },
+                    { value: '100x50', label: '100mm x 50mm (Large / Box)' },
+                    { value: 'a4-24', label: 'A4 Sheet (24-up grid)' }
+                  ]}
                   value={labelSize}
-                  onChange={(e) => setLabelSize(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs bg-white focus:outline-teal-500 font-semibold"
-                >
-                  <option value="50x25">50mm x 25mm (Standard)</option>
-                  <option value="40x30">40mm x 30mm (Compact)</option>
-                  <option value="35x25">35mm x 25mm (Jewelry/Small)</option>
-                  <option value="100x50">100mm x 50mm (Large / Box)</option>
-                  <option value="a4-24">A4 Sheet (24-up grid)</option>
-                </select>
+                  onChange={(val) => setLabelSize(val)}
+                  searchable={false}
+                />
               </div>
             </div>
 

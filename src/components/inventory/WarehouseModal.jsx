@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Warehouse as WarehouseIcon, AlertCircle } from 'lucide-react';
 import Button from '../ui/Button';
+import SearchableSelect from '../ui/SearchableSelect';
 
 export const WarehouseModal = ({ isOpen, onClose, onSaved, warehouse = null }) => {
   const [formData, setFormData] = useState({
@@ -142,18 +143,19 @@ export const WarehouseModal = ({ isOpen, onClose, onSaved, warehouse = null }) =
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Warehouse Type</label>
-                <select
-                  name="type"
+                <SearchableSelect
+                  options={[
+                    { value: 'main', label: 'Main Hub' },
+                    { value: 'branch', label: 'Branch Depot' },
+                    { value: 'distribution', label: 'Distribution Center' },
+                    { value: 'storage', label: 'Storage Facility' },
+                    { value: 'virtual', label: 'Virtual / Transit' }
+                  ]}
                   value={formData.type}
-                  onChange={handleChange}
-                  className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white"
-                >
-                  <option value="main">Main Hub</option>
-                  <option value="branch">Branch Depot</option>
-                  <option value="distribution">Distribution Center</option>
-                  <option value="storage">Storage Facility</option>
-                  <option value="virtual">Virtual / Transit</option>
-                </select>
+                  onChange={(val) => handleChange({ target: { name: 'type', value: val } })}
+                  placeholder="Select Type"
+                  searchable={false}
+                />
               </div>
 
               <div>
@@ -223,15 +225,16 @@ export const WarehouseModal = ({ isOpen, onClose, onSaved, warehouse = null }) =
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
-              <select
-                name="status"
+              <SearchableSelect
+                options={[
+                  { value: 'active', label: 'Active' },
+                  { value: 'inactive', label: 'Inactive' }
+                ]}
                 value={formData.status}
-                onChange={handleChange}
-                className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white"
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
+                onChange={(val) => handleChange({ target: { name: 'status', value: val } })}
+                placeholder="Select Status"
+                searchable={false}
+              />
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">

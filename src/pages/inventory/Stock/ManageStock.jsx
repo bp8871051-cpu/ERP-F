@@ -22,6 +22,7 @@ import StockStatusBadge from '../../../components/inventory/StockStatusBadge';
 import StockActionModal from '../../../components/inventory/StockActionModal';
 import StockAdjustmentModal from '../../../components/inventory/StockAdjustmentModal';
 import StockTransferModal from '../../../components/inventory/StockTransferModal';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const ManageStock = () => {
   const [stocks, setStocks] = useState([]);
@@ -142,7 +143,7 @@ export const ManageStock = () => {
       </div>
 
       {/* Filter Bar */}
-      <Card className="p-3.5 shadow-sm border border-slate-200/80">
+      <Card className="p-3.5 shadow-sm border border-slate-200/80 !overflow-visible">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[220px]">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -158,35 +159,38 @@ export const ManageStock = () => {
             />
           </div>
 
-          <select
-            value={warehouseId}
-            onChange={(e) => {
-              setWarehouseId(e.target.value);
-              setPage(1);
-            }}
-            className="text-xs px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white text-slate-700 min-w-[140px]"
-          >
-            <option value="">All Warehouses</option>
-            {warehouses.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name}
-              </option>
-            ))}
-          </select>
+          <div className="w-56">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Warehouses' },
+                ...warehouses.map((w) => ({ value: String(w.id), label: w.name }))
+              ]}
+              value={String(warehouseId)}
+              onChange={(val) => {
+                setWarehouseId(val);
+                setPage(1);
+              }}
+              placeholder="All Warehouses"
+            />
+          </div>
 
-          <select
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value);
-              setPage(1);
-            }}
-            className="text-xs px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white text-slate-700"
-          >
-            <option value="">All Health Statuses</option>
-            <option value="healthy">Healthy Stock</option>
-            <option value="low_stock">Low Stock</option>
-            <option value="out_of_stock">Out of Stock</option>
-          </select>
+          <div className="w-44">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Health Statuses' },
+                { value: 'healthy', label: 'Healthy Stock' },
+                { value: 'low_stock', label: 'Low Stock' },
+                { value: 'out_of_stock', label: 'Out of Stock' }
+              ]}
+              value={status}
+              onChange={(val) => {
+                setStatus(val);
+                setPage(1);
+              }}
+              placeholder="All Health Statuses"
+              searchable={false}
+            />
+          </div>
 
           {(search || warehouseId || status) && (
             <Button

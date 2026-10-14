@@ -19,6 +19,7 @@ import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const QuoteList = () => {
   const navigate = useNavigate();
@@ -146,14 +147,14 @@ export const QuoteList = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={handleExportCSV} className="gap-2">
+          <Button variant="secondary" onClick={handleExportCSV} className="gap-2">
             <Download className="w-4 h-4" />
             Export CSV
           </Button>
           <Button
-            variant="primary"
+            variant="teal"
             onClick={() => navigate('/app/sales/quotes/create')}
-            className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="gap-2"
           >
             <Plus className="w-4 h-4" />
             Create Quotation
@@ -162,7 +163,7 @@ export const QuoteList = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 !overflow-visible">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
@@ -178,29 +179,30 @@ export const QuoteList = () => {
             />
           </div>
 
-          <div className="relative">
-            <Filter className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-            <select
+          <div className="relative z-10">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'draft', label: 'Draft' },
+                { value: 'sent', label: 'Sent' },
+                { value: 'accepted', label: 'Accepted' },
+                { value: 'converted', label: 'Converted' },
+                { value: 'rejected', label: 'Rejected' },
+                { value: 'expired', label: 'Expired' }
+              ]}
               value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
+              onChange={(val) => {
+                setStatus(val);
                 setPage(1);
               }}
-              className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
-              <option value="accepted">Accepted</option>
-              <option value="converted">Converted</option>
-              <option value="rejected">Rejected</option>
-              <option value="expired">Expired</option>
-            </select>
+              placeholder="All Statuses"
+              searchable={false}
+            />
           </div>
 
           <div className="flex items-center justify-end">
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => {
                 setSearch('');
@@ -230,9 +232,9 @@ export const QuoteList = () => {
               Send formal proposals to potential clients to win deals.
             </p>
             <Button
-              variant="primary"
+              variant="teal"
               onClick={() => navigate('/app/sales/quotes/create')}
-              className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="gap-2"
             >
               <Plus className="w-4 h-4" />
               Create Quotation
@@ -330,7 +332,7 @@ export const QuoteList = () => {
             </div>
             <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 disabled={meta.current_page <= 1}
                 onClick={() => setPage((p) => Math.max(p - 1, 1))}
@@ -338,7 +340,7 @@ export const QuoteList = () => {
                 Previous
               </Button>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 disabled={meta.current_page >= meta.last_page}
                 onClick={() => setPage((p) => p + 1)}

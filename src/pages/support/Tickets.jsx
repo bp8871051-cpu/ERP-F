@@ -23,6 +23,7 @@ import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
 import ErrorState from '../../components/ui/ErrorState';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export const Tickets = () => {
   const navigate = useNavigate();
@@ -139,8 +140,8 @@ export const Tickets = () => {
       </div>
 
       {/* Search & Filter Controls */}
-      <Card noPadding>
-        <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <Card noPadding className="!overflow-visible">
+        <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3 !overflow-visible">
           <form onSubmit={handleSearchSubmit} className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -153,51 +154,60 @@ export const Tickets = () => {
           </form>
 
           <div className="flex items-center gap-2 flex-wrap text-xs">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 z-30">
               <Filter className="w-3.5 h-3.5 text-slate-400" />
               <span className="text-slate-500 font-medium">Status:</span>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700"
-              >
-                <option value="all">All Statuses</option>
-                <option value="open">Open</option>
-                <option value="in_progress">In Progress</option>
-                <option value="pending">Pending</option>
-                <option value="waiting_for_customer">Waiting for Client</option>
-                <option value="resolved">Resolved</option>
-                <option value="closed">Closed</option>
-              </select>
+              <div className="w-32">
+                <SearchableSelect
+                  options={[
+                    { value: 'all', label: 'All Statuses' },
+                    { value: 'open', label: 'Open' },
+                    { value: 'in_progress', label: 'In Progress' },
+                    { value: 'pending', label: 'Pending' },
+                    { value: 'waiting_for_customer', label: 'Waiting for Client' },
+                    { value: 'resolved', label: 'Resolved' },
+                    { value: 'closed', label: 'Closed' }
+                  ]}
+                  value={status}
+                  onChange={(val) => setStatus(val)}
+                  searchable={false}
+                />
+              </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 z-20">
               <span className="text-slate-500 font-medium">Priority:</span>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700"
-              >
-                <option value="all">All Priorities</option>
-                <option value="urgent">Urgent (P1)</option>
-                <option value="high">High (P2)</option>
-                <option value="medium">Medium (P3)</option>
-                <option value="low">Low (P4)</option>
-              </select>
+              <div className="w-32">
+                <SearchableSelect
+                  options={[
+                    { value: 'all', label: 'All Priorities' },
+                    { value: 'urgent', label: 'Urgent (P1)' },
+                    { value: 'high', label: 'High (P2)' },
+                    { value: 'medium', label: 'Medium (P3)' },
+                    { value: 'low', label: 'Low (P4)' }
+                  ]}
+                  value={priority}
+                  onChange={(val) => setPriority(val)}
+                  searchable={false}
+                />
+              </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 z-10">
               <span className="text-slate-500 font-medium">SLA:</span>
-              <select
-                value={slaStatus}
-                onChange={(e) => setSlaStatus(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700"
-              >
-                <option value="all">All SLAs</option>
-                <option value="within_sla">Within SLA</option>
-                <option value="warning">SLA Warning</option>
-                <option value="breached">Breached</option>
-              </select>
+              <div className="w-32">
+                <SearchableSelect
+                  options={[
+                    { value: 'all', label: 'All SLAs' },
+                    { value: 'within_sla', label: 'Within SLA' },
+                    { value: 'warning', label: 'SLA Warning' },
+                    { value: 'breached', label: 'Breached' }
+                  ]}
+                  value={slaStatus}
+                  onChange={(val) => setSlaStatus(val)}
+                  searchable={false}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -341,7 +351,7 @@ export const Tickets = () => {
       {/* Create Ticket Modal */}
       {isCreateOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg border border-slate-200 !overflow-visible">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
               <h3 className="font-bold text-sm text-slate-900">Create New Support Ticket</h3>
               <button onClick={() => setIsCreateOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
@@ -387,32 +397,34 @@ export const Tickets = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className="z-20">
                   <label className="block font-medium text-slate-700 mb-1">Priority Tier *</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'low', label: 'Low (72h SLA)' },
+                      { value: 'medium', label: 'Medium (24h SLA)' },
+                      { value: 'high', label: 'High (8h SLA)' },
+                      { value: 'urgent', label: 'Urgent (4h SLA)' }
+                    ]}
                     value={createForm.priority}
-                    onChange={(e) => setCreateForm({ ...createForm, priority: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs"
-                  >
-                    <option value="low">Low (72h SLA)</option>
-                    <option value="medium">Medium (24h SLA)</option>
-                    <option value="high">High (8h SLA)</option>
-                    <option value="urgent">Urgent (4h SLA)</option>
-                  </select>
+                    onChange={(val) => setCreateForm({ ...createForm, priority: val })}
+                    searchable={false}
+                  />
                 </div>
-                <div>
+                <div className="z-10">
                   <label className="block font-medium text-slate-700 mb-1">Incident Category *</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 1, label: 'Technical & Infrastructure' },
+                      { value: 2, label: 'Billing & Invoicing' },
+                      { value: 3, label: 'Software & API' },
+                      { value: 4, label: 'Hardware Workstation' },
+                      { value: 5, label: 'Account Access' }
+                    ]}
                     value={createForm.category_id}
-                    onChange={(e) => setCreateForm({ ...createForm, category_id: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs"
-                  >
-                    <option value={1}>Technical & Infrastructure</option>
-                    <option value={2}>Billing & Invoicing</option>
-                    <option value={3}>Software & API</option>
-                    <option value={4}>Hardware Workstation</option>
-                    <option value={5}>Account Access</option>
-                  </select>
+                    onChange={(val) => setCreateForm({ ...createForm, category_id: val })}
+                    searchable={false}
+                  />
                 </div>
               </div>
 

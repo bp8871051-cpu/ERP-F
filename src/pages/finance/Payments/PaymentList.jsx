@@ -23,6 +23,7 @@ import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
 import ErrorState from '../../../components/ui/ErrorState';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const PaymentList = () => {
   const [payments, setPayments] = useState([]);
@@ -71,13 +72,18 @@ export const PaymentList = () => {
           status: statusFilter || undefined,
         }),
         financeService.getAccounts(),
-        api.get('/sales/customers').then((r) => r.data.data).catch(() => []),
-        api.get('/purchase/vendors').then((r) => r.data.data).catch(() => []),
+        api.get('/sales/customers').then((r) => r.data?.data?.data || r.data?.data || r.data || []).catch(() => []),
+        api.get('/purchase/vendors').then((r) => r.data?.data?.data || r.data?.data || r.data || []).catch(() => []),
       ]);
-      setPayments(payRes || []);
-      setAccounts(accRes || []);
-      setCustomers(custRes || []);
-      setVendors(venRes || []);
+
+      const pData = Array.isArray(payRes) ? payRes : (payRes?.data?.data || payRes?.data || []);
+      setPayments(Array.isArray(pData) ? pData : []);
+
+      const aData = Array.isArray(accRes) ? accRes : (accRes?.data || []);
+      setAccounts(Array.isArray(aData) ? aData : []);
+
+      setCustomers(Array.isArray(custRes) ? custRes : []);
+      setVendors(Array.isArray(venRes) ? venRes : []);
 
       if (accRes && accRes.length > 0 && !formData.account_id) {
         setFormData((prev) => ({ ...prev, account_id: accRes[0].id }));
@@ -239,7 +245,7 @@ export const PaymentList = () => {
       )}
 
       {/* Filter Toolbar */}
-      <Card className="p-4 bg-white shadow-xs border border-slate-200">
+      <Card className="p-4 bg-white shadow-xs border border-slate-200 !overflow-visible">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
           <div className="relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -252,31 +258,35 @@ export const PaymentList = () => {
             />
           </div>
 
-          <div>
-            <select
+          <div className="z-20">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Payment Types' },
+                { value: 'customer_payment', label: 'Customer Receipt' },
+                { value: 'vendor_payment', label: 'Vendor Settlement' },
+                { value: 'expense_payment', label: 'Expense Payment' },
+                { value: 'refund', label: 'Customer Refund' }
+              ]}
               value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white"
-            >
-              <option value="">All Payment Types</option>
-              <option value="customer_payment">Customer Receipt</option>
-              <option value="vendor_payment">Vendor Settlement</option>
-              <option value="expense_payment">Expense Payment</option>
-              <option value="refund">Customer Refund</option>
-            </select>
+              onChange={setTypeFilter}
+              searchable={false}
+              placeholder="All Payment Types"
+            />
           </div>
 
-          <div>
-            <select
+          <div className="z-10">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'completed', label: 'Completed' },
+                { value: 'pending', label: 'Pending Clearance' },
+                { value: 'failed', label: 'Failed / Cancelled' }
+              ]}
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white"
-            >
-              <option value="">All Statuses</option>
-              <option value="completed">Completed</option>
-              <option value="pending">Pending Clearance</option>
-              <option value="failed">Failed / Cancelled</option>
-            </select>
+              onChange={setStatusFilter}
+              searchable={false}
+              placeholder="All Statuses"
+            />
           </div>
 
           <div className="flex items-center justify-end text-slate-500 text-xs">
@@ -382,8 +392,8 @@ export const PaymentList = () => {
 
       {/* Record Payment Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg border border-slate-200 overflow-hidden animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg border border-slate-200 !overflow-visible animate-fadeIn my-8">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-teal-600" />
@@ -397,20 +407,21 @@ export const PaymentList = () => {
               </button>
             </div>
 
-            <form onSubmit={handleRecordPayment} className="p-5 space-y-4 text-xs">
+            <form onSubmit={handleRecordPayment} className="p-5 space-y-4 text-xs !overflow-visible">
               <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className="z-30">
                   <label className="block font-medium text-slate-700 mb-1">Payment Type *</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'customer_payment', label: 'Customer Receipt (Inflow)' },
+                      { value: 'vendor_payment', label: 'Vendor Settlement (Outflow)' },
+                      { value: 'other_income', label: 'Other Miscellaneous Income' },
+                      { value: 'other_payment', label: 'Other Operational Outflow' }
+                    ]}
                     value={formData.payment_type}
-                    onChange={(e) => setFormData({ ...formData, payment_type: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white text-xs"
-                  >
-                    <option value="customer_payment">Customer Receipt (Inflow)</option>
-                    <option value="vendor_payment">Vendor Settlement (Outflow)</option>
-                    <option value="other_income">Other Miscellaneous Income</option>
-                    <option value="other_payment">Other Operational Outflow</option>
-                  </select>
+                    onChange={(val) => setFormData({ ...formData, payment_type: val })}
+                    searchable={false}
+                  />
                 </div>
 
                 <div>
@@ -427,40 +438,38 @@ export const PaymentList = () => {
 
               {/* Conditional Party selector */}
               {formData.payment_type === 'customer_payment' && (
-                <div>
+                <div className="z-20">
                   <label className="block font-medium text-slate-700 mb-1">Customer *</label>
-                  <select
-                    required
-                    value={formData.customer_id}
-                    onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white text-xs"
-                  >
-                    <option value="">Select Customer</option>
-                    {customers.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={[
+                      { value: '', label: 'Select Customer' },
+                      ...customers.map((c) => ({
+                        value: String(c.id),
+                        label: c.name
+                      }))
+                    ]}
+                    value={String(formData.customer_id)}
+                    onChange={(val) => setFormData({ ...formData, customer_id: val })}
+                    placeholder="Select Customer"
+                  />
                 </div>
               )}
 
               {formData.payment_type === 'vendor_payment' && (
-                <div>
+                <div className="z-20">
                   <label className="block font-medium text-slate-700 mb-1">Vendor *</label>
-                  <select
-                    required
-                    value={formData.vendor_id}
-                    onChange={(e) => setFormData({ ...formData, vendor_id: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white text-xs"
-                  >
-                    <option value="">Select Vendor</option>
-                    {vendors.map((v) => (
-                      <option key={v.id} value={v.id}>
-                        {v.name} ({v.company_name || 'Vendor'})
-                      </option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={[
+                      { value: '', label: 'Select Vendor' },
+                      ...vendors.map((v) => ({
+                        value: String(v.id),
+                        label: `${v.name} (${v.company_name || 'Vendor'})`
+                      }))
+                    ]}
+                    value={String(formData.vendor_id)}
+                    onChange={(val) => setFormData({ ...formData, vendor_id: val })}
+                    placeholder="Select Vendor"
+                  />
                 </div>
               )}
 
@@ -478,37 +487,34 @@ export const PaymentList = () => {
                   />
                 </div>
 
-                <div>
+                <div className="z-10">
                   <label className="block font-medium text-slate-700 mb-1">Vault / Bank Account *</label>
-                  <select
-                    required
-                    value={formData.account_id}
-                    onChange={(e) => setFormData({ ...formData, account_id: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white text-xs"
-                  >
-                    {accounts.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.account_name} (Bal: ₹{Number(a.current_balance || 0).toLocaleString()})
-                      </option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={accounts.map((a) => ({
+                      value: String(a.id),
+                      label: `${a.account_name} (Bal: ₹${Number(a.current_balance || 0).toLocaleString()})`
+                    }))}
+                    value={String(formData.account_id)}
+                    onChange={(val) => setFormData({ ...formData, account_id: val })}
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className="z-10">
                   <label className="block font-medium text-slate-700 mb-1">Payment Method</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'bank_transfer', label: 'Bank Transfer / NEFT' },
+                      { value: 'upi', label: 'UPI / Instant Pay' },
+                      { value: 'cash', label: 'Cash In Hand' },
+                      { value: 'card', label: 'Card Payment' },
+                      { value: 'cheque', label: 'Cheque' }
+                    ]}
                     value={formData.payment_method}
-                    onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white text-xs"
-                  >
-                    <option value="bank_transfer">Bank Transfer / NEFT</option>
-                    <option value="upi">UPI / Instant Pay</option>
-                    <option value="cash">Cash In Hand</option>
-                    <option value="card">Card Payment</option>
-                    <option value="cheque">Cheque</option>
-                  </select>
+                    onChange={(val) => setFormData({ ...formData, payment_method: val })}
+                    searchable={false}
+                  />
                 </div>
 
                 <div>

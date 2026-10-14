@@ -182,14 +182,14 @@ export const SalesOrderList = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={handleExportCSV} className="gap-2">
+          <Button variant="secondary" onClick={handleExportCSV} className="gap-2">
             <Download className="w-4 h-4" />
             Export CSV
           </Button>
           <Button
-            variant="primary"
+            variant="teal"
             onClick={() => navigate('/app/sales/orders/create')}
-            className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="gap-2"
           >
             <Plus className="w-4 h-4" />
             Create Sales Order
@@ -236,7 +236,7 @@ export const SalesOrderList = () => {
 
           <div className="flex items-center justify-end">
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => {
                 setSearch('');
@@ -266,9 +266,9 @@ export const SalesOrderList = () => {
               Get started by creating your first sales order to reserve inventory stock.
             </p>
             <Button
-              variant="primary"
+              variant="teal"
               onClick={() => navigate('/app/sales/orders/create')}
-              className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="gap-2"
             >
               <Plus className="w-4 h-4" />
               Create Sales Order
@@ -393,7 +393,7 @@ export const SalesOrderList = () => {
             </div>
             <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 disabled={meta.current_page <= 1}
                 onClick={() => setPage((p) => Math.max(p - 1, 1))}
@@ -401,7 +401,7 @@ export const SalesOrderList = () => {
                 Previous
               </Button>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 disabled={meta.current_page >= meta.last_page}
                 onClick={() => setPage((p) => p + 1)}

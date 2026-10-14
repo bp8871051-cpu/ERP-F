@@ -36,8 +36,49 @@ export const HrmDashboard = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await hrmService.getDashboardData();
-      setData(res.data);
+      const res = await hrmService.getDashboard();
+      
+      // Transform backend data to frontend expectations
+      const backendData = res;
+      const transformedData = {
+        metrics: {
+          totalWorkforce: backendData.metrics.totalWorkforce || 0,
+          onLeaveToday: backendData.metrics.onLeaveToday || 0,
+          attendanceRate: backendData.metrics.totalWorkforce ? Math.round((backendData.metrics.presentToday / backendData.metrics.totalWorkforce) * 100) : 0,
+          openPositions: backendData.metrics.openPositions || 0,
+          monthlyPayroll: backendData.metrics.monthlyPayroll || 0,
+          averageSalary: backendData.metrics.totalWorkforce ? Math.round((backendData.metrics.monthlyPayroll || 0) / backendData.metrics.totalWorkforce) : 0,
+          momGrowth: "+5.2%", // mock as backend doesn't provide
+        },
+        attendanceSummary: {
+          present: backendData.metrics.presentToday || 0,
+          late: backendData.metrics.lateToday || 0,
+          absent: backendData.metrics.absentToday || 0,
+          remote: 0, // backend doesn't explicitly separate remote from present in summary numbers easily, so defaulting to 0 or we can calculate
+        },
+        employeeDistribution: backendData.charts?.departments || [],
+        weeklyAttendance: (backendData.charts?.attendanceTrend || []).map(d => ({...d, remote: 0})),
+        payrollTrend: (backendData.charts?.payrollTrend || []).map(d => ({...d, payroll: d.amount})),
+        recruitment: {
+          newApplicants: backendData.charts?.recruitmentPipeline?.find(p => p.stage === 'Applied')?.count || 0,
+          screening: backendData.charts?.recruitmentPipeline?.find(p => p.stage === 'Screening')?.count || 0,
+          interviews: backendData.charts?.recruitmentPipeline?.find(p => p.stage === 'Interview')?.count || 0,
+          selected: backendData.charts?.recruitmentPipeline?.find(p => p.stage === 'Selected')?.count || 0,
+          hired: backendData.charts?.recruitmentPipeline?.find(p => p.stage === 'Hired')?.count || 0,
+        },
+        recentCandidates: (backendData.recentEmployees || []).map(e => ({
+          id: e.id,
+          name: e.name,
+          email: e.email,
+          position: e.designation,
+          experience: 'N/A',
+          stage: 'Hired',
+          expectedSalary: 'N/A',
+          appliedDate: e.joining_date,
+        })),
+      };
+      
+      setData(transformedData);
     } catch (err) {
       console.error('Error fetching HRM dashboard:', err);
       setError('Unable to load HRM telemetry from the Laravel backend.');

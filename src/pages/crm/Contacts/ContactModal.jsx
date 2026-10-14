@@ -3,6 +3,7 @@ import { X, Users, Building2, Mail, Phone, MapPin, Tag, Globe, Briefcase } from 
 import crmService from '../../../services/crmService';
 import salesService from '../../../services/salesService';
 import Button from '../../../components/ui/Button';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const ContactModal = ({ isOpen, onClose, onSuccess, contact = null }) => {
   const [formData, setFormData] = useState({
@@ -139,8 +140,8 @@ export const ContactModal = ({ isOpen, onClose, onSuccess, contact = null }) => 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden border border-slate-200 my-8">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl border border-slate-200 my-8 !overflow-visible">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-teal-600" />
@@ -153,7 +154,7 @@ export const ContactModal = ({ isOpen, onClose, onSuccess, contact = null }) => 
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs !overflow-visible">
           {/* Section: Name & Classification */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
@@ -179,14 +180,16 @@ export const ContactModal = ({ isOpen, onClose, onSuccess, contact = null }) => 
             </div>
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Contact Type</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: 'business', label: 'Business / Corporate' },
+                  { value: 'individual', label: 'Individual' }
+                ]}
                 value={formData.contact_type}
-                onChange={(e) => setFormData({ ...formData, contact_type: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                <option value="business">Business / Corporate</option>
-                <option value="individual">Individual</option>
-              </select>
+                onChange={(val) => setFormData({ ...formData, contact_type: val })}
+                placeholder="Contact Type"
+                searchable={false}
+              />
             </div>
           </div>
 
@@ -197,18 +200,18 @@ export const ContactModal = ({ isOpen, onClose, onSuccess, contact = null }) => 
                 <Building2 className="w-3.5 h-3.5 text-teal-600" />
                 Link Existing ERP Customer
               </label>
-              <select
-                value={formData.customer_id}
-                onChange={handleCustomerSelect}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                <option value="">-- No Linked Customer (New Account) --</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} {c.company_name ? `(${c.company_name})` : ''} - {c.customer_code}
-                  </option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={[
+                  { value: '', label: '-- No Linked Customer (New Account) --' },
+                  ...customers.map((c) => ({
+                    value: String(c.id),
+                    label: `${c.name} ${c.company_name ? `(${c.company_name})` : ''} - ${c.customer_code}`
+                  }))
+                ]}
+                value={String(formData.customer_id)}
+                onChange={(val) => handleCustomerSelect({ target: { value: val } })}
+                placeholder="-- No Linked Customer (New Account) --"
+              />
               <span className="text-[10px] text-slate-400 mt-1 block">
                 Reuse existing ERP Customer record to prevent duplicates.
               </span>
@@ -246,18 +249,15 @@ export const ContactModal = ({ isOpen, onClose, onSuccess, contact = null }) => 
                 <Tag className="w-3.5 h-3.5 text-slate-400" />
                 Lead Source
               </label>
-              <select
-                value={formData.lead_source_id}
-                onChange={(e) => setFormData({ ...formData, lead_source_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                <option value="">-- Select Acquisition Source --</option>
-                {leadSources.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={[
+                  { value: '', label: '-- Select Acquisition Source --' },
+                  ...leadSources.map((s) => ({ value: String(s.id), label: s.name }))
+                ]}
+                value={String(formData.lead_source_id)}
+                onChange={(val) => setFormData({ ...formData, lead_source_id: val })}
+                placeholder="-- Select Acquisition Source --"
+              />
             </div>
           </div>
 
@@ -392,14 +392,16 @@ export const ContactModal = ({ isOpen, onClose, onSuccess, contact = null }) => 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Status</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: 'active', label: 'Active' },
+                  { value: 'inactive', label: 'Inactive' }
+                ]}
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
+                onChange={(val) => setFormData({ ...formData, status: val })}
+                placeholder="Status"
+                searchable={false}
+              />
             </div>
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Internal Notes</label>

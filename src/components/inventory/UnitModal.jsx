@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Scale, AlertCircle } from 'lucide-react';
 import Button from '../ui/Button';
+import SearchableSelect from '../ui/SearchableSelect';
 
 export const UnitModal = ({ isOpen, onClose, onSaved, unit = null }) => {
   const [name, setName] = useState('');
@@ -67,9 +68,9 @@ export const UnitModal = ({ isOpen, onClose, onSaved, unit = null }) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200"
+          className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-visible border border-slate-200"
         >
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50 rounded-t-xl">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center">
                 <Scale className="w-5 h-5" />
@@ -133,17 +134,19 @@ export const UnitModal = ({ isOpen, onClose, onSaved, unit = null }) => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Unit Type</label>
-                <select
+                <SearchableSelect
+                  options={[
+                    { value: 'quantity', label: 'Quantity / Pieces' },
+                    { value: 'pack', label: 'Packaging / Pack' },
+                    { value: 'weight', label: 'Weight (Mass)' },
+                    { value: 'volume', label: 'Volume (Liquid)' },
+                    { value: 'length', label: 'Length / Linear' }
+                  ]}
                   value={unitType}
-                  onChange={(e) => setUnitType(e.target.value)}
-                  className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white"
-                >
-                  <option value="quantity">Quantity / Pieces</option>
-                  <option value="pack">Packaging / Pack</option>
-                  <option value="weight">Weight (Mass)</option>
-                  <option value="volume">Volume (Liquid)</option>
-                  <option value="length">Length / Linear</option>
-                </select>
+                  onChange={(val) => setUnitType(val)}
+                  placeholder="Select Unit Type"
+                  searchable={false}
+                />
               </div>
 
               <div>
@@ -151,6 +154,7 @@ export const UnitModal = ({ isOpen, onClose, onSaved, unit = null }) => {
                 <input
                   type="number"
                   step="0.0001"
+                  min="0.0001"
                   value={conversionFactor}
                   onChange={(e) => setConversionFactor(e.target.value)}
                   placeholder="1.0000"
@@ -161,14 +165,16 @@ export const UnitModal = ({ isOpen, onClose, onSaved, unit = null }) => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: 'active', label: 'Active' },
+                  { value: 'inactive', label: 'Inactive' }
+                ]}
                 value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white"
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
+                onChange={(val) => setStatus(val)}
+                placeholder="Select Status"
+                searchable={false}
+              />
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">

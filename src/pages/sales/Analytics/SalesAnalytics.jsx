@@ -52,7 +52,23 @@ export const SalesAnalytics = () => {
         start_date: startDate || undefined,
         end_date: endDate || undefined,
       });
-      setData(res.data?.data || res.data);
+      const fetchedData = res.data?.data || res.data;
+      
+      // Handle mapping between different backend structures
+      const mappedData = {
+        ...fetchedData,
+        gross_sales: fetchedData.gross_sales ?? fetchedData.metrics?.totalSales ?? 0,
+        net_sales: fetchedData.net_sales ?? fetchedData.metrics?.netSales ?? (fetchedData.metrics?.totalSales || 0),
+        tax_collected: fetchedData.tax_collected ?? 0,
+        discount_given: fetchedData.discount_given ?? 0,
+        total_receivable: fetchedData.total_receivable ?? fetchedData.metrics?.totalReceivable ?? 0,
+        total_refunds: fetchedData.total_refunds ?? fetchedData.metrics?.refunds ?? 0,
+        monthly_sales: fetchedData.monthly_sales || fetchedData.revenueTrend?.map(t => ({ month: t.month, total: t.sales })) || [],
+        sales_by_category: fetchedData.sales_by_category || fetchedData.salesByCategory?.map(c => ({ category: c.name, total: c.value })) || [],
+        top_products: fetchedData.top_products || fetchedData.topProducts?.map(p => ({ product_name: p.name, quantity_sold: p.quantity, revenue: p.revenue })) || [],
+        top_customers: fetchedData.top_customers || fetchedData.topCustomers?.map(c => ({ customer_name: c.name, orders_count: c.orders, revenue: c.revenue })) || [],
+      };
+      setData(mappedData);
     } catch (err) {
       console.error('Failed to load sales analytics:', err);
     } finally {
@@ -89,13 +105,14 @@ export const SalesAnalytics = () => {
   }
 
   const kpis = [
-    { label: 'Gross Sales', val: data?.gross_sales || 0, color: 'text-indigo-600', desc: 'Total sales invoices billed' },
-    { label: 'Net Sales', val: data?.net_sales || (data?.gross_sales - (data?.discount_given || 0)), color: 'text-emerald-600', desc: 'After trade discounts' },
+    { label: 'Gross Sales', val: data?.metrics?.totalSales || data?.gross_sales || 0, color: 'text-indigo-600', desc: 'Total sales invoices billed' },
+    { label: 'Net Sales', val: data?.metrics?.netSales || data?.net_sales || ((data?.metrics?.totalSales || data?.gross_sales || 0) - (data?.discount_given || 0)), color: 'text-emerald-600', desc: 'After trade discounts' },
     { label: 'Tax Collected (GST)', val: data?.tax_collected || 0, color: 'text-cyan-600', desc: 'Total GST liability' },
     { label: 'Discounts Granted', val: data?.discount_given || 0, color: 'text-amber-600', desc: 'Promotional deductions' },
-    { label: 'Total Receivables', val: data?.total_receivable || 0, color: 'text-blue-600', desc: 'Customer unpaid balance' },
-    { label: 'Customer Refunds', val: data?.total_refunds || 0, color: 'text-rose-600', desc: 'Settled returns/refunds' },
+    { label: 'Total Receivables', val: data?.metrics?.totalReceivable || data?.total_receivable || 0, color: 'text-blue-600', desc: 'Customer unpaid balance' },
+    { label: 'Customer Refunds', val: data?.metrics?.refunds || data?.total_refunds || 0, color: 'text-rose-600', desc: 'Settled returns/refunds' },
   ];
+
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16">
@@ -111,10 +128,10 @@ export const SalesAnalytics = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={handleExportCSV} className="gap-2">
+          <Button variant="secondary" onClick={handleExportCSV} className="gap-2">
             <Download className="w-4 h-4" /> Export Metrics
           </Button>
-          <Button variant="outline" onClick={() => window.print()} className="gap-2">
+          <Button variant="secondary" onClick={() => window.print()} className="gap-2">
             <Printer className="w-4 h-4" /> Print Report
           </Button>
         </div>
@@ -143,7 +160,7 @@ export const SalesAnalytics = () => {
         </div>
         {(startDate || endDate) && (
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => {
               setStartDate('');

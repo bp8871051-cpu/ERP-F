@@ -16,6 +16,7 @@ import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const RefundList = () => {
   const [refunds, setRefunds] = useState([]);
@@ -137,7 +138,7 @@ export const RefundList = () => {
             Manage customer payout requests, cancellations, and accounts receivable settlements.
           </p>
         </div>
-        <Button variant="primary" onClick={handleOpenModal} className="gap-2 bg-indigo-600 text-white">
+        <Button variant="teal" onClick={handleOpenModal} className="gap-2">
           <Plus className="w-4 h-4" /> Request Refund
         </Button>
       </div>
@@ -221,7 +222,7 @@ export const RefundList = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4 !overflow-visible">
             <div className="flex justify-between items-center border-b pb-3">
               <h3 className="font-bold text-slate-900 dark:text-white">Create Refund Request</h3>
               <button onClick={() => setShowModal(false)}>✕</button>
@@ -230,17 +231,15 @@ export const RefundList = () => {
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold mb-1">Customer *</label>
-                <select
-                  required
-                  value={customerId}
-                  onChange={(e) => setCustomerId(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
-                >
-                  <option value="">Select Customer</option>
-                  {customers.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={[
+                    { value: '', label: 'Select Customer' },
+                    ...customers.map((c) => ({ value: String(c.id), label: c.name }))
+                  ]}
+                  value={String(customerId)}
+                  onChange={(val) => setCustomerId(val)}
+                  placeholder="Select Customer"
+                />
               </div>
 
               <div>
@@ -257,16 +256,18 @@ export const RefundList = () => {
 
               <div>
                 <label className="block text-xs font-semibold mb-1">Refund Method</label>
-                <select
+                <SearchableSelect
+                  options={[
+                    { value: 'bank_transfer', label: 'Bank Transfer' },
+                    { value: 'cash', label: 'Cash' },
+                    { value: 'card', label: 'Card Refund' },
+                    { value: 'upi', label: 'UPI' }
+                  ]}
                   value={refundMethod}
-                  onChange={(e) => setRefundMethod(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-slate-800"
-                >
-                  <option value="bank_transfer">Bank Transfer</option>
-                  <option value="cash">Cash</option>
-                  <option value="card">Card Refund</option>
-                  <option value="upi">UPI</option>
-                </select>
+                  onChange={(val) => setRefundMethod(val)}
+                  placeholder="Refund Method"
+                  searchable={false}
+                />
               </div>
 
               <div>
@@ -281,8 +282,8 @@ export const RefundList = () => {
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary" disabled={submitting} className="bg-indigo-600 text-white">
+                <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+                <Button type="submit" variant="teal" disabled={submitting}>
                   {submitting ? 'Submitting...' : 'Submit Request'}
                 </Button>
               </div>

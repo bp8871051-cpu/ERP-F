@@ -28,28 +28,35 @@ export const StockActionModal = ({
 
   useEffect(() => {
     if (isOpen) {
-      loadDropdowns();
+      setProductId(initialProductId);
+      setWarehouseId(initialWarehouseId);
+      setQuantity(10);
+      setNotes('');
+      loadDropdowns(initialProductId, initialWarehouseId);
       setReference(
         (actionType === 'receive' ? 'RCV-' : actionType === 'issue' ? 'ISS-' : 'OPN-') +
           Math.floor(1000 + Math.random() * 9000)
       );
     }
-  }, [isOpen, actionType]);
+  }, [isOpen, actionType, initialProductId, initialWarehouseId]);
 
-  const loadDropdowns = async () => {
+  const loadDropdowns = async (currentProductId, currentWarehouseId) => {
     try {
       const [whRes, prdRes] = await Promise.all([
         warehouseService.getWarehouses(),
         productService.getProducts({ per_page: 100 }),
       ]);
       setWarehouses(whRes.data || []);
-      if (!warehouseId && whRes.data?.length > 0) {
+      if (!currentWarehouseId && whRes.data?.length > 0) {
         setWarehouseId(whRes.data[0].id);
       }
       setProducts(prdRes.data || []);
-      if (!productId && prdRes.data?.length > 0) {
+      if (!currentProductId && prdRes.data?.length > 0) {
         setProductId(prdRes.data[0].id);
         setUnitCost(prdRes.data[0].purchase_price ?? prdRes.data[0].cost_price ?? '');
+      } else if (currentProductId && prdRes.data?.length > 0) {
+        const p = prdRes.data.find(prod => String(prod.id) === String(currentProductId));
+        if (p) setUnitCost(p.purchase_price ?? p.cost_price ?? '');
       }
     } catch (err) {
       console.error('Failed to load modal dependencies:', err);

@@ -19,6 +19,7 @@ import Button from '../../../components/ui/Button';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const PurchaseOrderList = () => {
   const navigate = useNavigate();
@@ -144,6 +145,19 @@ export const PurchaseOrderList = () => {
     }
   };
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    try {
+      return new Date(dateStr).toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Header */}
@@ -162,9 +176,9 @@ export const PurchaseOrderList = () => {
             <Download className="w-4 h-4" /> Export CSV
           </Button>
           <Button
-            variant="primary"
+            variant="teal"
             onClick={() => navigate('/app/purchase/orders/create')}
-            className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="gap-2"
           >
             <Plus className="w-4 h-4" /> Create Purchase Order
           </Button>
@@ -172,7 +186,7 @@ export const PurchaseOrderList = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 !overflow-visible">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
@@ -188,29 +202,30 @@ export const PurchaseOrderList = () => {
             />
           </div>
 
-          <div className="relative">
-            <Filter className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-            <select
+          <div className="relative z-30">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'draft', label: 'Draft' },
+                { value: 'pending_approval', label: 'Pending Approval' },
+                { value: 'approved', label: 'Approved' },
+                { value: 'received', label: 'Received' },
+                { value: 'completed', label: 'Completed' },
+                { value: 'cancelled', label: 'Cancelled' }
+              ]}
               value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
+              onChange={(val) => {
+                setStatus(val);
                 setPage(1);
               }}
-              className="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
-            >
-              <option value="">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="pending_approval">Pending Approval</option>
-              <option value="approved">Approved</option>
-              <option value="received">Received</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+              placeholder="All Statuses"
+              searchable={false}
+            />
           </div>
 
           <div className="flex items-center justify-end">
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => {
                 setSearch('');
@@ -226,7 +241,7 @@ export const PurchaseOrderList = () => {
       </Card>
 
       {/* Orders Table */}
-      <Card className="overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+      <Card className="!overflow-visible border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         {loading ? (
           <div className="p-8">
             <LoadingSkeleton count={6} />
@@ -236,9 +251,9 @@ export const PurchaseOrderList = () => {
             <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
             <p className="font-semibold text-slate-800 dark:text-white">No Purchase Orders Found</p>
             <Button
-              variant="primary"
+              variant="teal"
               onClick={() => navigate('/app/purchase/orders/create')}
-              className="mt-4 bg-indigo-600 text-white"
+              className="mt-4"
             >
               Create Purchase Order
             </Button>
@@ -271,8 +286,8 @@ export const PurchaseOrderList = () => {
                         <div className="text-xs text-slate-400 mt-0.5">{po.vendor.company_name}</div>
                       )}
                     </td>
-                    <td className="px-5 py-4 text-xs text-slate-500">{po.po_date || 'N/A'}</td>
-                    <td className="px-5 py-4 text-xs text-slate-500">{po.expected_delivery_date || '—'}</td>
+                    <td className="px-5 py-4 text-xs text-slate-500">{formatDate(po.po_date)}</td>
+                    <td className="px-5 py-4 text-xs text-slate-500">{formatDate(po.expected_delivery_date)}</td>
                     <td className="px-5 py-4 text-right font-bold text-slate-900 dark:text-white">
                       ₹{Number(po.grand_total || po.total || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </td>

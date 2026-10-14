@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowRightLeft, Plus, Trash2, AlertCircle, ArrowRight } from 'lucide-react';
 import Button from '../ui/Button';
+import SearchableSelect from '../ui/SearchableSelect';
 import warehouseService from '../../services/warehouseService';
 import productService from '../../services/productService';
 import stockService from '../../services/stockService';
@@ -178,19 +179,12 @@ export const StockTransferModal = ({ isOpen, onClose, onSaved }) => {
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Source Warehouse <span className="text-rose-500">*</span>
                 </label>
-                <select
+                <SearchableSelect
+                  options={warehouses.map((w) => ({ value: w.id, label: `${w.name} (${w.code})` }))}
                   value={fromWarehouseId}
-                  onChange={(e) => setFromWarehouseId(e.target.value)}
-                  className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white"
-                  required
-                >
-                  <option value="">Select Origin</option>
-                  {warehouses.map((w) => (
-                    <option key={w.id} value={w.id}>
-                      {w.name} ({w.code})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setFromWarehouseId(val)}
+                  placeholder="Select Origin"
+                />
               </div>
 
               <div className="flex justify-center items-center py-2 md:py-0">
@@ -203,19 +197,12 @@ export const StockTransferModal = ({ isOpen, onClose, onSaved }) => {
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Destination Warehouse <span className="text-rose-500">*</span>
                 </label>
-                <select
+                <SearchableSelect
+                  options={warehouses.map((w) => ({ value: w.id, label: `${w.name} (${w.code})` }))}
                   value={toWarehouseId}
-                  onChange={(e) => setToWarehouseId(e.target.value)}
-                  className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white"
-                  required
-                >
-                  <option value="">Select Destination</option>
-                  {warehouses.map((w) => (
-                    <option key={w.id} value={w.id}>
-                      {w.name} ({w.code})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setToWarehouseId(val)}
+                  placeholder="Select Destination"
+                />
               </div>
             </div>
 
@@ -242,7 +229,7 @@ export const StockTransferModal = ({ isOpen, onClose, onSaved }) => {
                 </Button>
               </div>
 
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
+              <div className="border border-slate-200 rounded-lg overflow-visible">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
                     <tr>
@@ -256,19 +243,12 @@ export const StockTransferModal = ({ isOpen, onClose, onSaved }) => {
                     {items.map((row, idx) => (
                       <tr key={idx} className="hover:bg-slate-50/50">
                         <td className="p-2">
-                          <select
+                          <SearchableSelect
+                            options={allProducts.map((p) => ({ value: p.id, label: `${p.name} (${p.sku})` }))}
                             value={row.product_id}
-                            onChange={(e) => handleProductChange(idx, e.target.value)}
-                            className="w-full text-xs px-2 py-1.5 border border-slate-200 rounded focus:outline-teal-600 bg-white"
-                            required
-                          >
-                            <option value="">Select a product...</option>
-                            {allProducts.map((p) => (
-                              <option key={p.id} value={p.id}>
-                                {p.name} ({p.sku})
-                              </option>
-                            ))}
-                          </select>
+                            onChange={(val) => handleProductChange(idx, val)}
+                            placeholder="Select a product..."
+                          />
                         </td>
                         <td className="p-2 text-right font-medium text-slate-600">
                           {row.available_qty}

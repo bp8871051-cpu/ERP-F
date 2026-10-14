@@ -474,9 +474,6 @@ export const AppRoutes = () => {
         <Route path="pos/screen" element={<PermissionRoute permission="pos.view"><POSScreen /></PermissionRoute>} />
         <Route path="pos/orders" element={<PermissionRoute permission="pos.view"><POSOrders /></PermissionRoute>} />
         <Route path="pos/orders/:id" element={<PermissionRoute permission="pos.view"><POSOrderDetails /></PermissionRoute>} />
-        <Route path="pos/barcode-print" element={<PermissionRoute permission="pos.view"><BarcodePrint /></PermissionRoute>} />
-        <Route path="pos/qr-print" element={<PermissionRoute permission="pos.view"><QRCodePrint /></PermissionRoute>} />
-        <Route path="pos/print-settings" element={<PermissionRoute permission="pos.view"><PrintSettings /></PermissionRoute>} />
 
         {/* =========================================
             FIXED ASSETS MODULE ROUTES

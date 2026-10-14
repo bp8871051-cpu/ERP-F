@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import systemService from '../../services/systemService';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export default function UsersManagement() {
   const [users, setUsers] = useState([]);
@@ -189,7 +190,7 @@ export default function UsersManagement() {
       )}
 
       {/* Filter Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4 !overflow-visible">
         <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80">
           <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
           <input
@@ -202,26 +203,30 @@ export default function UsersManagement() {
         </form>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          >
-            <option value="all">All Roles</option>
-            {roles.map(r => (
-              <option key={r.id} value={r.id}>{r.name}</option>
-            ))}
-          </select>
+          <div className="w-40 z-20">
+            <SearchableSelect
+              options={[
+                { value: 'all', label: 'All Roles' },
+                ...roles.map(r => ({ value: r.id, label: r.name }))
+              ]}
+              value={roleFilter}
+              onChange={(val) => setRoleFilter(val)}
+              searchable={false}
+            />
+          </div>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-          >
-            <option value="all">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive / Suspended</option>
-          </select>
+          <div className="w-40 z-10">
+            <SearchableSelect
+              options={[
+                { value: 'all', label: 'All Statuses' },
+                { value: 'active', label: 'Active' },
+                { value: 'inactive', label: 'Inactive / Suspended' }
+              ]}
+              value={statusFilter}
+              onChange={(val) => setStatusFilter(val)}
+              searchable={false}
+            />
+          </div>
 
           <button
             onClick={fetchUsers}
@@ -378,12 +383,12 @@ export default function UsersManagement() {
       {/* Create / Edit User Modal */}
       <AnimatePresence>
         {showUserModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-start justify-center p-4 overflow-y-auto bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 flex flex-col"
+              className="bg-white rounded-2xl max-w-lg w-full flex flex-col my-8 !overflow-visible shadow-2xl border border-slate-200"
             >
               <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -436,34 +441,33 @@ export default function UsersManagement() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
+                  <div className="z-20">
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Role Assignment *</label>
-                    <select
-                      required
+                    <SearchableSelect
+                      options={[
+                        { value: '', label: 'Select Role...' },
+                        ...roles.map(r => ({ value: r.id, label: r.name }))
+                      ]}
                       value={form.role_id}
-                      onChange={(e) => setForm({ ...form, role_id: e.target.value })}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-                    >
-                      <option value="">Select Role...</option>
-                      {roles.map(r => (
-                        <option key={r.id} value={r.id}>{r.name}</option>
-                      ))}
-                    </select>
+                      onChange={(val) => setForm({ ...form, role_id: val })}
+                      searchable={false}
+                    />
                   </div>
-                  <div>
+                  <div className="z-10">
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Department</label>
-                    <select
+                    <SearchableSelect
+                      options={[
+                        { value: 'Operations', label: 'Operations' },
+                        { value: 'Support & Tech', label: 'Support & Tech' },
+                        { value: 'Finance & Accounting', label: 'Finance & Accounting' },
+                        { value: 'Human Resources', label: 'Human Resources' },
+                        { value: 'Sales & CRM', label: 'Sales & CRM' },
+                        { value: 'Warehouse & Inventory', label: 'Warehouse & Inventory' }
+                      ]}
                       value={form.department}
-                      onChange={(e) => setForm({ ...form, department: e.target.value })}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-                    >
-                      <option value="Operations">Operations</option>
-                      <option value="Support & Tech">Support & Tech</option>
-                      <option value="Finance & Accounting">Finance & Accounting</option>
-                      <option value="Human Resources">Human Resources</option>
-                      <option value="Sales & CRM">Sales & CRM</option>
-                      <option value="Warehouse & Inventory">Warehouse & Inventory</option>
-                    </select>
+                      onChange={(val) => setForm({ ...form, department: val })}
+                      searchable={false}
+                    />
                   </div>
                 </div>
 

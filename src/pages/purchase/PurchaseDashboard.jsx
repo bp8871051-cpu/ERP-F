@@ -117,13 +117,15 @@ export const PurchaseDashboard = () => {
         {kpis.map((kpi, idx) => {
           const Icon = kpi.icon;
           return (
-            <Card key={idx} className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-3.5">
-              <div className={`p-2.5 rounded-xl ${kpi.bg} shrink-0`}>
-                <Icon className={`w-5 h-5 ${kpi.color}`} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="text-[11px] font-semibold text-slate-400 block truncate">{kpi.label}</span>
-                <p className="text-base font-bold text-slate-900 dark:text-white mt-0.5 truncate">{kpi.val}</p>
+            <Card key={idx} bodyClassName="p-4 bg-white dark:bg-slate-900 shadow-sm">
+              <div className="flex items-center gap-3.5">
+                <div className={`p-2.5 rounded-xl ${kpi.bg} shrink-0`}>
+                  <Icon className={`w-5 h-5 ${kpi.color}`} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[11px] font-semibold text-slate-400 block truncate uppercase tracking-wider">{kpi.label}</span>
+                  <p className="text-lg font-bold text-slate-900 dark:text-white mt-0.5 truncate">{kpi.val}</p>
+                </div>
               </div>
             </Card>
           );

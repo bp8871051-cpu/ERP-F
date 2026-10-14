@@ -5,6 +5,7 @@ import {
   MessageSquare, Cpu, CheckCircle, AlertCircle, X, Shield, Sparkles
 } from 'lucide-react';
 import membershipService from '../../services/membershipService';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export default function MembershipAddons() {
   const [addons, setAddons] = useState([]);
@@ -182,12 +183,12 @@ export default function MembershipAddons() {
       {/* Addon Modal */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-start justify-center p-4 overflow-y-auto bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 flex flex-col"
+              className="bg-white rounded-2xl max-w-lg w-full flex flex-col my-8 !overflow-visible shadow-2xl border border-slate-200"
             >
               <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -226,21 +227,22 @@ export default function MembershipAddons() {
                       className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none uppercase"
                     />
                   </div>
-                  <div>
+                  <div className="z-20">
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Feature Type</label>
-                    <select
+                    <SearchableSelect
+                      options={[
+                        { value: 'extra_user', label: 'Extra User Seats' },
+                        { value: 'extra_storage', label: 'Extra Storage' },
+                        { value: 'advanced_reports', label: 'Advanced Reports' },
+                        { value: 'premium_support', label: 'Premium 24/7 Support' },
+                        { value: 'api_access', label: 'API Access' },
+                        { value: 'whatsapp_integration', label: 'WhatsApp Integration' },
+                        { value: 'ai_features', label: 'AI Assistant Features' }
+                      ]}
                       value={form.feature}
-                      onChange={(e) => setForm({ ...form, feature: e.target.value })}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-                    >
-                      <option value="extra_user">Extra User Seats</option>
-                      <option value="extra_storage">Extra Storage</option>
-                      <option value="advanced_reports">Advanced Reports</option>
-                      <option value="premium_support">Premium 24/7 Support</option>
-                      <option value="api_access">API Access</option>
-                      <option value="whatsapp_integration">WhatsApp Integration</option>
-                      <option value="ai_features">AI Assistant Features</option>
-                    </select>
+                      onChange={(val) => setForm({ ...form, feature: val })}
+                      searchable={false}
+                    />
                   </div>
                 </div>
 
@@ -256,18 +258,19 @@ export default function MembershipAddons() {
                       className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                     />
                   </div>
-                  <div>
+                  <div className="z-10">
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Billing Cycle</label>
-                    <select
+                    <SearchableSelect
+                      options={[
+                        { value: 'monthly', label: 'Monthly' },
+                        { value: 'quarterly', label: 'Quarterly' },
+                        { value: 'half_yearly', label: 'Half-Yearly' },
+                        { value: 'yearly', label: 'Yearly' }
+                      ]}
                       value={form.billing_cycle}
-                      onChange={(e) => setForm({ ...form, billing_cycle: e.target.value })}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-                    >
-                      <option value="monthly">Monthly</option>
-                      <option value="quarterly">Quarterly</option>
-                      <option value="half_yearly">Half-Yearly</option>
-                      <option value="yearly">Yearly</option>
-                    </select>
+                      onChange={(val) => setForm({ ...form, billing_cycle: val })}
+                      searchable={false}
+                    />
                   </div>
                 </div>
 

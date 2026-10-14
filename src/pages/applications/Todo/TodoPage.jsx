@@ -49,6 +49,34 @@ export const TodoPage = () => {
   // Comments drawer state
   const [activeTaskForDetails, setActiveTaskForDetails] = useState(null);
   const [newComment, setNewComment] = useState('');
+  
+  // Drag and Drop state
+  const [draggedTaskId, setDraggedTaskId] = useState(null);
+
+  const handleDragStart = (e, taskId) => {
+    setDraggedTaskId(taskId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragEnd = () => {
+    setDraggedTaskId(null);
+  };
+
+  const handleDrop = (e, targetStatus) => {
+    e.preventDefault();
+    if (!draggedTaskId) return;
+
+    const task = tasks.find((t) => t.id === draggedTaskId);
+    if (task && task.status !== targetStatus) {
+      handleChangeStatus(draggedTaskId, targetStatus, null);
+    }
+    setDraggedTaskId(null);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
 
   const kanbanColumns = [
     { id: 'todo', name: 'To Do', color: 'border-slate-300' },
@@ -63,7 +91,7 @@ export const TodoPage = () => {
       setLoading(true);
       const res = await taskService.getTasks();
       if (res && res.data) {
-        setTasks(res.data);
+        setTasks(res.data.tasks || []);
       }
     } catch (err) {
       console.error('Failed to load tasks', err);
@@ -217,6 +245,19 @@ export const TodoPage = () => {
     if (activeFilter === 'overdue') return t.due_date && t.due_date < todayStr && t.status !== 'completed';
 
     return true;
+  }).sort((a, b) => {
+    const priorityWeight = { urgent: 4, high: 3, medium: 2, low: 1 };
+    const wA = priorityWeight[a.priority] || 0;
+    const wB = priorityWeight[b.priority] || 0;
+    
+    if (wA !== wB) return wB - wA;
+    
+    // Sort newest first by created_at or id fallback
+    const dateA = new Date(a.created_at || 0).getTime();
+    const dateB = new Date(b.created_at || 0).getTime();
+    if (dateA !== dateB) return dateB - dateA;
+    
+    return b.id - a.id;
   });
 
   const getPriorityBadge = (p) => {
@@ -334,7 +375,11 @@ export const TodoPage = () => {
             return (
               <div
                 key={col.id}
-                className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-3 flex flex-col min-h-[500px]"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, col.id)}
+                className={`bg-slate-50/70 border rounded-2xl p-3 flex flex-col min-h-[500px] transition-colors ${
+                  draggedTaskId ? 'border-dashed border-teal-300' : 'border-slate-200/80'
+                }`}
               >
                 {/* Column Header */}
                 <div className="flex items-center justify-between px-2 py-1.5 mb-3">
@@ -357,8 +402,13 @@ export const TodoPage = () => {
                   {columnTasks.map((task) => (
                     <div
                       key={task.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, task.id)}
+                      onDragEnd={handleDragEnd}
                       onClick={() => setActiveTaskForDetails(task)}
-                      className="p-3.5 bg-white rounded-xl border border-slate-200/80 hover:border-teal-500 hover:shadow-xs transition-all cursor-pointer group"
+                      className={`p-3.5 bg-white rounded-xl border border-slate-200/80 hover:border-teal-500 hover:shadow-xs transition-all cursor-pointer group ${
+                        draggedTaskId === task.id ? 'opacity-50 border-dashed border-teal-500 shadow-md' : ''
+                      }`}
                     >
                       {/* Priority & Category tags */}
                       <div className="flex items-center justify-between gap-1 mb-2">

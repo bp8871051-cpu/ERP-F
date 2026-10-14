@@ -22,6 +22,7 @@ import Card from '../../../components/ui/Card';
 import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 import DealModal from './DealModal';
 
 export const DealList = () => {
@@ -52,7 +53,8 @@ export const DealList = () => {
   const loadPipelines = async () => {
     try {
       const res = await crmService.getPipelines();
-      setPipelines(res.data || []);
+      const payload = res.data?.data || res.data;
+      setPipelines(payload?.all_pipelines || (Array.isArray(payload) ? payload : []));
     } catch (err) {
       console.error('Failed to load pipelines:', err);
     }
@@ -68,12 +70,12 @@ export const DealList = () => {
         page,
         per_page: 15,
       });
-      const payload = res.data;
+      const payload = res;
       setDeals(payload.data || payload || []);
       setMeta({
-        current_page: payload.current_page || 1,
-        last_page: payload.last_page || 1,
-        total: payload.total || 0,
+        current_page: payload.meta?.current_page || payload.current_page || 1,
+        last_page: payload.meta?.last_page || payload.last_page || 1,
+        total: payload.meta?.total || payload.total || 0,
       });
     } catch (err) {
       console.error('Error fetching deals:', err);
@@ -155,7 +157,7 @@ export const DealList = () => {
       </div>
 
       {/* Filters Card */}
-      <Card className="p-4">
+      <Card className="p-4 !overflow-visible">
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
           <div className="relative w-full sm:w-80">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -172,35 +174,39 @@ export const DealList = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <select
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
-                setPage(1);
-              }}
-              className="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden"
-            >
-              <option value="">All Statuses</option>
-              <option value="open">Open</option>
-              <option value="won">Won</option>
-              <option value="lost">Lost</option>
-            </select>
+            <div className="w-40 relative z-10">
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'All Statuses' },
+                  { value: 'open', label: 'Open' },
+                  { value: 'won', label: 'Won' },
+                  { value: 'lost', label: 'Lost' }
+                ]}
+                value={status}
+                onChange={(val) => {
+                  setStatus(val);
+                  setPage(1);
+                }}
+                placeholder="All Statuses"
+                searchable={false}
+              />
+            </div>
 
-            <select
-              value={pipelineId}
-              onChange={(e) => {
-                setPipelineId(e.target.value);
-                setPage(1);
-              }}
-              className="text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800 focus:outline-hidden"
-            >
-              <option value="">All Pipelines</option>
-              {pipelines.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+            <div className="w-40 relative z-10">
+              <SearchableSelect
+                options={[
+                  { value: '', label: 'All Pipelines' },
+                  ...pipelines.map((p) => ({ value: String(p.id), label: p.name }))
+                ]}
+                value={String(pipelineId)}
+                onChange={(val) => {
+                  setPipelineId(val);
+                  setPage(1);
+                }}
+                placeholder="All Pipelines"
+                searchable={false}
+              />
+            </div>
 
             <Button variant="secondary" size="sm" icon={RefreshCw} onClick={fetchDeals}>
               Refresh
@@ -282,7 +288,7 @@ export const DealList = () => {
                           {formatCurrency(d.expected_revenue, d.currency)}
                         </td>
                         <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">
-                          {d.expected_close_date || '—'}
+                          {d.expected_close_date ? new Date(d.expected_close_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
                         </td>
                         <td className="py-3 px-4">
                           <Badge

@@ -6,6 +6,7 @@ import {
   Archive, FileText, CheckSquare, Square
 } from 'lucide-react';
 import membershipService from '../../services/membershipService';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 const AVAILABLE_FEATURES = [
   { key: 'crm', label: 'CRM & Pipeline' },
@@ -322,12 +323,12 @@ export default function MembershipPlans() {
       {/* Plan Create / Edit Modal */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-start justify-center p-4 overflow-y-auto bg-slate-900/60 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-slate-200 flex flex-col"
+              className="bg-white rounded-2xl max-w-2xl w-full flex flex-col my-8 !overflow-visible shadow-2xl border border-slate-200"
             >
               <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -380,31 +381,33 @@ export default function MembershipPlans() {
                       className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                     />
                   </div>
-                  <div>
+                  <div className="z-20">
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Billing Cycle *</label>
-                    <select
+                    <SearchableSelect
+                      options={[
+                        { value: 'monthly', label: 'Monthly' },
+                        { value: 'quarterly', label: 'Quarterly' },
+                        { value: 'half_yearly', label: 'Half-Yearly' },
+                        { value: 'yearly', label: 'Yearly' },
+                        { value: 'lifetime', label: 'Lifetime' }
+                      ]}
                       value={form.billing_cycle}
-                      onChange={(e) => setForm({ ...form, billing_cycle: e.target.value })}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-                    >
-                      <option value="monthly">Monthly</option>
-                      <option value="quarterly">Quarterly</option>
-                      <option value="half_yearly">Half-Yearly</option>
-                      <option value="yearly">Yearly</option>
-                      <option value="lifetime">Lifetime</option>
-                    </select>
+                      onChange={(val) => setForm({ ...form, billing_cycle: val })}
+                      searchable={false}
+                    />
                   </div>
-                  <div>
+                  <div className="z-10">
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
-                    <select
+                    <SearchableSelect
+                      options={[
+                        { value: 'active', label: 'Active' },
+                        { value: 'inactive', label: 'Inactive' },
+                        { value: 'draft', label: 'Draft' }
+                      ]}
                       value={form.status}
-                      onChange={(e) => setForm({ ...form, status: e.target.value })}
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="draft">Draft</option>
-                    </select>
+                      onChange={(val) => setForm({ ...form, status: val })}
+                      searchable={false}
+                    />
                   </div>
                 </div>
 

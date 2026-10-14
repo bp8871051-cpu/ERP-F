@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Package, DollarSign, Layers, Boxes, AlertCircle } from 'lucide-react';
 import Button from '../ui/Button';
+import SearchableSelect from '../ui/SearchableSelect';
 import categoryService from '../../services/categoryService';
 import brandService from '../../services/brandService';
 import unitService from '../../services/unitService';
@@ -238,66 +239,46 @@ export const AddProductModal = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Category</label>
-                  <select
-                    name="category_id"
+                  <SearchableSelect
+                    options={categories.map((c) => ({ value: c.id, label: c.name }))}
                     value={formData.category_id}
-                    onChange={handleChange}
-                    className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white"
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => handleChange({ target: { name: 'category_id', value: val } })}
+                    placeholder="Select Category"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Brand</label>
-                  <select
-                    name="brand_id"
+                  <SearchableSelect
+                    options={brands.map((b) => ({ value: b.id, label: b.name }))}
                     value={formData.brand_id}
-                    onChange={handleChange}
-                    className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white"
-                  >
-                    <option value="">Select Brand</option>
-                    {brands.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => handleChange({ target: { name: 'brand_id', value: val } })}
+                    placeholder="Select Brand"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Unit of Measure</label>
-                  <select
-                    name="unit_id"
+                  <SearchableSelect
+                    options={units.map((u) => ({ value: u.id, label: `${u.name} (${u.short_name || u.short_code})` }))}
                     value={formData.unit_id}
-                    onChange={handleChange}
-                    className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white"
-                  >
-                    <option value="">Select Unit</option>
-                    {units.map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.name} ({u.short_name || u.short_code})
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => handleChange({ target: { name: 'unit_id', value: val } })}
+                    placeholder="Select Unit"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
-                  <select
-                    name="status"
+                  <SearchableSelect
+                    options={[
+                      { value: 'active', label: 'Active' },
+                      { value: 'inactive', label: 'Inactive' }
+                    ]}
                     value={formData.status}
-                    onChange={handleChange}
-                    className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white"
-                  >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
+                    onChange={(val) => handleChange({ target: { name: 'status', value: val } })}
+                    placeholder="Select Status"
+                    searchable={false}
+                  />
                 </div>
               </div>
             </div>
@@ -313,6 +294,7 @@ export const AddProductModal = ({
                   <input
                     type="number"
                     step="0.01"
+                    min="0"
                     name="purchase_price"
                     value={formData.purchase_price}
                     onChange={handleChange}
@@ -328,6 +310,7 @@ export const AddProductModal = ({
                   <input
                     type="number"
                     step="0.01"
+                    min="0"
                     name="selling_price"
                     value={formData.selling_price}
                     onChange={handleChange}
@@ -342,6 +325,7 @@ export const AddProductModal = ({
                   <input
                     type="number"
                     step="0.01"
+                    min="0"
                     name="mrp"
                     value={formData.mrp}
                     onChange={handleChange}
@@ -355,6 +339,7 @@ export const AddProductModal = ({
                   <input
                     type="number"
                     step="0.01"
+                    min="0"
                     name="tax_rate"
                     value={formData.tax_rate}
                     onChange={handleChange}
@@ -365,15 +350,16 @@ export const AddProductModal = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Tax Type</label>
-                  <select
-                    name="tax_type"
+                  <SearchableSelect
+                    options={[
+                      { value: 'exclusive', label: 'Exclusive' },
+                      { value: 'inclusive', label: 'Inclusive' }
+                    ]}
                     value={formData.tax_type}
-                    onChange={handleChange}
-                    className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white"
-                  >
-                    <option value="exclusive">Exclusive</option>
-                    <option value="inclusive">Inclusive</option>
-                  </select>
+                    onChange={(val) => handleChange({ target: { name: 'tax_type', value: val } })}
+                    placeholder="Select Tax Type"
+                    searchable={false}
+                  />
                 </div>
               </div>
             </div>
@@ -386,19 +372,12 @@ export const AddProductModal = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Default Warehouse</label>
-                  <select
-                    name="default_warehouse_id"
+                  <SearchableSelect
+                    options={warehouses.map((w) => ({ value: w.id, label: `${w.name} (${w.code})` }))}
                     value={formData.default_warehouse_id}
-                    onChange={handleChange}
-                    className="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg focus:outline-teal-600 bg-white"
-                  >
-                    <option value="">Select Warehouse</option>
-                    {warehouses.map((w) => (
-                      <option key={w.id} value={w.id}>
-                        {w.name} ({w.code})
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => handleChange({ target: { name: 'default_warehouse_id', value: val } })}
+                    placeholder="Select Warehouse"
+                  />
                 </div>
 
                 {!product && (
@@ -406,6 +385,7 @@ export const AddProductModal = ({
                     <label className="block text-xs font-semibold text-slate-700 mb-1">Opening Stock Qty</label>
                     <input
                       type="number"
+                      min="0"
                       name="opening_stock"
                       value={formData.opening_stock}
                       onChange={handleChange}
@@ -419,6 +399,7 @@ export const AddProductModal = ({
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Min / Alert Stock</label>
                   <input
                     type="number"
+                    min="0"
                     name="minimum_stock"
                     value={formData.minimum_stock}
                     onChange={handleChange}
@@ -431,6 +412,7 @@ export const AddProductModal = ({
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Reorder Level</label>
                   <input
                     type="number"
+                    min="0"
                     name="reorder_level"
                     value={formData.reorder_level}
                     onChange={handleChange}
@@ -443,6 +425,7 @@ export const AddProductModal = ({
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Max Stock Limit</label>
                   <input
                     type="number"
+                    min="0"
                     name="maximum_stock"
                     value={formData.maximum_stock}
                     onChange={handleChange}

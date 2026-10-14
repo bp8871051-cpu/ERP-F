@@ -387,9 +387,6 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const posItems = [
     { name: 'POS', path: '/app/pos/terminal', icon: Store },
     { name: 'POS Orders', path: '/app/pos/orders', icon: Receipt },
-    { name: 'Barcode Print', path: '/app/pos/barcode-print', icon: Barcode },
-    { name: 'QR Code Print', path: '/app/pos/qr-print', icon: QrCode },
-    { name: 'Print Settings', path: '/app/pos/print-settings', icon: Printer },
   ];
 
   const assetItems = [

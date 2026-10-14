@@ -4,6 +4,7 @@ import crmService from '../../../services/crmService';
 import salesService from '../../../services/salesService';
 import productService from '../../../services/productService';
 import Button from '../../../components/ui/Button';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const DealModal = ({ isOpen, onClose, onSuccess, deal = null }) => {
   const [formData, setFormData] = useState({
@@ -86,7 +87,8 @@ export const DealModal = ({ isOpen, onClose, onSuccess, deal = null }) => {
       setCustomers(cPayload.data || cPayload || []);
       const contPayload = contRes.data?.data || contRes.data;
       setContacts(contPayload.data || contPayload || []);
-      const pipeList = pipeRes.data || [];
+      const payload = pipeRes.data?.data || pipeRes.data;
+      const pipeList = payload?.all_pipelines || (Array.isArray(payload) ? payload : []);
       setPipelines(pipeList);
       if (!deal && pipeList.length > 0) {
         setFormData((prev) => ({
@@ -196,8 +198,8 @@ export const DealModal = ({ isOpen, onClose, onSuccess, deal = null }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden border border-slate-200 my-8">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl border border-slate-200 my-8 !overflow-visible">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-2">
             <Briefcase className="w-5 h-5 text-teal-600" />
@@ -210,7 +212,7 @@ export const DealModal = ({ isOpen, onClose, onSuccess, deal = null }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs !overflow-visible">
           {/* Section: Basic info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -226,14 +228,16 @@ export const DealModal = ({ isOpen, onClose, onSuccess, deal = null }) => {
             </div>
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Currency</label>
-              <select
+              <SearchableSelect
+                options={[
+                  { value: 'INR', label: 'INR (₹)' },
+                  { value: 'USD', label: 'USD ($)' }
+                ]}
                 value={formData.currency}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                <option value="INR">INR (₹)</option>
-                <option value="USD">USD ($)</option>
-              </select>
+                onChange={(val) => setFormData({ ...formData, currency: val })}
+                placeholder="Currency"
+                searchable={false}
+              />
             </div>
           </div>
 
@@ -244,19 +248,18 @@ export const DealModal = ({ isOpen, onClose, onSuccess, deal = null }) => {
                 <Building2 className="w-3.5 h-3.5 text-teal-600" />
                 Customer Account *
               </label>
-              <select
-                required
-                value={formData.customer_id}
-                onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                <option value="">-- Select Existing ERP Customer --</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} {c.company_name ? `(${c.company_name})` : ''} - {c.customer_code}
-                  </option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={[
+                  { value: '', label: '-- Select Existing ERP Customer --' },
+                  ...customers.map((c) => ({
+                    value: String(c.id),
+                    label: `${c.name} ${c.company_name ? `(${c.company_name})` : ''} - ${c.customer_code}`
+                  }))
+                ]}
+                value={String(formData.customer_id)}
+                onChange={(val) => setFormData({ ...formData, customer_id: val })}
+                placeholder="-- Select Existing ERP Customer --"
+              />
             </div>
 
             <div>
@@ -264,18 +267,18 @@ export const DealModal = ({ isOpen, onClose, onSuccess, deal = null }) => {
                 <Users className="w-3.5 h-3.5 text-slate-400" />
                 Key Contact Person
               </label>
-              <select
-                value={formData.contact_id}
-                onChange={(e) => setFormData({ ...formData, contact_id: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                <option value="">-- Select Linked Contact --</option>
-                {contacts.map((ct) => (
-                  <option key={ct.id} value={ct.id}>
-                    {ct.first_name} {ct.last_name} ({ct.company_name || 'Individual'})
-                  </option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={[
+                  { value: '', label: '-- Select Linked Contact --' },
+                  ...contacts.map((ct) => ({
+                    value: String(ct.id),
+                    label: `${ct.first_name} ${ct.last_name} (${ct.company_name || 'Individual'})`
+                  }))
+                ]}
+                value={String(formData.contact_id)}
+                onChange={(val) => setFormData({ ...formData, contact_id: val })}
+                placeholder="-- Select Linked Contact --"
+              />
             </div>
           </div>
 
@@ -285,32 +288,27 @@ export const DealModal = ({ isOpen, onClose, onSuccess, deal = null }) => {
               <label className="font-semibold text-slate-700 block mb-1 flex items-center gap-1">
                 <Layers className="w-3.5 h-3.5 text-teal-600" /> Pipeline
               </label>
-              <select
-                value={formData.pipeline_id}
-                onChange={handlePipelineChange}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                {pipelines.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={pipelines.map((p) => ({ value: String(p.id), label: p.name }))}
+                value={String(formData.pipeline_id)}
+                onChange={(val) => handlePipelineChange({ target: { value: val } })}
+                placeholder="Pipeline"
+                searchable={false}
+              />
             </div>
 
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Current Stage</label>
-              <select
-                value={formData.stage_id}
-                onChange={handleStageChange}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
-              >
-                {selectedPipeline?.stages?.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.probability}%)
-                  </option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={selectedPipeline?.stages?.map((s) => ({
+                  value: String(s.id),
+                  label: `${s.name} (${s.probability}%)`
+                })) || []}
+                value={String(formData.stage_id)}
+                onChange={(val) => handleStageChange({ target: { value: val } })}
+                placeholder="Current Stage"
+                searchable={false}
+              />
             </div>
 
             <div>
@@ -348,7 +346,7 @@ export const DealModal = ({ isOpen, onClose, onSuccess, deal = null }) => {
               </Button>
             </div>
 
-            <div className="border border-slate-200 rounded-xl overflow-hidden">
+            <div className="border border-slate-200 rounded-xl !overflow-visible">
               <table className="w-full text-left text-xs text-slate-600">
                 <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200 text-[10px] uppercase">
                   <tr>
@@ -373,18 +371,20 @@ export const DealModal = ({ isOpen, onClose, onSuccess, deal = null }) => {
                         <td className="p-2">
                           <div className="space-y-1">
                             {products.length > 0 && (
-                              <select
-                                value={it.product_id}
-                                onChange={(e) => handleItemChange(idx, 'product_id', e.target.value)}
-                                className="w-full p-1.5 rounded border border-slate-200 bg-white text-xs mb-1"
-                              >
-                                <option value="">-- Choose Existing ERP Product --</option>
-                                {products.map((p) => (
-                                  <option key={p.id} value={p.id}>
-                                    {p.name} (₹{p.price || p.sale_price || 0})
-                                  </option>
-                                ))}
-                              </select>
+                              <div className="mb-1">
+                                <SearchableSelect
+                                  options={[
+                                    { value: '', label: '-- Choose Existing ERP Product --' },
+                                    ...products.map((p) => ({
+                                      value: String(p.id),
+                                      label: `${p.name} (₹${p.price || p.sale_price || 0})`
+                                    }))
+                                  ]}
+                                  value={String(it.product_id)}
+                                  onChange={(val) => handleItemChange(idx, 'product_id', val)}
+                                  placeholder="-- Choose Existing ERP Product --"
+                                />
+                              </div>
                             )}
                             <input
                               type="text"

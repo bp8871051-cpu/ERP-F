@@ -19,9 +19,9 @@ import {
 } from 'lucide-react';
 import assetService from '../../services/assetService';
 import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import LoadingSkeleton from '../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export const Maintenance = () => {
   const navigate = useNavigate();
@@ -262,8 +262,8 @@ export const Maintenance = () => {
       </div>
 
       {/* Filters Bar */}
-      <Card className="p-4 bg-white border border-slate-200 shadow-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+      <Card className="p-4 bg-white border border-slate-200 shadow-xs !overflow-visible">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 !overflow-visible">
           <div className="relative sm:col-span-2">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
@@ -275,33 +275,35 @@ export const Maintenance = () => {
             />
           </div>
 
-          <div>
-            <select
+          <div className="z-20">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'requested', label: 'Requested' },
+                { value: 'scheduled', label: 'Scheduled' },
+                { value: 'in_progress', label: 'In Progress' },
+                { value: 'completed', label: 'Completed' },
+                { value: 'cancelled', label: 'Cancelled' }
+              ]}
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-teal-500 text-slate-700"
-            >
-              <option value="">All Statuses</option>
-              <option value="requested">Requested</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+              onChange={(val) => setSelectedStatus(val)}
+              searchable={false}
+            />
           </div>
 
-          <div>
-            <select
+          <div className="z-10">
+            <SearchableSelect
+              options={[
+                { value: '', label: 'All Priorities' },
+                { value: 'low', label: 'Low Priority' },
+                { value: 'medium', label: 'Medium Priority' },
+                { value: 'high', label: 'High Priority' },
+                { value: 'urgent', label: 'Urgent Priority' }
+              ]}
               value={selectedPriority}
-              onChange={(e) => setSelectedPriority(e.target.value)}
-              className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg bg-white focus:outline-teal-500 text-slate-700"
-            >
-              <option value="">All Priorities</option>
-              <option value="low">Low Priority</option>
-              <option value="medium">Medium Priority</option>
-              <option value="high">High Priority</option>
-              <option value="urgent">Urgent Priority</option>
-            </select>
+              onChange={(val) => setSelectedPriority(val)}
+              searchable={false}
+            />
           </div>
         </div>
       </Card>
@@ -409,8 +411,8 @@ export const Maintenance = () => {
 
       {/* Schedule Maintenance Ticket Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg flex flex-col my-8 !overflow-visible">
             <div className="p-4 border-b border-slate-200 bg-amber-50 flex justify-between items-center">
               <h3 className="text-sm font-bold text-amber-900 flex items-center gap-2">
                 <Wrench className="w-4 h-4 text-amber-600" />
@@ -418,21 +420,18 @@ export const Maintenance = () => {
               </h3>
               <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600">&times;</button>
             </div>
-            <form onSubmit={handleCreateSubmit} className="p-4 overflow-y-auto space-y-3 text-xs">
-              <div>
+            <form onSubmit={handleCreateSubmit} className="p-4 space-y-3 text-xs">
+              <div className="z-30">
                 <label className="block font-semibold text-slate-700 mb-1">Select Target Asset *</label>
-                <select
-                  required
+                <SearchableSelect
+                  options={assets.map((a) => ({
+                    value: a.id,
+                    label: `${a.name} (${a.asset_code || `AST-${a.id}`}) — Status: ${a.status}`
+                  }))}
                   value={ticketForm.asset_id}
-                  onChange={(e) => setTicketForm({ ...ticketForm, asset_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500 font-medium"
-                >
-                  {assets.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.name} ({a.asset_code || `AST-${a.id}`}) — Status: {a.status}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setTicketForm({ ...ticketForm, asset_id: val })}
+                  searchable={true}
+                />
               </div>
 
               <div>
@@ -448,32 +447,34 @@ export const Maintenance = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className="z-20">
                   <label className="block font-semibold text-slate-700 mb-1">Maintenance Type</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'preventive', label: 'Preventative (Routine)' },
+                      { value: 'corrective', label: 'Corrective (Breakdown)' },
+                      { value: 'upgrade', label: 'Upgrade / Enhancement' },
+                      { value: 'inspection', label: 'Regulatory Inspection' }
+                    ]}
                     value={ticketForm.maintenance_type}
-                    onChange={(e) => setTicketForm({ ...ticketForm, maintenance_type: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500"
-                  >
-                    <option value="preventive">Preventative (Routine)</option>
-                    <option value="corrective">Corrective (Breakdown)</option>
-                    <option value="upgrade">Upgrade / Enhancement</option>
-                    <option value="inspection">Regulatory Inspection</option>
-                  </select>
+                    onChange={(val) => setTicketForm({ ...ticketForm, maintenance_type: val })}
+                    searchable={false}
+                  />
                 </div>
 
-                <div>
+                <div className="z-10">
                   <label className="block font-semibold text-slate-700 mb-1">Priority</label>
-                  <select
+                  <SearchableSelect
+                    options={[
+                      { value: 'low', label: 'Low Priority' },
+                      { value: 'medium', label: 'Medium Priority' },
+                      { value: 'high', label: 'High Priority' },
+                      { value: 'urgent', label: 'Urgent Priority' }
+                    ]}
                     value={ticketForm.priority}
-                    onChange={(e) => setTicketForm({ ...ticketForm, priority: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500"
-                  >
-                    <option value="low">Low Priority</option>
-                    <option value="medium">Medium Priority</option>
-                    <option value="high">High Priority</option>
-                    <option value="urgent">Urgent Priority</option>
-                  </select>
+                    onChange={(val) => setTicketForm({ ...ticketForm, priority: val })}
+                    searchable={false}
+                  />
                 </div>
               </div>
 
@@ -560,7 +561,7 @@ export const Maintenance = () => {
       {/* Update Maintenance Ticket Modal */}
       {showUpdateModal && selectedTicket && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md !overflow-visible">
             <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
               <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-teal-600" />
@@ -574,17 +575,18 @@ export const Maintenance = () => {
                 <div className="text-[10px] text-slate-500">Asset: {selectedTicket.asset?.name || selectedTicket.asset_name}</div>
               </div>
 
-              <div>
+              <div className="z-10">
                 <label className="block font-semibold text-slate-700 mb-1">Job Status</label>
-                <select
+                <SearchableSelect
+                  options={[
+                    { value: 'in_progress', label: 'In Progress' },
+                    { value: 'completed', label: 'Completed (Mark Asset as Available)' },
+                    { value: 'cancelled', label: 'Cancelled' }
+                  ]}
                   value={updateForm.status}
-                  onChange={(e) => setUpdateForm({ ...updateForm, status: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-teal-500 font-semibold"
-                >
-                  <option value="in_progress">In Progress</option>
-                  <option value="completed">Completed (Mark Asset as Available)</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
+                  onChange={(val) => setUpdateForm({ ...updateForm, status: val })}
+                  searchable={false}
+                />
               </div>
 
               <div>

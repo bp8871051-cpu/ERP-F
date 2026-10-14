@@ -17,6 +17,7 @@ import financeService from '../../../services/financeService';
 import api from '../../../services/api';
 import Card from '../../../components/ui/Card';
 import Button from '../../../components/ui/Button';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const ExpenseCreate = () => {
   const navigate = useNavigate();
@@ -56,12 +57,12 @@ export const ExpenseCreate = () => {
           financeService.getExpenseCategories(),
           financeService.getAccounts(),
           financeService.getTaxes(),
-          api.get('/purchase/vendors').then((r) => r.data.data).catch(() => []),
+          api.get('/purchase/vendors').then((r) => r.data?.data?.data || r.data?.data || r.data || []).catch(() => []),
         ]);
         setCategories(catRes || []);
         setAccounts(accRes || []);
         setTaxes(taxRes || []);
-        setVendors(venRes || []);
+        setVendors(Array.isArray(venRes) ? venRes : []);
 
         if (catRes && catRes.length > 0) {
           setFormData((prev) => ({ ...prev, expense_category_id: catRes[0].id }));
@@ -149,7 +150,7 @@ export const ExpenseCreate = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Info */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
+            <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4 !overflow-visible">
               <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
                 <Receipt className="w-4 h-4 text-teal-600" />
                 Primary Expense Details
@@ -191,44 +192,42 @@ export const ExpenseCreate = () => {
                 </div>
 
                 {/* Category */}
-                <div>
+                <div className="z-30">
                   <label className="block font-medium text-slate-700 mb-1">
                     Expense Category <span className="text-rose-500">*</span>
                   </label>
-                  <select
-                    name="expense_category_id"
-                    value={formData.expense_category_id}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white"
-                  >
-                    <option value="">Select Category</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name} {c.budget ? `(Budget: ₹${Number(c.budget).toLocaleString()})` : ''}
-                      </option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={[
+                      { value: '', label: 'Select Category' },
+                      ...categories.map((c) => ({
+                        value: String(c.id),
+                        label: `${c.name} ${c.budget ? `(Budget: ₹${Number(c.budget).toLocaleString()})` : ''}`
+                      }))
+                    ]}
+                    value={String(formData.expense_category_id)}
+                    onChange={(val) => handleChange({ target: { name: 'expense_category_id', value: val }})}
+                    placeholder="Select Category"
+                  />
                   {formErrors.expense_category_id && (
                     <p className="text-[10px] text-rose-500 mt-1">{formErrors.expense_category_id}</p>
                   )}
                 </div>
 
                 {/* Vendor / Payee */}
-                <div>
+                <div className="z-20">
                   <label className="block font-medium text-slate-700 mb-1">Vendor / Payee (Optional)</label>
-                  <select
-                    name="vendor_id"
-                    value={formData.vendor_id}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white"
-                  >
-                    <option value="">Select Vendor / External Entity</option>
-                    {vendors.map((v) => (
-                      <option key={v.id} value={v.id}>
-                        {v.name} ({v.company_name || 'Vendor'})
-                      </option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={[
+                      { value: '', label: 'Select Vendor / External Entity' },
+                      ...vendors.map((v) => ({
+                        value: String(v.id),
+                        label: `${v.name} (${v.company_name || 'Vendor'})`
+                      }))
+                    ]}
+                    value={String(formData.vendor_id)}
+                    onChange={(val) => handleChange({ target: { name: 'vendor_id', value: val }})}
+                    placeholder="Select Vendor / External Entity"
+                  />
                 </div>
               </div>
 
@@ -247,7 +246,7 @@ export const ExpenseCreate = () => {
             </Card>
 
             {/* Financial Calculations */}
-            <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
+            <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4 !overflow-visible">
               <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-teal-600" />
                 Line Item Financials & Authoritative Tax
@@ -272,21 +271,20 @@ export const ExpenseCreate = () => {
                 </div>
 
                 {/* Applicable Tax */}
-                <div>
+                <div className="z-10">
                   <label className="block font-medium text-slate-700 mb-1">Tax Code / Bracket</label>
-                  <select
-                    name="tax_id"
-                    value={formData.tax_id}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white"
-                  >
-                    <option value="">No Tax (0%)</option>
-                    {taxes.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name} ({t.rate}% - {t.type})
-                      </option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={[
+                      { value: '', label: 'No Tax (0%)' },
+                      ...taxes.map((t) => ({
+                        value: String(t.id),
+                        label: `${t.name} (${t.rate}% - ${t.type})`
+                      }))
+                    ]}
+                    value={String(formData.tax_id)}
+                    onChange={(val) => handleChange({ target: { name: 'tax_id', value: val }})}
+                    placeholder="No Tax (0%)"
+                  />
                 </div>
 
                 {/* Discount */}
@@ -329,57 +327,54 @@ export const ExpenseCreate = () => {
 
           {/* Payment Method & Destination Account */}
           <div className="space-y-6">
-            <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
+            <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4 !overflow-visible">
               <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-teal-600" />
                 Settlement & Ledger
               </h2>
 
               <div className="space-y-3 text-xs">
-                <div>
+                <div className="z-30">
                   <label className="block font-medium text-slate-700 mb-1">Initial Status</label>
-                  <select
-                    name="status"
+                  <SearchableSelect
+                    options={[
+                      { value: 'draft', label: 'Draft (Saved only)' },
+                      { value: 'submitted', label: 'Submitted (Awaiting Approval)' },
+                      { value: 'approved', label: 'Approved (Ready for Payment)' }
+                    ]}
                     value={formData.status}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white"
-                  >
-                    <option value="draft">Draft (Saved only)</option>
-                    <option value="submitted">Submitted (Awaiting Approval)</option>
-                    <option value="approved">Approved (Ready for Payment)</option>
-                  </select>
+                    onChange={(val) => handleChange({ target: { name: 'status', value: val }})}
+                    searchable={false}
+                  />
                 </div>
 
-                <div>
+                <div className="z-20">
                   <label className="block font-medium text-slate-700 mb-1">Disbursement Account / Vault</label>
-                  <select
-                    name="account_id"
-                    value={formData.account_id}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white"
-                  >
-                    {accounts.map((acc) => (
-                      <option key={acc.id} value={acc.id}>
-                        {acc.account_name} (₹{Number(acc.current_balance || 0).toLocaleString()})
-                      </option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    options={accounts.map((acc) => ({
+                      value: String(acc.id),
+                      label: `${acc.account_name} (₹${Number(acc.current_balance || 0).toLocaleString()})`
+                    }))}
+                    value={String(formData.account_id)}
+                    onChange={(val) => handleChange({ target: { name: 'account_id', value: val }})}
+                    placeholder="Select Account"
+                  />
                 </div>
 
-                <div>
+                <div className="z-10">
                   <label className="block font-medium text-slate-700 mb-1">Payment Method</label>
-                  <select
-                    name="payment_method"
+                  <SearchableSelect
+                    options={[
+                      { value: 'bank_transfer', label: 'Bank Transfer' },
+                      { value: 'cash', label: 'Cash in Hand' },
+                      { value: 'card', label: 'Corporate Card' },
+                      { value: 'upi', label: 'UPI / Instant Pay' },
+                      { value: 'cheque', label: 'Cheque' }
+                    ]}
                     value={formData.payment_method}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:border-teal-500 focus:bg-white"
-                  >
-                    <option value="bank_transfer">Bank Transfer</option>
-                    <option value="cash">Cash in Hand</option>
-                    <option value="card">Corporate Card</option>
-                    <option value="upi">UPI / Instant Pay</option>
-                    <option value="cheque">Cheque</option>
-                  </select>
+                    onChange={(val) => handleChange({ target: { name: 'payment_method', value: val }})}
+                    searchable={false}
+                  />
                 </div>
 
                 <div>

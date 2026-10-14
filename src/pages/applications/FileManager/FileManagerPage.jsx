@@ -43,13 +43,18 @@ export const FileManagerPage = () => {
   const [selectedFileForShare, setSelectedFileForShare] = useState(null);
   const [shareEmail, setShareEmail] = useState('');
 
+  // Rename state
+  const [selectedFileId, setSelectedFileId] = useState(null);
+  const [renamingFileId, setRenamingFileId] = useState(null);
+  const [renameValue, setRenameValue] = useState('');
+
   const fileInputRef = useRef(null);
 
   // Load files & folders
   const loadFiles = async (folderId = currentFolderId) => {
     try {
       setLoading(true);
-      const res = await fileService.getFiles({ folder_id: folderId });
+      const res = await fileService.getFiles({ folderId });
       if (res && res.data) {
         setFolders(res.data.folders || []);
         setFiles(res.data.files || []);
@@ -86,10 +91,7 @@ export const FileManagerPage = () => {
     e.preventDefault();
     if (!newFolderName.trim()) return;
     try {
-      await fileService.createFolder({
-        name: newFolderName,
-        parent_id: currentFolderId,
-      });
+      await fileService.createFolder(newFolderName, currentFolderId);
       setNewFolderName('');
       setIsFolderModalOpen(false);
       loadFiles(currentFolderId);
@@ -103,16 +105,11 @@ export const FileManagerPage = () => {
     const selectedFiles = e.target.files;
     if (!selectedFiles || selectedFiles.length === 0) return;
 
-    const formData = new FormData();
-    for (let i = 0; i < selectedFiles.length; i++) {
-      formData.append('files[]', selectedFiles[i]);
-    }
-    if (currentFolderId) {
-      formData.append('folder_id', currentFolderId);
-    }
-
     try {
-      await fileService.uploadFiles(formData);
+      const uploadPromises = Array.from(selectedFiles).map(file => 
+        fileService.uploadFile(file, currentFolderId)
+      );
+      await Promise.all(uploadPromises);
       loadFiles(currentFolderId);
     } catch (err) {
       console.error('Failed to upload file', err);
@@ -154,6 +151,21 @@ export const FileManagerPage = () => {
       alert('Document share link generated and sent.');
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  // Rename file
+  const handleRenameSubmit = async (file) => {
+    if (!renameValue.trim() || renameValue === file.name) {
+      setRenamingFileId(null);
+      return;
+    }
+    try {
+      await fileService.updateFile(file.id, { name: renameValue });
+      setRenamingFileId(null);
+      loadFiles(currentFolderId);
+    } catch (err) {
+      console.error('Failed to rename file', err);
     }
   };
 
@@ -379,7 +391,18 @@ export const FileManagerPage = () => {
                     {filteredFiles.map((file) => (
                       <div
                         key={file.id}
-                        className="p-4 rounded-xl border border-slate-200 hover:border-teal-500 hover:shadow-sm transition-all bg-white flex flex-col justify-between group relative"
+                        tabIndex={0}
+                        onClick={() => setSelectedFileId(file.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'F2' && selectedFileId === file.id) {
+                            e.preventDefault();
+                            setRenamingFileId(file.id);
+                            setRenameValue(file.name);
+                          }
+                        }}
+                        className={`p-4 rounded-xl border transition-all flex flex-col justify-between group relative outline-none cursor-pointer ${
+                          selectedFileId === file.id ? 'border-teal-500 shadow-md ring-2 ring-teal-500/20 bg-teal-50/10' : 'border-slate-200 hover:border-teal-500 hover:shadow-sm bg-white'
+                        }`}
                       >
                         <div className="flex items-start justify-between mb-3">
                           <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center">
@@ -404,9 +427,25 @@ export const FileManagerPage = () => {
                         </div>
 
                         <div>
-                          <h4 className="text-xs font-bold text-slate-800 truncate mb-1" title={file.name}>
-                            {file.name}
-                          </h4>
+                          {renamingFileId === file.id ? (
+                            <input
+                              autoFocus
+                              type="text"
+                              value={renameValue}
+                              onChange={(e) => setRenameValue(e.target.value)}
+                              onBlur={() => handleRenameSubmit(file)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleRenameSubmit(file);
+                                if (e.key === 'Escape') setRenamingFileId(null);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-full text-xs font-bold text-slate-800 mb-1 border border-teal-500 rounded px-1 outline-none bg-white"
+                            />
+                          ) : (
+                            <h4 className="text-xs font-bold text-slate-800 truncate mb-1" title={file.name}>
+                              {file.name}
+                            </h4>
+                          )}
                           <div className="flex items-center justify-between text-[10px] text-slate-400">
                             <span>{formatFileSize(file.size)}</span>
                             <span className="uppercase font-semibold">{file.extension}</span>
@@ -415,7 +454,7 @@ export const FileManagerPage = () => {
 
                         <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[10px]">
                           <span className="text-slate-400">
-                            {new Date(file.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                            {file.updatedAt?.split(' ')[0] + ' ' + file.updatedAt?.split(' ')[1] || 'Unknown'}
                           </span>
                           <a
                             href={file.file_path}
@@ -446,21 +485,45 @@ export const FileManagerPage = () => {
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {filteredFiles.map((file) => (
-                          <tr key={file.id} className="hover:bg-slate-50/70 transition-colors">
+                          <tr 
+                            key={file.id} 
+                            tabIndex={0}
+                            onClick={() => setSelectedFileId(file.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'F2' && selectedFileId === file.id) {
+                                e.preventDefault();
+                                setRenamingFileId(file.id);
+                                setRenameValue(file.name);
+                              }
+                            }}
+                            className={`transition-colors outline-none cursor-pointer ${selectedFileId === file.id ? 'bg-teal-50/50' : 'hover:bg-slate-50/70'}`}
+                          >
                             <td className="py-3 px-4 flex items-center gap-2.5">
                               <FileText className="w-4 h-4 text-teal-600 shrink-0" />
-                              <span className="font-semibold text-slate-800 truncate">{file.name}</span>
+                              {renamingFileId === file.id ? (
+                                <input
+                                  autoFocus
+                                  type="text"
+                                  value={renameValue}
+                                  onChange={(e) => setRenameValue(e.target.value)}
+                                  onBlur={() => handleRenameSubmit(file)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleRenameSubmit(file);
+                                    if (e.key === 'Escape') setRenamingFileId(null);
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="w-full font-semibold text-slate-800 border border-teal-500 rounded px-1 outline-none text-xs bg-white"
+                                />
+                              ) : (
+                                <span className="font-semibold text-slate-800 truncate">{file.name}</span>
+                              )}
                             </td>
                             <td className="py-3 px-4 uppercase font-semibold text-[10px] text-slate-400">
                               {file.extension}
                             </td>
                             <td className="py-3 px-4 font-mono text-[11px]">{formatFileSize(file.size)}</td>
                             <td className="py-3 px-4 text-slate-400">
-                              {new Date(file.created_at).toLocaleDateString([], {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })}
+                              {file.updatedAt || 'Unknown'}
                             </td>
                             <td className="py-3 px-4 text-right">
                               <div className="inline-flex items-center gap-2">

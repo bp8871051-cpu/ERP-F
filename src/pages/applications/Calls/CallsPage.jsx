@@ -24,6 +24,7 @@ import { useAuth } from '../../../context/AuthContext';
 export const CallsPage = () => {
   const { user } = useAuth();
   const [calls, setCalls] = useState([]);
+  const [contacts, setContacts] = useState([]);
   const [metrics, setMetrics] = useState({ total: 0, incoming: 0, outgoing: 0, missed: 0 });
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
@@ -32,7 +33,7 @@ export const CallsPage = () => {
   // Call modal states
   const [isDialModalOpen, setIsDialModalOpen] = useState(false);
   const [dialTarget, setDialTarget] = useState('');
-  const [callType, setCallType] = useState('audio'); // audio or video
+  const [callType, setCallType] = useState('voice'); // voice or video
   const [activeSession, setActiveSession] = useState(null); // active in-call simulator
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoDisabled, setIsVideoDisabled] = useState(false);
@@ -44,10 +45,13 @@ export const CallsPage = () => {
       setLoading(true);
       const res = await callService.getCalls();
       if (res && res.data) {
-        setCalls(res.data);
-      }
-      if (res && res.metrics) {
-        setMetrics(res.metrics);
+        setCalls(res.data.calls || []);
+        if (res.data.contacts) {
+          setContacts(res.data.contacts);
+        }
+        if (res.data.metrics) {
+          setMetrics(res.data.metrics);
+        }
       }
     } catch (err) {
       console.error('Failed to load calls', err);
@@ -163,7 +167,7 @@ export const CallsPage = () => {
             </div>
           </div>
           <div className="mt-3">
-            <span className="text-2xl font-bold text-slate-900">{metrics.total}</span>
+            <span className="text-2xl font-bold text-slate-900">{metrics.totalCalls ?? metrics.total ?? 0}</span>
             <span className="text-[11px] text-slate-400 block mt-0.5">Recorded sessions</span>
           </div>
         </div>
@@ -341,14 +345,14 @@ export const CallsPage = () => {
                       {/* Date & Time */}
                       <td className="py-3 px-4">
                         <span className="block text-slate-800">
-                          {new Date(call.created_at).toLocaleDateString([], {
+                          {new Date(call.created_at || call.date).toLocaleDateString([], {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric',
                           })}
                         </span>
                         <span className="text-[10px] text-slate-400">
-                          {new Date(call.created_at).toLocaleTimeString([], {
+                          {new Date(call.created_at || call.date).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
                           })}
@@ -475,10 +479,11 @@ export const CallsPage = () => {
                       required
                     >
                       <option value="">-- Choose contact --</option>
-                      <option value="2">Sarah Jenkins (HR Manager)</option>
-                      <option value="3">David Chen (Sales Lead)</option>
-                      <option value="4">Elena Rostova (Finance Director)</option>
-                      <option value="5">Marcus Brody (Operations)</option>
+                      {contacts.map((contact) => (
+                        <option key={contact.id} value={contact.id}>
+                          {contact.name} {contact.role ? `(${contact.role})` : ''}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -489,9 +494,9 @@ export const CallsPage = () => {
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         type="button"
-                        onClick={() => setCallType('audio')}
+                        onClick={() => setCallType('voice')}
                         className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all ${
-                          callType === 'audio'
+                          callType === 'voice'
                             ? 'border-teal-600 bg-teal-50 text-teal-700'
                             : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                         }`}

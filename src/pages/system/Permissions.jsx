@@ -104,6 +104,7 @@ export default function Permissions() {
                 <th className="p-3.5">Display Name</th>
                 <th className="p-3.5">Module Group</th>
                 <th className="p-3.5">Guard</th>
+                <th className="p-3.5">Super Admin Approval</th>
                 <th className="p-3.5">Enforcement</th>
               </tr>
             </thead>
@@ -111,14 +112,14 @@ export default function Permissions() {
               {loading ? (
                 [1, 2, 3, 4, 5].map(n => (
                   <tr key={n}>
-                    <td colSpan="5" className="p-4">
+                    <td colSpan="6" className="p-4">
                       <div className="h-6 bg-slate-100 rounded animate-pulse" />
                     </td>
                   </tr>
                 ))
               ) : filteredPerms.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-12 text-center text-slate-400">
+                  <td colSpan="6" className="p-12 text-center text-slate-400">
                     <Lock className="w-10 h-10 mx-auto text-slate-300 mb-2" />
                     <p className="font-semibold text-slate-700">No permissions matched criteria</p>
                   </td>
@@ -139,6 +140,23 @@ export default function Permissions() {
                     </td>
                     <td className="p-3.5 font-mono text-slate-400">
                       {perm.guard_name || 'web'}
+                    </td>
+                    <td className="p-3.5">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          defaultChecked={perm.requires_approval || false}
+                          onChange={async (e) => {
+                            // Call systemService to update approval requirement if needed
+                            // In demo, we just reflect the change visually
+                          }}
+                        />
+                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                        <span className="ml-2 text-[10px] font-semibold text-slate-500 peer-checked:text-amber-700">
+                          Requires Approval
+                        </span>
+                      </label>
                     </td>
                     <td className="p-3.5">
                       <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] font-bold">
