@@ -22,6 +22,7 @@ import {
   Receipt,
   ShoppingCart,
   Send,
+  Lock,
 } from 'lucide-react';
 import crmService from '../../../services/crmService';
 import Card from '../../../components/ui/Card';
@@ -227,28 +228,63 @@ export const ContactDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Contact Details Card */}
           <Card title="Contact Information" className="lg:col-span-2">
+            {contact.has_contact_access === false && (
+              <div className="mb-4 p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-amber-800 text-xs flex items-start gap-2.5">
+                <Lock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-bold">Contact Details Protected by Privacy Policy</div>
+                  <div className="text-[11px] text-amber-700 mt-0.5">
+                    This contact is unassigned or linked to a lead assigned to another employee. Full email and phone number are visible only to the assigned employee or a Super Admin.
+                  </div>
+                </div>
+              </div>
+            )}
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-xs">
               <div>
-                <dt className="text-slate-400 font-medium">Primary Email</dt>
+                <dt className="text-slate-400 font-medium flex items-center justify-between">
+                  <span>Primary Email</span>
+                  {contact.has_contact_access === false && (
+                    <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
+                      <Lock className="w-2.5 h-2.5" /> Protected
+                    </span>
+                  )}
+                </dt>
                 <dd className="font-semibold text-slate-800 flex items-center gap-1.5 mt-0.5">
                   <Mail className="w-3.5 h-3.5 text-teal-600" />
-                  {contact.email || '—'}
+                  <span className={contact.has_contact_access === false ? 'font-mono text-slate-500' : ''}>
+                    {contact.email || '—'}
+                  </span>
                 </dd>
               </div>
               <div>
                 <dt className="text-slate-400 font-medium">Secondary Email</dt>
-                <dd className="text-slate-700 mt-0.5">{contact.secondary_email || '—'}</dd>
+                <dd className="text-slate-700 mt-0.5">
+                  <span className={contact.has_contact_access === false ? 'font-mono text-slate-500' : ''}>
+                    {contact.secondary_email || '—'}
+                  </span>
+                </dd>
               </div>
               <div>
-                <dt className="text-slate-400 font-medium">Phone</dt>
+                <dt className="text-slate-400 font-medium flex items-center justify-between">
+                  <span>Phone</span>
+                  {contact.has_contact_access === false && (
+                    <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
+                      <Lock className="w-2.5 h-2.5" /> Protected
+                    </span>
+                  )}
+                </dt>
                 <dd className="font-semibold text-slate-800 flex items-center gap-1.5 mt-0.5">
                   <Phone className="w-3.5 h-3.5 text-teal-600" />
-                  {contact.phone || '—'}
+                  <span className={contact.has_contact_access === false ? 'font-mono text-slate-500' : ''}>
+                    {contact.phone || '—'}
+                  </span>
                 </dd>
               </div>
               <div>
                 <dt className="text-slate-400 font-medium">WhatsApp</dt>
-                <dd className="text-emerald-700 font-semibold mt-0.5">{contact.whatsapp || '—'}</dd>
+                <dd className={`mt-0.5 font-semibold ${contact.has_contact_access === false ? 'font-mono text-slate-500' : 'text-emerald-700'}`}>
+                  {contact.whatsapp || '—'}
+                </dd>
               </div>
               <div>
                 <dt className="text-slate-400 font-medium">Website</dt>

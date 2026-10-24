@@ -242,11 +242,23 @@ export const HrmDashboard = () => {
 
       {/* Row 2: Employee Distribution Donut + 6-Month Payroll Trend */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card title="Departmental Workforce Distribution" subtitle="Headcount by organizational division">
+        <Card
+          title="Departmental Workforce Distribution"
+          subtitle="Headcount by organizational division"
+          action={
+            <span className="text-xs font-semibold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200/60">
+              {employeeDistribution.length} Departments
+            </span>
+          }
+        >
           <DonutMetricChart
             data={employeeDistribution.map((d) => ({ name: d.name, value: d.count }))}
             nameKey="name"
             dataKey="value"
+            chartHeight={180}
+            innerRadius={50}
+            outerRadius={75}
+            legendMaxHeight="max-h-56"
           />
         </Card>
 

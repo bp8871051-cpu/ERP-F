@@ -19,6 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
   UserCheck,
+  Lock,
 } from 'lucide-react';
 import crmService from '../../../services/crmService';
 import Card from '../../../components/ui/Card';
@@ -393,7 +394,12 @@ export const ContactList = () => {
                           <td className="py-3 px-4">
                             <span className="flex items-center gap-1.5 text-slate-600 truncate max-w-[170px]">
                               <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                              {c.email || '—'}
+                              <span className={c.has_contact_access === false ? 'font-mono text-slate-400' : ''}>
+                                {c.email || '—'}
+                              </span>
+                              {c.has_contact_access === false && (
+                                <Lock className="w-2.5 h-2.5 text-amber-500 shrink-0" title="Contact info protected - Unassigned or assigned to another employee" />
+                              )}
                             </span>
                           </td>
                         )}
@@ -402,11 +408,17 @@ export const ContactList = () => {
                             <div className="flex flex-col text-[11px] text-slate-600">
                               {c.phone && (
                                 <span className="flex items-center gap-1">
-                                  <Phone className="w-3 h-3 text-slate-400 shrink-0" /> {c.phone}
+                                  <Phone className="w-3 h-3 text-slate-400 shrink-0" />
+                                  <span className={c.has_contact_access === false ? 'font-mono text-slate-400' : ''}>
+                                    {c.phone}
+                                  </span>
+                                  {c.has_contact_access === false && (
+                                    <Lock className="w-2.5 h-2.5 text-amber-500 shrink-0" title="Protected phone number" />
+                                  )}
                                 </span>
                               )}
                               {c.whatsapp && (
-                                <span className="text-emerald-600 text-[10px]">
+                                <span className={`text-[10px] ${c.has_contact_access === false ? 'font-mono text-slate-400' : 'text-emerald-600'}`}>
                                   WA: {c.whatsapp}
                                 </span>
                               )}

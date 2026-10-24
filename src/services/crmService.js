@@ -78,6 +78,14 @@ export const crmService = {
     });
     return response.data;
   },
+  assignLead: async (id, assigned_to) => {
+    const response = await api.post(`/v1/crm/leads/${id}/assign`, { assigned_to });
+    return response.data;
+  },
+  getAssignees: async () => {
+    const response = await api.get('/v1/crm/assignees');
+    return response.data;
+  },
   getLeadSources: async () => {
     const response = await api.get('/v1/crm/lead-sources');
     return response.data;

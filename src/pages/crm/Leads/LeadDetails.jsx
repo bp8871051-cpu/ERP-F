@@ -23,12 +23,16 @@ import {
   RefreshCw,
   CheckCircle2,
   XCircle,
+  Lock,
+  Shield,
 } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 import crmService from '../../../services/crmService';
 import Card from '../../../components/ui/Card';
 import Button from '../../../components/ui/Button';
 import Badge from '../../../components/ui/Badge';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import SearchableSelect from '../../../components/ui/SearchableSelect';
 import ErrorState from '../../../components/ui/ErrorState';
 import ActivityTimeline from '../Activities/ActivityTimeline';
 import {
@@ -44,9 +48,15 @@ import LeadConvertModal from './LeadConvertModal';
 export const LeadDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === 'Super Admin' || user?.is_super_admin === true;
+
   const [lead, setLead] = useState(null);
   const [timeline, setTimeline] = useState([]);
   const [scoreDetails, setScoreDetails] = useState(null);
+  const [assignees, setAssignees] = useState([]);
+  const [selectedAssignee, setSelectedAssignee] = useState(undefined);
+  const [assigning, setAssigning] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
@@ -63,6 +73,33 @@ export const LeadDetails = () => {
   useEffect(() => {
     fetchLead();
   }, [id]);
+
+  useEffect(() => {
+    if (isSuperAdmin) {
+      loadAssignees();
+    }
+  }, [isSuperAdmin]);
+
+  const loadAssignees = async () => {
+    try {
+      const res = await crmService.getAssignees();
+      setAssignees(res.data || []);
+    } catch (err) {
+      console.error('Failed to load assignees:', err);
+    }
+  };
+
+  const handleAssign = async (newAssigneeId) => {
+    try {
+      setAssigning(true);
+      await crmService.assignLead(id, newAssigneeId);
+      await fetchLead();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to reassign lead.');
+    } finally {
+      setAssigning(false);
+    }
+  };
 
   const fetchLead = async () => {
     try {
@@ -196,6 +233,16 @@ export const LeadDetails = () => {
                   <Tag className="w-3.5 h-3.5 text-slate-400" />
                   Source: {lead.lead_source?.name || 'Website Inbound'}
                 </span>
+                <span className="flex items-center gap-1 font-medium text-slate-700">
+                  <UserCheck className="w-3.5 h-3.5 text-teal-600" />
+                  Assigned: {lead.assigned_to ? (lead.assigned_user?.name || lead.owner?.name || 'Assigned') : 'Unassigned'}
+                </span>
+                {lead.has_contact_access === false && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                    <Lock className="w-3 h-3 text-amber-600" />
+                    Contact Protected
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -254,9 +301,9 @@ export const LeadDetails = () => {
             </span>
           </div>
           <div>
-            <span className="text-[10px] font-semibold text-slate-400 uppercase block">Owner</span>
+            <span className="text-[10px] font-semibold text-slate-400 uppercase block">Assigned Employee</span>
             <span className="text-xs font-semibold text-slate-700 block mt-1">
-              {lead.owner?.name || 'Unassigned'}
+              {lead.assigned_to ? (lead.assigned_user?.name || lead.owner?.name || 'Assigned') : 'Unassigned'}
             </span>
           </div>
         </div>
@@ -285,21 +332,115 @@ export const LeadDetails = () => {
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card title="Lead Information" className="lg:col-span-2">
+            {lead.has_contact_access === false && (
+              <div className="mb-4 p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-amber-800 text-xs flex items-start gap-2.5">
+                <Lock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-bold">Contact Details Protected by Privacy Policy</div>
+                  <div className="text-[11px] text-amber-700 mt-0.5">
+                    This lead is unassigned or assigned to another employee. Full email and phone number are visible only to the currently assigned employee or a Super Admin.
+                  </div>
+                </div>
+              </div>
+            )}
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-xs">
               <div>
-                <dt className="text-slate-400 font-medium">Email Address</dt>
+                <dt className="text-slate-400 font-medium flex items-center justify-between">
+                  <span>Email Address</span>
+                  {lead.has_contact_access === false && (
+                    <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
+                      <Lock className="w-2.5 h-2.5" /> Protected
+                    </span>
+                  )}
+                </dt>
                 <dd className="font-semibold text-slate-800 flex items-center gap-1.5 mt-0.5">
                   <Mail className="w-3.5 h-3.5 text-teal-600" />
-                  {lead.email || '—'}
+                  <span className={lead.has_contact_access === false ? 'font-mono text-slate-500' : ''}>
+                    {lead.email || '—'}
+                  </span>
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-400 font-medium">Phone</dt>
+                <dt className="text-slate-400 font-medium flex items-center justify-between">
+                  <span>Phone</span>
+                  {lead.has_contact_access === false && (
+                    <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
+                      <Lock className="w-2.5 h-2.5" /> Protected
+                    </span>
+                  )}
+                </dt>
                 <dd className="font-semibold text-slate-800 flex items-center gap-1.5 mt-0.5">
                   <Phone className="w-3.5 h-3.5 text-teal-600" />
-                  {lead.phone || '—'}
+                  <span className={lead.has_contact_access === false ? 'font-mono text-slate-500' : ''}>
+                    {lead.phone || '—'}
+                  </span>
                 </dd>
               </div>
+
+              {/* Super Admin Assignment Control Row */}
+              <div className="sm:col-span-2 pt-3 border-t border-slate-100">
+                <dt className="text-slate-400 font-medium mb-1 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-slate-700 font-bold">
+                    <UserCheck className="w-4 h-4 text-teal-600" />
+                    Lead Assignment {isSuperAdmin ? '(Super Admin Assignment Control)' : ''}
+                  </span>
+                  {isSuperAdmin && (
+                    <span className="text-[10px] font-bold text-amber-700 uppercase">
+                      Super Admin Only
+                    </span>
+                  )}
+                </dt>
+                {isSuperAdmin ? (
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 max-w-md mt-1">
+                    <div className="flex-1">
+                      <SearchableSelect
+                        options={[
+                          { value: '', label: '-- Assign Lead To --' },
+                          ...assignees.map((a) => ({
+                            value: String(a.id),
+                            label: `${a.name} (${typeof a.department === 'string' ? a.department : (a.department?.name || a.role)})`
+                          }))
+                        ]}
+                        value={selectedAssignee !== undefined ? String(selectedAssignee) : (lead.assigned_to ? String(lead.assigned_to) : '')}
+                        onChange={(val) => setSelectedAssignee(val)}
+                        placeholder="-- Assign Lead To --"
+                        searchPlaceholder="Search employee name..."
+                        disabled={assigning}
+                        menuClassName="w-72 shadow-2xl"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      disabled={assigning}
+                      onClick={() => {
+                        const val = selectedAssignee !== undefined ? selectedAssignee : (lead.assigned_to ? String(lead.assigned_to) : '');
+                        handleAssign(val ? Number(val) : null);
+                      }}
+                      className="px-3.5 py-2 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-lg text-xs shrink-0 flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-2xs disabled:opacity-50 whitespace-nowrap"
+                      title="Assign Lead"
+                    >
+                      {assigning ? (
+                        <RefreshCw className="w-3.5 h-3.5 text-white animate-spin shrink-0" />
+                      ) : (
+                        <>
+                          <UserCheck className="w-3.5 h-3.5 shrink-0" />
+                          <span>Assign Lead</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <dd className="font-semibold text-slate-800 mt-1 flex items-center gap-2">
+                    <span>{lead.assigned_to ? (lead.assigned_user?.name || lead.owner?.name || 'Assigned') : 'Unassigned'}</span>
+                    {lead.assigned_to === user?.id && (
+                      <span className="px-2 py-0.5 bg-teal-100 text-teal-800 rounded text-[10px] font-bold border border-teal-200">
+                        Assigned to You
+                      </span>
+                    )}
+                  </dd>
+                )}
+              </div>
+
               <div>
                 <dt className="text-slate-400 font-medium">Website</dt>
                 <dd className="text-teal-600 mt-0.5">

@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { X, Target, Building2, Mail, Phone, Tag, Calendar, DollarSign, Globe, Briefcase } from 'lucide-react';
+import { X, Target, Building2, Mail, Phone, Tag, Calendar, DollarSign, Globe, Briefcase, Lock, UserCheck } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 import crmService from '../../../services/crmService';
 import Button from '../../../components/ui/Button';
 import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const LeadModal = ({ isOpen, onClose, onSuccess, lead = null }) => {
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === 'Super Admin' || user?.is_super_admin === true;
+  const hasContactAccess = !lead || lead.has_contact_access !== false;
   const [formData, setFormData] = useState({
     name: '',
     company_name: '',
@@ -20,11 +24,13 @@ export const LeadModal = ({ isOpen, onClose, onSuccess, lead = null }) => {
     expected_value: '',
     expected_close_date: new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10),
     status: 'new',
+    assigned_to: '',
     notes: '',
   });
 
   const [leadSources, setLeadSources] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
+  const [assignees, setAssignees] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -46,6 +52,7 @@ export const LeadModal = ({ isOpen, onClose, onSuccess, lead = null }) => {
           expected_value: lead.expected_value || '',
           expected_close_date: lead.expected_close_date || '',
           status: lead.status || 'new',
+          assigned_to: lead.assigned_to || '',
           notes: lead.notes || '',
         });
       } else {
@@ -64,6 +71,7 @@ export const LeadModal = ({ isOpen, onClose, onSuccess, lead = null }) => {
           expected_value: '',
           expected_close_date: new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10),
           status: 'new',
+          assigned_to: '',
           notes: '',
         });
       }
@@ -72,13 +80,20 @@ export const LeadModal = ({ isOpen, onClose, onSuccess, lead = null }) => {
 
   const loadDependencies = async () => {
     try {
-      const [srcRes, campRes] = await Promise.all([
+      const calls = [
         crmService.getLeadSources(),
         crmService.getCampaigns({ per_page: 50 }),
-      ]);
+      ];
+      if (isSuperAdmin) {
+        calls.push(crmService.getAssignees());
+      }
+      const [srcRes, campRes, assigneesRes] = await Promise.all(calls);
       setLeadSources(srcRes.data || []);
       const campPayload = campRes.data?.data || campRes.data;
       setCampaigns(campPayload.data || campPayload || []);
+      if (assigneesRes) {
+        setAssignees(assigneesRes.data || []);
+      }
     } catch (err) {
       console.error('Error loading lead dependencies:', err);
     }
@@ -146,35 +161,100 @@ export const LeadModal = ({ isOpen, onClose, onSuccess, lead = null }) => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-semibold text-slate-700 block mb-1 flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-slate-400" />
-                Email Address
+              <label className="font-semibold text-slate-700 block mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-slate-400" />
+                  Email Address
+                </span>
+                {!hasContactAccess && (
+                  <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
+                    <Lock className="w-2.5 h-2.5" /> Protected
+                  </span>
+                )}
               </label>
               <input
                 type="email"
-                placeholder="vikram@infosys.com"
+                disabled={!hasContactAccess}
+                placeholder={hasContactAccess ? "vikram@infosys.com" : "Email masked by privacy policy"}
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
+                className={`w-full px-3 py-2 rounded-lg border ${
+                  !hasContactAccess ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' : 'border-slate-300 focus:ring-2 focus:ring-teal-500'
+                } focus:outline-hidden`}
               />
               <span className="text-[10px] text-slate-400 mt-0.5 block">
-                Corporate domain email earns +20 lead score.
+                {hasContactAccess
+                  ? 'Corporate domain email earns +20 lead score.'
+                  : 'Only assigned employee or Super Admin can view/edit unmasked email.'}
               </span>
             </div>
             <div>
-              <label className="font-semibold text-slate-700 block mb-1 flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5 text-slate-400" />
-                Phone Number
+              <label className="font-semibold text-slate-700 block mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-slate-400" />
+                  Phone Number
+                </span>
+                {!hasContactAccess && (
+                  <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
+                    <Lock className="w-2.5 h-2.5" /> Protected
+                  </span>
+                )}
               </label>
               <input
                 type="tel"
-                placeholder="+91 98210 54321"
+                disabled={!hasContactAccess}
+                placeholder={hasContactAccess ? "+91 98210 54321" : "Phone masked by privacy policy"}
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
+                className={`w-full px-3 py-2 rounded-lg border ${
+                  !hasContactAccess ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' : 'border-slate-300 focus:ring-2 focus:ring-teal-500'
+                } focus:outline-hidden`}
               />
+              <span className="text-[10px] text-slate-400 mt-0.5 block">
+                {!hasContactAccess && 'Contact privacy rule active.'}
+              </span>
             </div>
           </div>
+
+          {/* Super Admin Lead Assignment Control */}
+          {isSuperAdmin ? (
+            <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-200/70">
+              <label className="font-semibold text-slate-800 block mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <UserCheck className="w-3.5 h-3.5 text-amber-600" />
+                  Assign Lead To (Super Admin Only)
+                </span>
+                <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wide">
+                  Super Admin Only
+                </span>
+              </label>
+              <SearchableSelect
+                options={[
+                  { value: '', label: '-- Assign Lead To (Unassigned) --' },
+                  ...assignees.map((a) => ({
+                    value: String(a.id),
+                    label: `${a.name} (${typeof a.department === 'string' ? a.department : (a.department?.name || a.role)})`
+                  }))
+                ]}
+                value={String(formData.assigned_to || '')}
+                onChange={(val) => setFormData({ ...formData, assigned_to: val ? Number(val) : '' })}
+                placeholder="-- Assign Lead To --"
+              />
+              <span className="text-[10px] text-amber-700/80 mt-1 block">
+                Assigning this lead immediately grants the employee access to full contact details and revokes previous assignee access.
+              </span>
+            </div>
+          ) : lead ? (
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <span className="text-[11px] font-semibold text-slate-600 block">Lead Assignment:</span>
+              <span className="text-xs font-bold text-slate-800">
+                {lead.assigned_to ? (lead.assigned_user?.name || lead.owner?.name || 'Assigned') : 'Unassigned'}
+              </span>
+              <span className="text-[10px] text-slate-400 block mt-0.5">
+                Lead assignment can only be modified by Super Admin.
+              </span>
+            </div>
+          ) : null}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>

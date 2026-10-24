@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { X, Users, Building2, Mail, Phone, MapPin, Tag, Globe, Briefcase } from 'lucide-react';
+import { X, Users, Building2, Mail, Phone, MapPin, Tag, Globe, Briefcase, Lock } from 'lucide-react';
 import crmService from '../../../services/crmService';
 import salesService from '../../../services/salesService';
 import Button from '../../../components/ui/Button';
 import SearchableSelect from '../../../components/ui/SearchableSelect';
 
 export const ContactModal = ({ isOpen, onClose, onSuccess, contact = null }) => {
+  const hasContactAccess = !contact || contact.has_contact_access !== false;
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -264,54 +265,80 @@ export const ContactModal = ({ isOpen, onClose, onSuccess, contact = null }) => 
           {/* Section: Contact Details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-semibold text-slate-700 block mb-1 flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-slate-400" />
-                Primary Email *
+              <label className="font-semibold text-slate-700 block mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-slate-400" />
+                  Primary Email *
+                </span>
+                {!hasContactAccess && (
+                  <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
+                    <Lock className="w-2.5 h-2.5" /> Protected
+                  </span>
+                )}
               </label>
               <input
-                required
+                required={hasContactAccess}
+                disabled={!hasContactAccess}
                 type="email"
-                placeholder="rajesh@company.com"
+                placeholder={hasContactAccess ? "rajesh@company.com" : "Email masked by privacy policy"}
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
+                className={`w-full px-3 py-2 rounded-lg border ${
+                  !hasContactAccess ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' : 'border-slate-300 focus:ring-2 focus:ring-teal-500'
+                } focus:outline-hidden`}
               />
             </div>
             <div>
               <label className="font-semibold text-slate-700 block mb-1">Secondary Email</label>
               <input
+                disabled={!hasContactAccess}
                 type="email"
-                placeholder="alt.rajesh@gmail.com"
+                placeholder={hasContactAccess ? "alt.rajesh@gmail.com" : "Protected"}
                 value={formData.secondary_email}
                 onChange={(e) => setFormData({ ...formData, secondary_email: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
+                className={`w-full px-3 py-2 rounded-lg border ${
+                  !hasContactAccess ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' : 'border-slate-300 focus:ring-2 focus:ring-teal-500'
+                } focus:outline-hidden`}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="font-semibold text-slate-700 block mb-1 flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5 text-slate-400" />
-                Phone Number *
+              <label className="font-semibold text-slate-700 block mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-slate-400" />
+                  Phone Number *
+                </span>
+                {!hasContactAccess && (
+                  <span className="flex items-center gap-1 text-[10px] text-amber-600 font-medium">
+                    <Lock className="w-2.5 h-2.5" /> Protected
+                  </span>
+                )}
               </label>
               <input
-                required
+                required={hasContactAccess}
+                disabled={!hasContactAccess}
                 type="tel"
-                placeholder="+91 98200 12345"
+                placeholder={hasContactAccess ? "+91 98200 12345" : "Phone protected"}
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
+                className={`w-full px-3 py-2 rounded-lg border ${
+                  !hasContactAccess ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' : 'border-slate-300 focus:ring-2 focus:ring-teal-500'
+                } focus:outline-hidden`}
               />
             </div>
             <div>
               <label className="font-semibold text-slate-700 block mb-1">WhatsApp Number</label>
               <input
+                disabled={!hasContactAccess}
                 type="tel"
-                placeholder="+91 98200 12345"
+                placeholder={hasContactAccess ? "+91 98200 12345" : "Protected"}
                 value={formData.whatsapp}
                 onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-teal-500 focus:outline-hidden"
+                className={`w-full px-3 py-2 rounded-lg border ${
+                  !hasContactAccess ? 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200' : 'border-slate-300 focus:ring-2 focus:ring-teal-500'
+                } focus:outline-hidden`}
               />
             </div>
             <div>
