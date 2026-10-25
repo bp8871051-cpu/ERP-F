@@ -43,8 +43,19 @@ export const LoginPage = () => {
     try {
       setSubmitting(true);
       setAuthError(null);
-      await login(data.email, data.password);
-      navigate('/app/dashboard');
+      const authRes = await login(data.email, data.password);
+      const userRole = authRes?.user?.role;
+      if (userRole === 'Service Engineer') {
+        navigate('/app/service-engineer/dashboard');
+      } else if (userRole === 'Store Executive') {
+        navigate('/app/store-executive/dashboard');
+      } else if (userRole === 'Quality Control') {
+        navigate('/app/quality-control/dashboard');
+      } else if (userRole === 'Project Engineer') {
+        navigate('/app/project-engineer/dashboard');
+      } else {
+        navigate('/app/dashboard');
+      }
     } catch (err) {
       console.error('Login error:', err);
       if (!err.response || err.code === 'ERR_NETWORK') {
@@ -64,6 +75,10 @@ export const LoginPage = () => {
 
   const demoAccounts = [
     { role: 'Super Admin', email: 'admin@falconerp.com' },
+    { role: 'Service Engineer', email: 'service@falconerp.com' },
+    { role: 'Store Executive', email: 'store@falconerp.com' },
+    { role: 'Quality Control', email: 'qc@falconerp.com' },
+    { role: 'Project Engineer', email: 'projecteng@falconerp.com' },
     { role: 'HR Manager', email: 'hr@falconerp.com' },
     { role: 'Inventory Mgr', email: 'inventory@falconerp.com' },
     { role: 'CRM Manager', email: 'crm@falconerp.com' },

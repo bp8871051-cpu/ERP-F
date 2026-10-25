@@ -11,7 +11,8 @@ import { Link } from 'react-router-dom';
 const PERMISSION_GROUPS = [
   'Dashboard', 'CRM', 'Sales', 'Purchase', 'Inventory', 
   'POS', 'Finance', 'HRM', 'Assets', 'Documents', 
-  'Support', 'Membership', 'Reports', 'System', 'Settings'
+  'Support', 'Membership', 'Reports', 'System', 'Settings',
+  'Service', 'Store', 'QC', 'Projects'
 ];
 
 const PERMISSION_ACTIONS = [

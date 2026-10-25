@@ -18,6 +18,12 @@ import FinanceDashboard from '../pages/finance/FinanceDashboard';
 import ProjectDashboard from '../pages/projects/ProjectDashboard';
 import SupportDashboard from '../pages/support/SupportDashboard';
 
+// Enterprise Role-Specific Dashboards
+import ServiceEngineerDashboard from '../pages/dashboards/ServiceEngineerDashboard';
+import StoreExecutiveDashboard from '../pages/dashboards/StoreExecutiveDashboard';
+import QualityControlDashboard from '../pages/dashboards/QualityControlDashboard';
+import ProjectEngineerDashboard from '../pages/dashboards/ProjectEngineerDashboard';
+
 // Enterprise Support Management Module Pages
 import ContactMessages from '../pages/support/ContactMessages';
 import Tickets from '../pages/support/Tickets';
@@ -247,6 +253,24 @@ const PermissionRoute = ({ permission, children }) => {
   return children;
 };
 
+// Role-Aware Dashboard Dispatcher
+const DashboardDispatcher = () => {
+  const { user } = useAuth();
+  if (user?.role === 'Service Engineer') {
+    return <Navigate to="/app/service-engineer/dashboard" replace />;
+  }
+  if (user?.role === 'Store Executive') {
+    return <Navigate to="/app/store-executive/dashboard" replace />;
+  }
+  if (user?.role === 'Quality Control') {
+    return <Navigate to="/app/quality-control/dashboard" replace />;
+  }
+  if (user?.role === 'Project Engineer') {
+    return <Navigate to="/app/project-engineer/dashboard" replace />;
+  }
+  return <MainDashboard />;
+};
+
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -406,7 +430,11 @@ export const AppRoutes = () => {
         }
       >
         <Route index element={<Navigate to="/app/dashboard" replace />} />
-        <Route path="dashboard" element={<MainDashboard />} />
+        <Route path="dashboard" element={<DashboardDispatcher />} />
+        <Route path="service-engineer/dashboard" element={<PermissionRoute permission="service.view"><ServiceEngineerDashboard /></PermissionRoute>} />
+        <Route path="store-executive/dashboard" element={<PermissionRoute permission="store.view"><StoreExecutiveDashboard /></PermissionRoute>} />
+        <Route path="quality-control/dashboard" element={<PermissionRoute permission="qc.view"><QualityControlDashboard /></PermissionRoute>} />
+        <Route path="project-engineer/dashboard" element={<PermissionRoute permission="projects.view"><ProjectEngineerDashboard /></PermissionRoute>} />
 
         {/* =========================================
             HRM / HUMAN RESOURCE MANAGEMENT ROUTES

@@ -279,7 +279,26 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     });
   };
 
+  const getRoleDashboardPath = () => {
+    switch (user?.role) {
+      case 'Service Engineer':
+        return '/app/service-engineer/dashboard';
+      case 'Store Executive':
+        return '/app/store-executive/dashboard';
+      case 'Quality Control':
+        return '/app/quality-control/dashboard';
+      case 'Project Engineer':
+        return '/app/project-engineer/dashboard';
+      default:
+        return '/app/dashboard';
+    }
+  };
+
   const rawDashboardItems = [
+    { name: 'Service Engineer Dashboard', path: '/app/service-engineer/dashboard', icon: Wrench, perm: 'service.view' },
+    { name: 'Store Executive Dashboard', path: '/app/store-executive/dashboard', icon: Boxes, perm: 'store.view' },
+    { name: 'Quality Control Dashboard', path: '/app/quality-control/dashboard', icon: ShieldCheck, perm: 'qc.view' },
+    { name: 'Project Engineer Dashboard', path: '/app/project-engineer/dashboard', icon: FolderKanban, perm: 'projects.view' },
     { name: 'HRM Dashboard', path: '/app/hrm', icon: Users, perm: 'hrm.view' },
     { name: 'Inventory Dashboard', path: '/app/inventory', icon: Boxes, perm: 'inventory.view' },
     { name: 'CRM Dashboard', path: '/app/crm', icon: Briefcase, perm: 'crm.view' },
@@ -431,7 +450,8 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     { name: 'Integrations', path: '/app/system/settings/integrations', icon: Puzzle },
   ];
 
-  const isAnyDashboardActive = dashboardItems.some((item) => location.pathname === item.path);
+  const isAnyDashboardActive = dashboardItems.some((item) => location.pathname === item.path) ||
+    ['/app/service-engineer/dashboard', '/app/store-executive/dashboard', '/app/quality-control/dashboard', '/app/project-engineer/dashboard'].includes(location.pathname);
   const isAnyAppActive = applicationItems.some((item) => location.pathname.startsWith(item.path));
   const isAnyLayoutActive = location.pathname.startsWith('/app/layouts');
   const isAnyStockActive = [
@@ -531,7 +551,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       <div className="flex flex-col h-full bg-[#1E293B] text-slate-300 select-none overflow-hidden">
         {/* Brand Header */}
         <div className="h-16 flex items-center justify-between px-3.5 border-b border-slate-700/60 shrink-0">
-          <NavLink to="/app/dashboard" className="flex items-center gap-3">
+          <NavLink to={getRoleDashboardPath()} className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0">
               F
             </div>
@@ -574,18 +594,18 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
             {/* ERP Overview Link */}
             <NavLink
-              to="/app/dashboard"
-              title={!showText ? 'ERP Overview' : ''}
+              to={getRoleDashboardPath()}
+              title={!showText ? (user?.role && user.role !== 'Super Admin' ? `${user.role} Dashboard` : 'ERP Overview') : ''}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                  isActive
+                  isActive || location.pathname === getRoleDashboardPath()
                     ? 'bg-teal-600 text-white font-semibold shadow-xs'
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 } ${!showText ? 'justify-center' : ''}`
               }
             >
               <LayoutDashboard className={`w-4 h-4 shrink-0 ${!showText ? 'text-teal-400' : ''}`} />
-              {showText && <span className="truncate">ERP Overview</span>}
+              {showText && <span className="truncate">{user?.role && user.role !== 'Super Admin' ? `${user.role} Dashboard` : 'ERP Overview'}</span>}
             </NavLink>
 
             {/* 1. Dashboard Submenu Trigger */}
