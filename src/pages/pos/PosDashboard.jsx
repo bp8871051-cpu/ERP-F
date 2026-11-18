@@ -235,10 +235,11 @@ export const PosDashboard = () => {
             <div className="h-64">
               <TrendAreaChart
                 data={hourlySales}
-                dataKey="sales"
-                xAxisKey="hour"
-                color="#0F8B7A"
-                tooltipFormatter={(val) => [`₹${Number(val).toLocaleString()}`, 'Sales']}
+                dataKeyX="hour"
+                series={[
+                  { key: 'sales', name: 'Sales', color: '#0F8B7A' },
+                ]}
+                formatY={(val) => `₹${val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val}`}
               />
             </div>
           </Card>
@@ -253,10 +254,11 @@ export const PosDashboard = () => {
             <div className="h-64">
               <BarMetricChart
                 data={dailySales}
-                dataKey="sales"
-                xAxisKey="day"
-                color="#2563EB"
-                tooltipFormatter={(val) => [`₹${Number(val).toLocaleString()}`, 'Turnover']}
+                dataKeyX="day"
+                bars={[
+                  { key: 'sales', name: 'Turnover', color: '#2563EB' },
+                ]}
+                formatY={(val) => `₹${val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val}`}
               />
             </div>
           </Card>
@@ -292,10 +294,11 @@ export const PosDashboard = () => {
             <div className="h-64">
               <BarMetricChart
                 data={categorySales}
-                dataKey="amount"
-                xAxisKey="category"
-                color="#8B5CF6"
-                tooltipFormatter={(val) => [`₹${Number(val).toLocaleString()}`, 'Gross Volume']}
+                dataKeyX="category"
+                bars={[
+                  { key: 'amount', name: 'Gross Volume', color: '#8B5CF6' },
+                ]}
+                formatY={(val) => `₹${val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val}`}
               />
             </div>
           </Card>
@@ -310,10 +313,11 @@ export const PosDashboard = () => {
             <div className="h-64">
               <TrendAreaChart
                 data={refundTrend}
-                dataKey="amount"
-                xAxisKey="day"
-                color="#EF4444"
-                tooltipFormatter={(val) => [`₹${Number(val).toLocaleString()}`, 'Refunds']}
+                dataKeyX="day"
+                series={[
+                  { key: 'amount', name: 'Refunds', color: '#EF4444' },
+                ]}
+                formatY={(val) => `₹${val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val}`}
               />
             </div>
           </Card>
