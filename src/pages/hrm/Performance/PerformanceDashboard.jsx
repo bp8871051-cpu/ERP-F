@@ -45,7 +45,7 @@ export const PerformanceDashboard = () => {
       setError(null);
       const [perfRes, empRes] = await Promise.all([
         hrmService.getPerformance(),
-        hrmService.getEmployees(),
+        hrmService.getEmployees({ all: true }),
       ]);
       const pData = Array.isArray(perfRes) ? perfRes : (perfRes?.data?.data || perfRes?.data || []);
       setPerformanceData(Array.isArray(pData) ? pData : []);

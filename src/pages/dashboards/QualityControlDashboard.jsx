@@ -1621,96 +1621,102 @@ export default function QualityControlDashboard() {
         )}
       </AnimatePresence>
 
-      {/* MODAL 4: CREATE NCR / DEFECT */}
+      {/* MODAL 4: RAISE NCR - Clean, Responsive & Enterprise Standard */}
       <AnimatePresence>
         {modalType === 'ncr' && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-slate-850 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800"
+              className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200/80 overflow-hidden my-6"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 mb-4">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <AlertOctagon className="w-5 h-5 text-rose-600" />
-                  Raise Non-Conformance Report (NCR)
-                </h3>
+              <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+                    <AlertOctagon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Raise Non-Conformance Report (NCR)</h3>
+                    <p className="text-xs text-slate-500">Record quality defect, quarantine non-compliant lots, and initiate CAPA</p>
+                  </div>
+                </div>
                 <button
                   onClick={() => setModalType(null)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateNcr} className="space-y-3.5 text-xs">
+              <form onSubmit={handleCreateNcr} className="p-5 sm:p-6 space-y-4 text-xs">
                 <div>
-                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    Defect Title / Summary
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Defect Title / Summary <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Dimensions out of tolerance, surface oxidation"
+                    placeholder="e.g. Dimensions out of tolerance, surface oxidation on batch #84"
                     value={ncrForm.title}
                     onChange={(e) => setNcrForm({ ...ncrForm, title: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                    className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium text-slate-900"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Related Product
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Related Product <span className="text-rose-500">*</span>
                     </label>
                     <select
                       value={ncrForm.product_id}
                       onChange={(e) => setNcrForm({ ...ncrForm, product_id: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                      required
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none bg-white text-slate-800"
                     >
-                      <option value="">Select product</option>
+                      <option value="">Select product...</option>
                       {lookups.products?.map((p) => (
                         <option key={p.id} value={p.id}>
-                          {p.name} ({p.sku})
+                          {p.name} {p.sku ? `(SKU: ${p.sku})` : ''}
                         </option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Severity Level
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Severity Level <span className="text-rose-500">*</span>
                     </label>
                     <select
                       value={ncrForm.severity}
                       onChange={(e) => setNcrForm({ ...ncrForm, severity: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-semibold"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none bg-white text-slate-800 font-semibold"
                     >
                       <option value="minor">Minor (Rework possible)</option>
                       <option value="major">Major (Performance impacted)</option>
-                      <option value="critical">Critical (Safety / Scrap)</option>
+                      <option value="critical">Critical (Immediate Quarantine / Scrap)</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    Defect Description & Root Cause
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Defect Description & Root Cause <span className="text-rose-500">*</span>
                   </label>
                   <textarea
                     rows={2}
                     required
                     value={ncrForm.description}
                     onChange={(e) => setNcrForm({ ...ncrForm, description: e.target.value })}
-                    placeholder="Describe specific failure mode..."
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                    placeholder="Describe specific failure mode, observed measurements, visual defects..."
+                    className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none text-slate-800 resize-none"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Proposed Corrective Action (CAPA)
                     </label>
                     <input
@@ -1718,36 +1724,37 @@ export default function QualityControlDashboard() {
                       value={ncrForm.corrective_action}
                       onChange={(e) => setNcrForm({ ...ncrForm, corrective_action: e.target.value })}
                       placeholder="e.g. Supplier recalibration / Vendor return"
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none text-slate-800"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Action Due Date
                     </label>
                     <input
                       type="date"
                       value={ncrForm.action_due_date}
                       onChange={(e) => setNcrForm({ ...ncrForm, action_due_date: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none text-slate-800"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setModalType(null)}
-                    className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                    className="w-full sm:w-auto px-4 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 font-semibold transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-4 py-2 rounded-lg bg-rose-600 text-white font-semibold hover:bg-rose-700"
+                    className="w-full sm:w-auto px-5 py-2.5 bg-rose-600 text-white font-semibold rounded-xl hover:bg-rose-700 shadow-xs transition flex items-center justify-center gap-1.5 disabled:opacity-50"
                   >
+                    <AlertOctagon className="w-4 h-4" />
                     {submitting ? 'Logging...' : 'Submit NCR'}
                   </button>
                 </div>

@@ -60,9 +60,10 @@ export const AttendanceDashboard = () => {
           date: dateFilter || undefined,
           status: statusFilter || undefined,
         }),
-        hrmService.getEmployees(),
+        hrmService.getEmployees({ all: true }),
       ]);
-      setAttendances(attRes || []);
+      const rawAtt = Array.isArray(attRes) ? attRes : (Array.isArray(attRes?.data) ? attRes.data : []);
+      setAttendances(rawAtt);
       setEmployees(empRes || []);
       if (empRes && empRes.length > 0 && !formData.employee_id) {
         setFormData((prev) => ({ ...prev, employee_id: empRes[0].id }));
@@ -123,7 +124,8 @@ export const AttendanceDashboard = () => {
     }
   };
 
-  const filteredAttendances = attendances.filter((att) => {
+  const safeAttendances = Array.isArray(attendances) ? attendances : [];
+  const filteredAttendances = safeAttendances.filter((att) => {
     const q = searchTerm.toLowerCase();
     const name = `${att.employee?.first_name || ''} ${att.employee?.last_name || ''}`.toLowerCase();
     const code = att.employee?.employee_code?.toLowerCase() || '';

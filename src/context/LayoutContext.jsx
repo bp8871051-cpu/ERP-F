@@ -7,7 +7,7 @@ const LayoutContext = createContext(null);
 const DEFAULT_PREFERENCES = {
   sidebar_mode: 'default',       // 'default', 'mini', 'hover', 'hidden'
   menu_behavior: 'click',        // 'click', 'hover'
-  content_width: 'default',      // 'default', 'full'
+  content_width: 'full',         // 'full', 'boxed'
   direction: 'ltr',              // 'ltr', 'rtl'
   sidebar_visibility: 'visible', // 'visible', 'hidden'
   sidebar_state: 'expanded',     // 'expanded', 'collapsed'

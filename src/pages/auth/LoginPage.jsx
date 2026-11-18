@@ -53,6 +53,10 @@ export const LoginPage = () => {
         navigate('/app/quality-control/dashboard');
       } else if (userRole === 'Project Engineer') {
         navigate('/app/project-engineer/dashboard');
+      } else if (userRole === 'Document Manager') {
+        navigate('/app/documents');
+      } else if (userRole === 'Licensing Manager') {
+        navigate('/app/licensing-manager/dashboard');
       } else {
         navigate('/app/dashboard');
       }
@@ -74,16 +78,19 @@ export const LoginPage = () => {
   };
 
   const demoAccounts = [
-    { role: 'Super Admin', email: 'admin@falconerp.com' },
+    { role: 'Field Sales', email: 'fieldsales@falconerp.com' },
+    { role: 'HR Manager', email: 'hr@falconerp.com' },
+    { role: 'Purchase Manager', email: 'purchase@falconerp.com' },
     { role: 'Service Engineer', email: 'service@falconerp.com' },
     { role: 'Store Executive', email: 'store@falconerp.com' },
-    { role: 'Quality Control', email: 'qc@falconerp.com' },
-    { role: 'Project Engineer', email: 'projecteng@falconerp.com' },
-    { role: 'HR Manager', email: 'hr@falconerp.com' },
-    { role: 'Inventory Mgr', email: 'inventory@falconerp.com' },
-    { role: 'CRM Manager', email: 'crm@falconerp.com' },
-    { role: 'Finance Mgr', email: 'finance@falconerp.com' },
+    { role: 'Licensing Manager', email: 'licensing@falconerp.com' },
+    { role: 'Tally Sales', email: 'tallysales@falconerp.com' },
     { role: 'Sales Manager', email: 'sales@falconerp.com' },
+    { role: 'Quantity Surveyor', email: 'qs@falconerp.com' },
+    { role: 'Counter Engineer', email: 'counter@falconerp.com' },
+    { role: 'Super Admin', email: 'admin@falconerp.com' },
+    { role: 'Project Engineer', email: 'projecteng@falconerp.com' },
+    { role: 'Project Manager', email: 'projectmgr@falconerp.com' },
   ];
 
   return (

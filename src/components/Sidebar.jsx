@@ -20,19 +20,19 @@ import {
   ExternalLink,
   Layers,
   MessageSquare,
-  PhoneCall,
   Calendar as CalendarIcon,
-  Mail,
   FolderClosed,
   FileText,
+  FileCheck2,
+  XCircle,
+  Archive,
+  History,
+  UploadCloud,
+  Settings,
+  FolderOpen,
   CheckSquare,
   GitPullRequest,
   Sliders,
-  Minimize2,
-  Maximize2,
-  MousePointer,
-  EyeOff,
-  MoveLeft,
   Check,
   Award,
   Scale,
@@ -56,6 +56,7 @@ import {
   Percent,
   GraduationCap,
   UserCheck,
+  UserX,
   UserPlus,
   Gift,
   CreditCard,
@@ -69,9 +70,13 @@ import {
   Ticket,
   Puzzle,
   Lock,
+  Key,
   Bell,
   Shield,
   Clock,
+  CopyCheck,
+  MapPin,
+  Database,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLayout } from '../context/LayoutContext';
@@ -93,17 +98,12 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     setIsHiddenMenuOpen,
     isMobileOpen,
     setIsMobileOpen,
-    applyPreset,
   } = useLayout();
 
   // Accordion state
   const [isDashboardOpen, setIsDashboardOpen] = useState(true);
   const [isAppsOpen, setIsAppsOpen] = useState(() => {
     const saved = localStorage.getItem('erp_apps_open');
-    return saved !== null ? JSON.parse(saved) : true;
-  });
-  const [isLayoutsOpen, setIsLayoutsOpen] = useState(() => {
-    const saved = localStorage.getItem('erp_layouts_open');
     return saved !== null ? JSON.parse(saved) : true;
   });
   const [isStockOpen, setIsStockOpen] = useState(() => {
@@ -231,14 +231,6 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     });
   };
 
-  const toggleLayoutsOpen = () => {
-    setIsLayoutsOpen((prev) => {
-      const next = !prev;
-      localStorage.setItem('erp_layouts_open', JSON.stringify(next));
-      return next;
-    });
-  };
-
   const toggleStockOpen = () => {
     setIsStockOpen((prev) => {
       const next = !prev;
@@ -289,6 +281,8 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         return '/app/quality-control/dashboard';
       case 'Project Engineer':
         return '/app/project-engineer/dashboard';
+      case 'Document Manager':
+        return '/app/documents';
       default:
         return '/app/dashboard';
     }
@@ -299,6 +293,8 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     { name: 'Store Executive Dashboard', path: '/app/store-executive/dashboard', icon: Boxes, perm: 'store.view' },
     { name: 'Quality Control Dashboard', path: '/app/quality-control/dashboard', icon: ShieldCheck, perm: 'qc.view' },
     { name: 'Project Engineer Dashboard', path: '/app/project-engineer/dashboard', icon: FolderKanban, perm: 'projects.view' },
+    { name: 'Licensing Manager Dashboard', path: '/app/licensing-manager/dashboard', icon: Key },
+    { name: 'Document Dashboard', path: '/app/documents', icon: FolderClosed, perm: 'documents.view' },
     { name: 'HRM Dashboard', path: '/app/hrm', icon: Users, perm: 'hrm.view' },
     { name: 'Inventory Dashboard', path: '/app/inventory', icon: Boxes, perm: 'inventory.view' },
     { name: 'CRM Dashboard', path: '/app/crm', icon: Briefcase, perm: 'crm.view' },
@@ -313,21 +309,11 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
   const applicationItems = [
     { name: 'Chat', path: '/app/applications/chat', icon: MessageSquare },
-    { name: 'Calls', path: '/app/applications/calls', icon: PhoneCall, hasSub: true },
     { name: 'Calendar', path: '/app/applications/calendar', icon: CalendarIcon },
-    { name: 'Email', path: '/app/applications/email', icon: Mail },
-    { name: 'File Manager', path: '/app/applications/files', icon: FolderClosed },
-    { name: 'Notes', path: '/app/applications/notes', icon: FileText },
     { name: 'To Do', path: '/app/applications/todo', icon: CheckSquare },
-    { name: 'Workflow & Approvals', path: '/app/applications/workflows', icon: GitPullRequest },
-  ];
-
-  const layoutItems = [
-    { name: 'Mini Sidebar', path: '/app/layouts/mini-sidebar', icon: Minimize2, key: 'mini', activeCheck: sidebarMode === 'mini' },
-    { name: 'Hover View', path: '/app/layouts/hover-view', icon: MousePointer, key: 'hover', activeCheck: sidebarMode === 'hover' },
-    { name: 'Hidden Menu', path: '/app/layouts/hidden-menu', icon: EyeOff, key: 'hidden', activeCheck: sidebarMode === 'hidden' },
-    { name: 'Full Width', path: '/app/layouts/full-width', icon: Maximize2, key: 'full-width', activeCheck: contentWidth === 'full' },
-    { name: 'RTL', path: '/app/layouts/rtl', icon: MoveLeft, key: 'rtl', activeCheck: direction === 'rtl' },
+    { name: 'Leave Application', path: '/app/hrm/leave', icon: CalendarIcon },
+    { name: 'Unavailable Users', path: '/app/hrm/unavailable-users', icon: UserX },
+    { name: 'Advance Management', path: '/app/finance/advances', icon: DollarSign },
   ];
 
   const inventoryItems = [
@@ -362,6 +348,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const crmItems = [
     { name: 'Contacts', path: '/app/crm/contacts', icon: Users },
     { name: 'Leads', path: '/app/crm/leads', icon: UserPlus },
+    { name: 'Duplicate Leads', path: '/app/crm/duplicate-leads', icon: CopyCheck },
     { name: 'Deals', path: '/app/crm/deals', icon: Briefcase },
     { name: 'Pipeline', path: '/app/crm/pipeline', icon: FolderKanban },
     { name: 'Campaigns', path: '/app/crm/campaigns', icon: Tag },
@@ -380,6 +367,8 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const financeItems = [
     { name: 'Finance Dashboard', path: '/app/finance', icon: DollarSign, end: true },
     { name: 'Expenses', path: '/app/finance/expenses', icon: Receipt },
+    { name: 'Site Expenses', path: '/app/finance/site-expenses', icon: MapPin },
+    { name: 'Advance Management', path: '/app/finance/advances', icon: DollarSign },
     { name: 'Expense Category', path: '/app/finance/expense-categories', icon: Layers },
     { name: 'Payments', path: '/app/finance/payments', icon: CreditCard },
     { name: 'Cashflow', path: '/app/finance/cashflow', icon: Wallet },
@@ -394,7 +383,8 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     { name: 'Departments', path: '/app/hrm/departments', icon: Building2 },
     { name: 'Designations / Roles', path: '/app/hrm/designations', icon: Briefcase },
     { name: 'Attendance', path: '/app/hrm/attendance', icon: UserCheck },
-    { name: 'Leave', path: '/app/hrm/leave', icon: CalendarIcon },
+    { name: 'Leave Management', path: '/app/hrm/leave', icon: CalendarIcon },
+    { name: 'Unavailable Users', path: '/app/hrm/unavailable-users', icon: UserX },
     { name: 'Holidays', path: '/app/hrm/holidays', icon: Gift },
     { name: 'Payroll', path: '/app/hrm/payroll', icon: Banknote },
     { name: 'Recruitment', path: '/app/hrm/recruitment', icon: UserPlus },
@@ -417,7 +407,9 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     { name: 'Asset Analytics', path: '/app/assets/analytics', icon: BarChart3 },
   ];
 
+
   const documentItems = [
+    { name: 'Document Dashboard', path: '/app/documents', icon: Layers, end: true },
     { name: 'Document Repository', path: '/app/documents/repository', icon: FolderClosed },
     { name: 'Policies & Manuals', path: '/app/documents/policies', icon: BookOpen },
     { name: 'Compliance Docs', path: '/app/documents/compliance', icon: Scale },
@@ -441,6 +433,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     { name: 'User Management', path: '/app/system/users', icon: Users },
     { name: 'Roles & Permissions', path: '/app/system/roles', icon: Shield },
     { name: 'Delete Requests', path: '/app/system/delete-requests', icon: Trash2 },
+    { name: 'Software Backups', path: '/app/system/backups', icon: Database },
   ];
 
   const settingsSubItems = [
@@ -453,7 +446,6 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const isAnyDashboardActive = dashboardItems.some((item) => location.pathname === item.path) ||
     ['/app/service-engineer/dashboard', '/app/store-executive/dashboard', '/app/quality-control/dashboard', '/app/project-engineer/dashboard'].includes(location.pathname);
   const isAnyAppActive = applicationItems.some((item) => location.pathname.startsWith(item.path));
-  const isAnyLayoutActive = location.pathname.startsWith('/app/layouts');
   const isAnyStockActive = [
     '/app/inventory/stock/manage',
     '/app/inventory/stock/adjustment',
@@ -476,9 +468,6 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   useEffect(() => {
     if (isAnyAppActive && !isAppsOpen) {
       setIsAppsOpen(true);
-    }
-    if (isAnyLayoutActive && !isLayoutsOpen) {
-      setIsLayoutsOpen(true);
     }
     if (isAnyStockActive && !isStockOpen) {
       setIsStockOpen(true);
@@ -522,7 +511,6 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   }, [
     location.pathname,
     isAnyAppActive,
-    isAnyLayoutActive,
     isAnyStockActive,
     isAnySalesActive,
     isAnyCrmActive,
@@ -717,85 +705,6 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                         </div>
                         {item.hasSub && (
                           <ChevronRight className={`w-3 h-3 shrink-0 ${isActive ? 'text-teal-100' : 'text-slate-500'}`} />
-                        )}
-                      </NavLink>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* 3. Layouts Submenu Trigger */}
-            <button
-              onClick={toggleLayoutsOpen}
-              title={!showText ? 'Layouts' : ''}
-              className={`w-full flex items-center justify-between px-2.5 py-2 mt-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                isAnyLayoutActive
-                  ? 'text-white bg-slate-800/80 font-semibold'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-              } ${!showText ? 'justify-center' : ''}`}
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <Sliders className={`w-4 h-4 shrink-0 ${isAnyLayoutActive ? 'text-teal-400' : 'text-slate-400'}`} />
-                {showText && <span className="truncate">Layouts</span>}
-              </div>
-              {showText && (
-                <ChevronDown
-                  className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${
-                    isLayoutsOpen ? 'transform rotate-180 text-teal-400' : ''
-                  }`}
-                />
-              )}
-            </button>
-
-            {/* Layouts Items */}
-            <AnimatePresence initial={false}>
-              {isLayoutsOpen && showText && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="pl-3 pr-1 py-1 space-y-0.5 overflow-hidden"
-                >
-                  {/* Settings overview link */}
-                  <NavLink
-                    to="/app/layouts"
-                    end
-                    className={({ isActive }) =>
-                      `flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all ${
-                        isActive
-                          ? 'bg-teal-600 text-white font-semibold'
-                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                      }`
-                    }
-                  >
-                    <Sliders className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                    <span>Layout Overview</span>
-                  </NavLink>
-
-                  {/* 5 Preset Layouts */}
-                  {layoutItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = location.pathname === item.path || item.activeCheck;
-
-                    return (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        onClick={() => applyPreset(item.key)}
-                        className={`flex items-center justify-between px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all ${
-                          isActive
-                            ? 'bg-teal-600/30 text-teal-300 font-semibold border border-teal-500/30'
-                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-teal-400' : 'text-slate-400'}`} />
-                          <span className="truncate">{item.name}</span>
-                        </div>
-                        {isActive && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0" />
                         )}
                       </NavLink>
                     );

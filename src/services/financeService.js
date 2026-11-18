@@ -108,6 +108,37 @@ export const financeService = {
     const res = await api.get('/finance/reports', { params });
     return res.data.data;
   },
+
+  // Advances Management
+  getAdvances: async (params = {}) => {
+    const res = await api.get('/finance/advances', { params });
+    return res.data;
+  },
+
+  getAdvance: async (id) => {
+    const res = await api.get(`/finance/advances/${id}`);
+    return res.data.data;
+  },
+
+  createAdvance: async (data) => {
+    const res = await api.post('/finance/advances', data);
+    return res.data;
+  },
+
+  updateAdvance: async (id, data) => {
+    const res = await api.put(`/finance/advances/${id}`, data);
+    return res.data;
+  },
+
+  approveAdvance: async (id, data = {}) => {
+    const res = await api.post(`/finance/advances/${id}/approve`, data);
+    return res.data;
+  },
+
+  deleteAdvance: async (id) => {
+    const res = await api.delete(`/finance/advances/${id}`);
+    return res.data;
+  },
 };
 
 export default financeService;

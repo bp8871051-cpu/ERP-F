@@ -322,6 +322,13 @@ export const EmployeeList = () => {
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </Link>
+                        <Link
+                          to={`/app/hrm/employees/${emp.id}/edit`}
+                          title="Edit Employee"
+                          className="p-1 rounded text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 transition-colors"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </Link>
                         <button
                           onClick={() => handleDelete(emp.id, `${emp.first_name} ${emp.last_name}`)}
                           title="Delete / Terminate"

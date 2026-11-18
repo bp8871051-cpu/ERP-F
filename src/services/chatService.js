@@ -46,6 +46,11 @@ export const chatService = {
     const response = await api.post(`/v1/chat/conversations/${conversationId}/read`);
     return response.data;
   },
+
+  getUsers: async () => {
+    const response = await api.get('/v1/chat/users');
+    return response.data;
+  },
 };
 
 export default chatService;

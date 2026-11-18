@@ -22,6 +22,11 @@ import {
   Lock,
   Shield,
   Check,
+  AlertCircle,
+  CheckCircle2,
+  X,
+  CopyCheck,
+  Upload,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import crmService from '../../../services/crmService';
@@ -37,16 +42,22 @@ export const LeadList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isSuperAdmin = user?.role === 'Super Admin' || user?.is_super_admin === true;
+  const isSalesManager = user?.is_sales_manager || 
+    (user?.role?.toLowerCase().includes('manager') && (user?.role?.toLowerCase().includes('sale') || user?.department_name?.toLowerCase().includes('sale')));
+  const canImportExport = isSuperAdmin || isSalesManager || user?.can_import_export === true;
+  const isManager = user?.is_manager || user?.role?.toLowerCase().includes('manager') || isSuperAdmin;
+  const canManageAssignment = isManager || isSuperAdmin;
 
   const [leads, setLeads] = useState([]);
   const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0 });
   const [loading, setLoading] = useState(true);
 
-  // Assignment states for Super Admin
+  // Assignment states for Managers and Super Admin
   const [assignees, setAssignees] = useState([]);
   const [rowAssignees, setRowAssignees] = useState({});
   const [assigningId, setAssigningId] = useState(null);
   const [assignmentNotice, setAssignmentNotice] = useState(null);
+  const [editingAssigneeId, setEditingAssigneeId] = useState(null);
 
   // Filters
   const [search, setSearch] = useState('');
@@ -66,10 +77,10 @@ export const LeadList = () => {
   }, []);
 
   useEffect(() => {
-    if (isSuperAdmin) {
+    if (canManageAssignment) {
       loadAssignees();
     }
-  }, [isSuperAdmin]);
+  }, [canManageAssignment]);
 
   const loadAssignees = async () => {
     try {
@@ -150,9 +161,14 @@ export const LeadList = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this lead?')) {
+    if (window.confirm('Are you sure you want to delete this lead? (If you are not Super Admin, this request will be sent to Super Admin for approval)')) {
       try {
-        await crmService.deleteLead(id);
+        const res = await crmService.deleteLead(id);
+        if (res?.requires_approval || res?.status === 'pending_approval' || res?.status === 'pending') {
+          alert(res.message || 'Lead deletion request has been submitted to Super Admin for approval.');
+        } else {
+          alert(res?.message || 'Lead deleted successfully.');
+        }
         fetchLeads();
       } catch (err) {
         alert(err.response?.data?.message || 'Error deleting lead.');
@@ -181,7 +197,61 @@ export const LeadList = () => {
       link.click();
       link.remove();
     } catch (err) {
-      alert('Error downloading CSV export.');
+      alert(err.response?.data?.message || 'Error downloading CSV export. Only Super Admin and Sales Manager are authorized.');
+    }
+  };
+
+  const handleImportCSV = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+      if (lines.length < 2) {
+        alert('CSV file appears to be empty or has no data rows.');
+        return;
+      }
+
+      const headers = lines[0].split(',').map((h) => h.trim().replace(/^["']|["']$/g, '').toLowerCase().replace(/[\s-]/g, '_'));
+      const rows = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map((v) => v.trim().replace(/^["']|["']$/g, ''));
+        if (values.length === 0 || !values[0]) continue;
+        const row = {};
+        headers.forEach((h, idx) => {
+          row[h] = values[idx] || '';
+        });
+        if (row.name || row.lead_name || row.contact_name) {
+          rows.push({
+            name: row.name || row.lead_name || row.contact_name,
+            company_name: row.company_name || row.company || '',
+            email: row.email || '',
+            phone: row.phone || row.mobile || '',
+            address: row.address || '',
+            city: row.city || '',
+            state: row.state || '',
+            pincode: row.pincode || '',
+            lead_source_name: row.source || row.lead_source || 'Website',
+            status: row.status || 'new',
+            notes: row.notes || '',
+          });
+        }
+      }
+
+      if (rows.length === 0) {
+        alert('No valid lead rows found in CSV. Please ensure a header row with "name", "email", "phone" etc.');
+        return;
+      }
+
+      await crmService.importLeads(rows);
+      alert(`Successfully imported ${rows.length} leads!`);
+      fetchLeads();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to import CSV file. Only Super Admin and Sales Manager are authorized.');
+    } finally {
+      e.target.value = '';
     }
   };
 
@@ -234,9 +304,36 @@ export const LeadList = () => {
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-          <Button variant="secondary" size="sm" icon={Download} onClick={handleExportCSV}>
-            Export CSV
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={CopyCheck}
+            onClick={() => navigate('/app/crm/duplicate-leads')}
+            className="text-amber-800 bg-amber-50 hover:bg-amber-100 border-amber-200"
+          >
+            Duplicate Requests
           </Button>
+
+          {/* Import / Export: ONLY for Super Admin and Sales Manager */}
+          {canImportExport && (
+            <>
+              <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold cursor-pointer transition-colors shadow-2xs">
+                <Upload className="w-3.5 h-3.5 text-slate-500" />
+                <span>Import CSV</span>
+                <input
+                  type="file"
+                  accept=".csv,.txt"
+                  className="hidden"
+                  onChange={handleImportCSV}
+                />
+              </label>
+
+              <Button variant="secondary" size="sm" icon={Download} onClick={handleExportCSV}>
+                Export CSV
+              </Button>
+            </>
+          )}
+
           <Button
             variant="teal"
             size="sm"
@@ -426,65 +523,146 @@ export const LeadList = () => {
                           </Badge>
                         </td>
                         <td className="py-3 px-4 text-slate-600">
-                          {isSuperAdmin ? (
-                            <div className="flex flex-col gap-1 py-0.5">
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-44 sm:w-48 shrink-0">
-                                  <SearchableSelect
-                                    options={[
-                                      { value: '', label: '-- Assign Lead To --' },
-                                      ...assignees.map((a) => ({
-                                        value: String(a.id),
-                                        label: `${a.name} (${typeof a.department === 'string' ? a.department : (a.department?.name || a.role)})`
-                                      }))
-                                    ]}
-                                    value={rowAssignees[l.id] !== undefined ? String(rowAssignees[l.id]) : (l.assigned_to ? String(l.assigned_to) : '')}
-                                    onChange={(val) => setRowAssignees(prev => ({ ...prev, [l.id]: val }))}
-                                    placeholder="-- Assign Lead To --"
-                                    searchPlaceholder="Search employee name..."
-                                    disabled={assigningId === l.id}
-                                    menuClassName="w-64 shadow-2xl"
-                                  />
-                                </div>
-                                <button
-                                  type="button"
-                                  disabled={assigningId === l.id}
-                                  onClick={() => {
-                                    const val = rowAssignees[l.id] !== undefined ? rowAssignees[l.id] : (l.assigned_to ? String(l.assigned_to) : '');
-                                    handleExecuteAssign(l.id, val ? Number(val) : null);
-                                  }}
-                                  title="Assign Lead"
-                                  className="px-2.5 py-2 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-lg text-xs shrink-0 flex items-center gap-1 cursor-pointer transition-colors shadow-2xs disabled:opacity-50 whitespace-nowrap"
-                                >
-                                  {assigningId === l.id ? (
-                                    <RefreshCw className="w-3.5 h-3.5 text-white animate-spin shrink-0" />
-                                  ) : (
-                                    <>
-                                      <UserCheck className="w-3.5 h-3.5 shrink-0" />
-                                      <span>Assign Lead</span>
-                                    </>
-                                  )}
-                                </button>
+                          {l.assigned_to ? (
+                            <div className="flex flex-col gap-1.5 py-0.5">
+                              {/* Prominent Assigned Status Badge */}
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200/90 text-emerald-900 shadow-2xs w-fit">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                                <span className="font-bold text-xs text-slate-900 whitespace-nowrap">
+                                  {l.assigned_user?.name || l.owner?.name || 'Assigned Staff'}
+                                </span>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded font-semibold bg-emerald-100 text-emerald-800 whitespace-nowrap">
+                                  {typeof l.assigned_user?.department === 'string'
+                                    ? l.assigned_user.department
+                                    : (l.assigned_user?.department?.name || l.assigned_user?.department_name || l.assigned_user?.role || 'Sales')}
+                                </span>
+                                {l.assigned_to === user?.id && (
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded font-bold bg-teal-600 text-white shrink-0">
+                                    You
+                                  </span>
+                                )}
                               </div>
-                              {l.assigned_to ? (
-                                <span className="text-[10px] text-slate-500 whitespace-nowrap">
-                                  Current: <strong className="text-teal-700">{l.assigned_user?.name || l.owner?.name}</strong>
-                                </span>
-                              ) : (
-                                <span className="text-[10px] text-slate-400 italic">
-                                  Unassigned
-                                </span>
+
+                                {/* Manager & Super Admin Reassign Action */}
+                              {canManageAssignment && (
+                                <div className="flex flex-col gap-1">
+                                  {editingAssigneeId === l.id ? (
+                                    <div className="flex items-center gap-1.5 mt-1 bg-white p-1.5 rounded-xl border border-teal-300 shadow-lg animate-fadeIn">
+                                      <div className="w-48 shrink-0">
+                                        <SearchableSelect
+                                          options={[
+                                            { value: '', label: '-- Unassign Lead --' },
+                                            ...assignees.map((a) => ({
+                                              value: String(a.id),
+                                              label: `${a.name} (${typeof a.department === 'string' ? a.department : (a.department?.name || a.role)})`
+                                            }))
+                                          ]}
+                                          value={rowAssignees[l.id] !== undefined ? String(rowAssignees[l.id]) : String(l.assigned_to || '')}
+                                          onChange={(val) => setRowAssignees(prev => ({ ...prev, [l.id]: val }))}
+                                          placeholder="Select new assignee..."
+                                          disabled={assigningId === l.id}
+                                          menuClassName="w-64 shadow-2xl"
+                                        />
+                                      </div>
+                                      <button
+                                        type="button"
+                                        disabled={assigningId === l.id}
+                                        onClick={async () => {
+                                          const val = rowAssignees[l.id] !== undefined ? rowAssignees[l.id] : (l.assigned_to ? String(l.assigned_to) : '');
+                                          await handleExecuteAssign(l.id, val ? Number(val) : null);
+                                          setEditingAssigneeId(null);
+                                        }}
+                                        className="px-2.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shrink-0 cursor-pointer shadow-2xs"
+                                      >
+                                        {assigningId === l.id ? <RefreshCw className="w-3 h-3 animate-spin" /> : 'Save'}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingAssigneeId(null)}
+                                        className="p-1 text-slate-400 hover:text-slate-600 rounded cursor-pointer"
+                                        title="Cancel"
+                                      >
+                                        <X className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingAssigneeId(l.id)}
+                                      className="text-[10px] text-teal-600 hover:text-teal-800 hover:underline font-semibold flex items-center gap-1 w-fit cursor-pointer"
+                                    >
+                                      <UserCheck className="w-3 h-3" />
+                                      <span>Change Assignee</span>
+                                    </button>
+                                  )}
+                                </div>
                               )}
                             </div>
                           ) : (
-                            <div className="flex items-center gap-1.5 whitespace-nowrap">
-                              <span className="font-medium text-slate-700">
-                                {l.assigned_to ? (l.assigned_user?.name || l.owner?.name || 'Assigned') : 'Unassigned'}
-                              </span>
-                              {l.assigned_to && l.assigned_to === user?.id && (
-                                <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-bold bg-teal-100 text-teal-800 border border-teal-200">
-                                  You
+                            <div className="flex flex-col gap-1.5 py-0.5">
+                              {/* Distinct Unassigned Status Badge */}
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200/90 text-amber-900 shadow-2xs w-fit">
+                                <AlertCircle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                                <span className="font-bold text-xs text-amber-900 whitespace-nowrap">
+                                  Not Assigned
                                 </span>
+                              </div>
+
+                              {/* Manager & Super Admin Quick Assign Button */}
+                              {canManageAssignment && (
+                                <div className="flex flex-col gap-1">
+                                  {editingAssigneeId === l.id ? (
+                                    <div className="flex items-center gap-1.5 mt-1 bg-white p-1.5 rounded-xl border border-teal-300 shadow-lg animate-fadeIn">
+                                      <div className="w-48 shrink-0">
+                                        <SearchableSelect
+                                          options={[
+                                            { value: '', label: '-- Select Employee --' },
+                                            ...assignees.map((a) => ({
+                                              value: String(a.id),
+                                              label: `${a.name} (${typeof a.department === 'string' ? a.department : (a.department?.name || a.role)})`
+                                            }))
+                                          ]}
+                                          value={rowAssignees[l.id] !== undefined ? String(rowAssignees[l.id]) : ''}
+                                          onChange={(val) => setRowAssignees(prev => ({ ...prev, [l.id]: val }))}
+                                          placeholder="Select employee..."
+                                          disabled={assigningId === l.id}
+                                          menuClassName="w-64 shadow-2xl"
+                                        />
+                                      </div>
+                                      <button
+                                        type="button"
+                                        disabled={assigningId === l.id}
+                                        onClick={async () => {
+                                          const val = rowAssignees[l.id] !== undefined ? rowAssignees[l.id] : '';
+                                          if (val) {
+                                            await handleExecuteAssign(l.id, Number(val));
+                                            setEditingAssigneeId(null);
+                                          }
+                                        }}
+                                        className="px-2.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shrink-0 cursor-pointer shadow-2xs"
+                                      >
+                                        {assigningId === l.id ? <RefreshCw className="w-3 h-3 animate-spin" /> : 'Assign'}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditingAssigneeId(null)}
+                                        className="p-1 text-slate-400 hover:text-slate-600 rounded cursor-pointer"
+                                        title="Cancel"
+                                      >
+                                        <X className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingAssigneeId(l.id)}
+                                      className="text-[10px] px-2 py-0.5 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold rounded-md border border-teal-200/80 flex items-center gap-1 w-fit cursor-pointer transition-colors shadow-2xs"
+                                    >
+                                      <UserCheck className="w-3 h-3" />
+                                      <span>+ Assign Lead</span>
+                                    </button>
+                                  )}
+                                </div>
                               )}
                             </div>
                           )}

@@ -5,6 +5,8 @@ import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
 import Breadcrumb from '../components/Breadcrumb';
 import Footer from '../components/Footer';
+import FloatingChatWidget from '../components/chat/FloatingChatWidget';
+import MandatoryDailyTaskModal from '../components/MandatoryDailyTaskModal';
 import { useLayout } from '../context/LayoutContext';
 
 export const AppLayout = () => {
@@ -29,7 +31,7 @@ export const AppLayout = () => {
 
         <main
           className={`flex-1 p-3 sm:p-4 lg:p-6 transition-all duration-200 ${
-            contentWidth === 'full' ? 'w-full max-w-none' : 'w-full max-w-7xl mx-auto'
+            contentWidth === 'boxed' ? 'w-full max-w-7xl mx-auto' : 'w-full max-w-none'
           }`}
         >
           <AnimatePresence mode="wait">
@@ -48,6 +50,12 @@ export const AppLayout = () => {
 
         <Footer />
       </div>
+
+      {/* Global Floating Chat Launcher across entire software */}
+      <FloatingChatWidget />
+
+      {/* Mandatory Daily Task Popup for all employees/roles on first login of the day */}
+      <MandatoryDailyTaskModal />
     </div>
   );
 };

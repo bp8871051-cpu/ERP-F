@@ -14,12 +14,6 @@ const routeNames = {
   projects: 'Project Dashboard',
   support: 'Support Dashboard',
   applications: 'Applications',
-  layouts: 'Layout Settings',
-  'mini-sidebar': 'Mini Sidebar',
-  'hover-view': 'Hover View',
-  'hidden-menu': 'Hidden Menu',
-  'full-width': 'Full Width',
-  rtl: 'RTL Mode',
 };
 
 export const Breadcrumb = () => {

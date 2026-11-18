@@ -53,7 +53,7 @@ export const TrainingList = () => {
       setError(null);
       const [trRes, empRes] = await Promise.all([
         hrmService.getTraining(),
-        hrmService.getEmployees(),
+        hrmService.getEmployees({ all: true }),
       ]);
       setTrainings(trRes || []);
       setEmployees(empRes || []);

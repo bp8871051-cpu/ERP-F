@@ -78,8 +78,36 @@ export const crmService = {
     });
     return response.data;
   },
+  importLeads: async (rows) => {
+    const response = await api.post('/v1/crm/leads/import', { rows });
+    return response.data;
+  },
   assignLead: async (id, assigned_to) => {
     const response = await api.post(`/v1/crm/leads/${id}/assign`, { assigned_to });
+    return response.data;
+  },
+  requestReassign: async (id, data = {}) => {
+    const response = await api.post(`/v1/crm/leads/${id}/request-reassign`, data);
+    return response.data;
+  },
+  checkDuplicate: async (data) => {
+    const response = await api.post('/v1/crm/leads/check-duplicate', data);
+    return response.data;
+  },
+  requestDuplicate: async (data) => {
+    const response = await api.post('/v1/crm/duplicate-leads/request', data);
+    return response.data;
+  },
+  getDuplicateRequests: async (params = {}) => {
+    const response = await api.get('/v1/crm/duplicate-leads', { params });
+    return response.data;
+  },
+  approveDuplicate: async (id, data = {}) => {
+    const response = await api.post(`/v1/crm/duplicate-leads/${id}/approve`, data);
+    return response.data;
+  },
+  rejectDuplicate: async (id, data = {}) => {
+    const response = await api.post(`/v1/crm/duplicate-leads/${id}/reject`, data);
     return response.data;
   },
   getAssignees: async () => {

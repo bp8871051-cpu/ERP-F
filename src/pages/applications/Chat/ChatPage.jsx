@@ -404,10 +404,17 @@ export const ChatPage = () => {
                   />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-bold text-slate-800 truncate">{activeConversation.title}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-slate-800 truncate">{activeConversation.title}</h3>
+                    {activeConversation.title?.toLowerCase().includes('general') && (
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-teal-100 text-teal-800 shrink-0">
+                        All Roles Channel
+                      </span>
+                    )}
+                  </div>
                   <p className="text-[11px] text-slate-400">
                     {activeConversation.type === 'group'
-                      ? `${activeConversation.participants?.length || 4} members`
+                      ? `${activeConversation.participants?.length || 'Company'} members • Open to all roles`
                       : activeConversation.is_online
                       ? 'Active now'
                       : 'Offline'}
@@ -498,12 +505,17 @@ export const ChatPage = () => {
 
                       {/* Message Bubble + Actions */}
                       <div className={`max-w-[70%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                        {/* Sender name for groups */}
-                        {!isMe && activeConversation.type === 'group' && (
-                          <span className="text-[10px] font-semibold text-slate-500 mb-1 ml-1">
-                            {m.user?.name || 'Participant'}
+                        {/* Sender Name and Department Badge */}
+                        <div className={`flex items-center gap-1.5 mb-1 ${isMe ? 'mr-1 flex-row-reverse' : 'ml-1'}`}>
+                          <span className="text-[11px] font-semibold text-slate-700">
+                            {isMe ? `${user?.name || 'You'} (You)` : (m.user?.name || 'Team Member')}
                           </span>
-                        )}
+                          {(m.user?.department || m.user?.role) && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-semibold bg-teal-50 text-teal-800 border border-teal-200/80 shadow-2xs">
+                              {m.user?.department || m.user?.role}
+                            </span>
+                          )}
+                        </div>
 
                         {/* Reply reference bubble if message replies to another */}
                         {m.reply_to && (

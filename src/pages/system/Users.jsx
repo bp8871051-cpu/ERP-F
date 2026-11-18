@@ -273,7 +273,7 @@ export default function UsersManagement() {
                 </tr>
               ) : (
                 users.map(u => {
-                  const roleName = u.roles?.[0]?.name || u.role_name || 'Employee';
+                  const roleName = u.role || u.roles?.[0]?.name || u.role_name || 'Project Engineer';
                   const isActive = u.is_active !== false;
                   const deptName = typeof u.department === 'object' && u.department !== null 
                     ? (u.department.name || u.department.department_name || 'Operations') 

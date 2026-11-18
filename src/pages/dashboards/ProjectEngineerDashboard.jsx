@@ -645,9 +645,9 @@ export default function ProjectEngineerDashboard() {
       </div>
 
       {/* Main Tab Views */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="space-y-6">
         {/* Left 3 cols: Tab contents */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="w-full space-y-6">
           {/* TAB 1: MY ASSIGNED PROJECTS */}
           {activeTab === 'projects' && (
             <div className="space-y-4">
@@ -1770,42 +1770,48 @@ export default function ProjectEngineerDashboard() {
         )}
       </AnimatePresence>
 
-      {/* MODAL 4: MATERIAL REQUEST */}
+      {/* MODAL 4: REQUEST MATERIAL - Responsive, Complete & Clean */}
       <AnimatePresence>
         {modalType === 'material_req' && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-slate-850 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800"
+              className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200/80 overflow-hidden my-6"
             >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 mb-4">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Package className="w-5 h-5 text-indigo-600" />
-                  Site Material Requisition to Store
-                </h3>
+              <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+                    <Package className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Request Project Material</h3>
+                    <p className="text-xs text-slate-500">Requisition site materials and equipment from Store Executive</p>
+                  </div>
+                </div>
                 <button
                   onClick={() => setModalType(null)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSubmitMaterialRequest} className="space-y-3.5 text-xs">
-                <div className="grid grid-cols-2 gap-3">
+              <form onSubmit={handleSubmitMaterialRequest} className="p-5 sm:p-6 space-y-4 text-xs">
+                {/* Target Project and Warehouse */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Project
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Target Project <span className="text-rose-500">*</span>
                     </label>
                     <select
                       value={materialForm.project_id}
                       onChange={(e) => setMaterialForm({ ...materialForm, project_id: e.target.value })}
                       required
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none bg-white text-slate-800"
                     >
-                      <option value="">Select project</option>
+                      <option value="">Select project...</option>
                       {lookups.projects?.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name}
@@ -1815,13 +1821,13 @@ export default function ProjectEngineerDashboard() {
                   </div>
 
                   <div>
-                    <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Target Warehouse
                     </label>
                     <select
                       value={materialForm.warehouse_id}
                       onChange={(e) => setMaterialForm({ ...materialForm, warehouse_id: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none bg-white text-slate-800"
                     >
                       <option value="">Auto-route (Main Warehouse)</option>
                       {lookups.warehouses?.map((w) => (
@@ -1833,29 +1839,30 @@ export default function ProjectEngineerDashboard() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                {/* Product and Quantity */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Product / Material
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Product / Material <span className="text-rose-500">*</span>
                     </label>
                     <select
                       value={materialForm.product_id}
                       onChange={(e) => setMaterialForm({ ...materialForm, product_id: e.target.value })}
                       required
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none bg-white text-slate-800"
                     >
-                      <option value="">Select product</option>
+                      <option value="">Select material from inventory...</option>
                       {lookups.products?.map((p) => (
                         <option key={p.id} value={p.id}>
-                          {p.name} ({p.sku})
+                          {p.name} {p.sku ? `(SKU: ${p.sku})` : ''} - In Stock: {p.quantity || 0}
                         </option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Quantity Needed
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Quantity Needed <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="number"
@@ -1863,68 +1870,86 @@ export default function ProjectEngineerDashboard() {
                       required
                       value={materialForm.quantity}
                       onChange={(e) => setMaterialForm({ ...materialForm, quantity: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none font-bold text-slate-900"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                {/* Date and Priority */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Required By Date
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Required By Date <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="date"
                       required
                       value={materialForm.required_date}
                       onChange={(e) => setMaterialForm({ ...materialForm, required_date: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none text-slate-800"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Priority Level
                     </label>
                     <select
                       value={materialForm.priority}
                       onChange={(e) => setMaterialForm({ ...materialForm, priority: e.target.value })}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-semibold"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none bg-white text-slate-800 font-semibold"
                     >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent (Line Down)</option>
+                      <option value="low">Low Priority</option>
+                      <option value="medium">Medium Priority</option>
+                      <option value="high">High Priority</option>
+                      <option value="urgent">Urgent (Line Down / Site Work Blocked)</option>
                     </select>
                   </div>
                 </div>
 
+                {/* Site location */}
                 <div>
-                  <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                    Site Delivery Location
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Site Delivery Location <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
+                    placeholder="e.g. Pipeline Automation Bay 2, Site Location A"
                     value={materialForm.site_location}
                     onChange={(e) => setMaterialForm({ ...materialForm, site_location: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+                    className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none text-slate-800"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                {/* Additional justification notes */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Justification & Requisition Notes
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={materialForm.notes || ''}
+                    onChange={(e) => setMaterialForm({ ...materialForm, notes: e.target.value })}
+                    placeholder="Specify project milestone requirement, engineering justification..."
+                    className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none text-slate-800 resize-none"
+                  />
+                </div>
+
+                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setModalType(null)}
-                    className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                    className="w-full sm:w-auto px-4 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 font-semibold transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
+                    className="w-full sm:w-auto px-5 py-2.5 bg-sky-600 text-white font-semibold rounded-xl hover:bg-sky-700 shadow-xs transition flex items-center justify-center gap-1.5 disabled:opacity-50"
                   >
+                    <Package className="w-4 h-4" />
                     {submitting ? 'Submitting...' : 'Send Request to Store'}
                   </button>
                 </div>

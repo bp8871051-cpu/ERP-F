@@ -5,7 +5,6 @@ import {
   Search,
   Bell,
   MessageSquare,
-  Globe,
   Sun,
   Moon,
   ChevronDown,
@@ -15,15 +14,9 @@ import {
   Building,
   Check,
   ExternalLink,
-  PhoneCall,
   Calendar,
-  Mail,
-  FolderClosed,
-  FileText,
   CheckSquare,
-  GitPullRequest,
   CheckCheck,
-  Sliders,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLayout } from '../context/LayoutContext';
@@ -44,8 +37,6 @@ export const Topbar = ({ isCollapsed, setIsCollapsed }) => {
   const [isCompanyDropdownOpen, setIsCompanyDropdownOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isLangOpen, setIsLangOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState('English (US)');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -58,7 +49,6 @@ export const Topbar = ({ isCollapsed, setIsCollapsed }) => {
   const companyRef = useRef(null);
   const profileRef = useRef(null);
   const notifyRef = useRef(null);
-  const langRef = useRef(null);
   const searchRef = useRef(null);
 
   // Fetch real notifications from API
@@ -135,14 +125,11 @@ export const Topbar = ({ isCollapsed, setIsCollapsed }) => {
       if (companyRef.current && !companyRef.current.contains(e.target)) setIsCompanyDropdownOpen(false);
       if (profileRef.current && !profileRef.current.contains(e.target)) setIsProfileDropdownOpen(false);
       if (notifyRef.current && !notifyRef.current.contains(e.target)) setIsNotificationsOpen(false);
-      if (langRef.current && !langRef.current.contains(e.target)) setIsLangOpen(false);
       if (searchRef.current && !searchRef.current.contains(e.target)) setIsSearchOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const languages = ['English (US)', 'Spanish (ES)', 'French (FR)', 'German (DE)', 'Arabic (AR)'];
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 sticky top-0 z-20 px-4 lg:px-8 flex items-center justify-between shadow-xs">
@@ -228,7 +215,7 @@ export const Topbar = ({ isCollapsed, setIsCollapsed }) => {
             onFocus={() => {
               if (searchResults.length > 0) setIsSearchOpen(true);
             }}
-            placeholder="Search messages, emails, files, tasks, events..."
+            placeholder="Search messages, tasks, events, products..."
             className="w-full bg-slate-50 border border-slate-200 text-xs rounded-lg pl-9 pr-14 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
           />
           <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 bg-white border border-slate-200 rounded shadow-2xs">
@@ -263,12 +250,8 @@ export const Topbar = ({ isCollapsed, setIsCollapsed }) => {
                     <div className="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-teal-600 group-hover:text-white transition-colors">
                       {item.type === 'chat' && <MessageSquare className="w-3.5 h-3.5" />}
                       {item.type === 'task' && <CheckSquare className="w-3.5 h-3.5" />}
-                      {item.type === 'email' && <Mail className="w-3.5 h-3.5" />}
-                      {item.type === 'file' && <FolderClosed className="w-3.5 h-3.5" />}
-                      {item.type === 'note' && <FileText className="w-3.5 h-3.5" />}
                       {item.type === 'calendar' && <Calendar className="w-3.5 h-3.5" />}
-                      {item.type === 'workflow' && <GitPullRequest className="w-3.5 h-3.5" />}
-                      {!['chat','task','email','file','note','calendar','workflow'].includes(item.type) && (
+                      {!['chat', 'task', 'calendar'].includes(item.type) && (
                         <Search className="w-3.5 h-3.5" />
                       )}
                     </div>
@@ -295,42 +278,22 @@ export const Topbar = ({ isCollapsed, setIsCollapsed }) => {
 
       {/* Right Controls */}
       <div className="flex items-center gap-1.5 sm:gap-2.5">
-        {/* Language Selector */}
-        <div className="relative" ref={langRef}>
-          <button
-            onClick={() => setIsLangOpen(!isLangOpen)}
-            className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer"
-            title="Language"
-          >
-            <Globe className="w-4 h-4" />
-          </button>
-          {isLangOpen && (
-            <div className="absolute right-0 mt-2 w-44 bg-white border border-slate-200 rounded-xl shadow-lg p-1 z-50">
-              {languages.map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() => {
-                    setCurrentLang(lang);
-                    setIsLangOpen(false);
-                  }}
-                  className={`w-full text-left px-3 py-1.5 text-xs rounded-md cursor-pointer transition-colors ${
-                    currentLang === lang ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  {lang}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Layout Settings Shortcut */}
+        {/* Calendar Shortcut */}
         <button
-          onClick={() => navigate('/app/layouts')}
-          className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors"
-          title="Layout Settings"
+          onClick={() => navigate('/app/applications/calendar')}
+          className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors relative"
+          title="Enterprise Calendar"
         >
-          <Sliders className="w-4 h-4 text-slate-500" />
+          <Calendar className="w-4 h-4" />
+        </button>
+
+        {/* Falcon Team Chat Shortcut */}
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('toggle-floating-chat'))}
+          className="p-2 text-slate-500 hover:text-teal-700 hover:bg-teal-50 rounded-lg cursor-pointer transition-colors relative"
+          title="Falcon Team Chat"
+        >
+          <MessageSquare className="w-4 h-4" />
         </button>
 
         {/* Centralized Notifications Dropdown */}

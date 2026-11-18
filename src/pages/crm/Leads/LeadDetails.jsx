@@ -25,6 +25,18 @@ import {
   XCircle,
   Lock,
   Shield,
+  CreditCard,
+  ShieldCheck,
+  Camera,
+  Image as ImageIcon,
+  FilePlus,
+  Download,
+  ExternalLink,
+  Eye,
+  MapPin,
+  AlertCircle,
+  X,
+  Zap,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import crmService from '../../../services/crmService';
@@ -69,6 +81,7 @@ export const LeadDetails = () => {
   const [emailOpen, setEmailOpen] = useState(false);
   const [taskOpen, setTaskOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   useEffect(() => {
     fetchLead();
@@ -164,8 +177,246 @@ export const LeadDetails = () => {
     );
   };
 
+  const renderDocumentsCard = () => {
+    const docs = lead.documents || {};
+    const requiredList = [
+      { key: 'pan_card', label: 'PAN Card', icon: CreditCard },
+      { key: 'aadhar_card', label: 'Aadhaar Card', icon: ShieldCheck },
+      { key: 'bank_passbook', label: 'Passbook / Cancel Cheque', icon: FileText },
+      { key: 'passport_photo', label: 'Passport Size Photo', icon: Camera },
+      { key: 'electricity_bill', label: 'Electricity Bill (લાઇટ બિલ)', icon: Zap },
+      { key: 'pre_installation_photo', label: 'Pre-installation Photo', icon: ImageIcon },
+      { key: 'post_installation_photo', label: 'Post-installation Photo', icon: ImageIcon },
+    ];
+    const uploadedCount = requiredList.filter((item) => !!docs[item.key]).length;
+    const otherDocs = Array.isArray(docs.other_documents) ? docs.other_documents : [];
+
+    return (
+      <Card
+        title="KYC Documents & Site Photos (તમામ દસ્તાવેજો અને સાઇટ ફોટોઝ)"
+        subtitle="Mandatory KYC identity records, Pre/Post installation verification photos, and extra attachments"
+        className="lg:col-span-3"
+      >
+        <div className="space-y-6">
+          {/* Header count indicator */}
+          <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-teal-600" />
+              <span className="font-semibold text-slate-800">Mandatory Verification Status:</span>
+              <span
+                className={`font-bold px-2 py-0.5 rounded-full text-[11px] border ${
+                  uploadedCount === 7
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                }`}
+              >
+                {uploadedCount} of 7 Required Documents Uploaded
+              </span>
+            </div>
+            <Button
+              variant="secondary"
+              size="xs"
+              icon={Edit}
+              onClick={() => setEditOpen(true)}
+            >
+              Update / Upload Documents
+            </Button>
+          </div>
+
+          {/* 7 Required Documents Grid */}
+          <div>
+            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-teal-600" />
+              <span>Required KYC & Installation Photos (૭ ફરજિયાત દસ્તાવેજો)</span>
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {requiredList.map((item) => {
+                const docObj = docs[item.key];
+                const Icon = item.icon;
+                const isImage = docObj?.data?.startsWith('data:image') || docObj?.type?.startsWith('image');
+                return (
+                  <div
+                    key={item.key}
+                    className="p-3.5 bg-slate-50/70 border border-slate-200 rounded-xl flex flex-col justify-between hover:border-slate-300 transition-all shadow-2xs"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                          <Icon className="w-4 h-4 text-teal-600 shrink-0" />
+                          <span>{item.label}</span>
+                          <span className="text-rose-500">*</span>
+                        </span>
+                        {docObj ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Uploaded
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] text-rose-600 font-semibold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">
+                            <AlertCircle className="w-3 h-3 text-rose-500" /> Missing
+                          </span>
+                        )}
+                      </div>
+
+                      {docObj ? (
+                        <div className="mt-2">
+                          {isImage ? (
+                            <div
+                              onClick={() => setPreviewDoc({ title: item.label, ...docObj })}
+                              className="relative group cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-white h-32 flex items-center justify-center mb-2"
+                            >
+                              <img
+                                src={docObj.data}
+                                alt={item.label}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                              />
+                              <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white text-xs font-semibold">
+                                <Eye className="w-4 h-4" /> Click to Preview
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="h-20 flex flex-col items-center justify-center bg-white border border-slate-200 rounded-lg mb-2">
+                              <FileText className="w-8 h-8 text-teal-600 mb-1" />
+                              <span className="text-[10px] text-slate-500 uppercase font-semibold">
+                                {docObj.type || 'Document'}
+                              </span>
+                            </div>
+                          )}
+                          <div className="text-xs font-semibold text-slate-800 truncate" title={docObj.name}>
+                            {docObj.name}
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-0.5">Size: {docObj.size}</div>
+                        </div>
+                      ) : (
+                        <div className="py-6 text-center text-xs text-slate-400 italic bg-white/60 rounded-lg border border-dashed border-slate-200 mt-2">
+                          Document not uploaded yet
+                        </div>
+                      )}
+                    </div>
+
+                    {docObj && (
+                      <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-slate-200/80">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewDoc({ title: item.label, ...docObj })}
+                          className="flex-1 py-1.5 px-2.5 text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" /> View
+                        </button>
+                        {docObj.data && (
+                          <a
+                            href={docObj.data}
+                            download={docObj.name || `${item.label}.png`}
+                            className="py-1.5 px-2.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                            title="Download file"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Other Documents Section */}
+          <div className="pt-4 border-t border-slate-100">
+            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <FilePlus className="w-3.5 h-3.5 text-teal-600" />
+              <span>Other Documents / Attachments (અન્ય દસ્તાવેજો)</span>
+            </h4>
+
+            {otherDocs.length === 0 ? (
+              <div className="text-center py-4 text-xs text-slate-400 italic bg-slate-50 border border-dashed border-slate-200 rounded-xl">
+                No extra documents attached to this lead. Click &quot;Update / Upload Documents&quot; to add GST, electricity bill, etc.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {otherDocs.map((otherItem, idx) => {
+                  const file = otherItem.file;
+                  const isImage = file?.data?.startsWith('data:image') || file?.type?.startsWith('image');
+                  return (
+                    <div
+                      key={otherItem.id || idx}
+                      className="p-3 bg-white border border-slate-200 rounded-xl shadow-2xs hover:border-slate-300 transition-all flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-slate-800 text-xs truncate" title={otherItem.title || 'Attachment'}>
+                            {otherItem.title || `Attachment #${idx + 1}`}
+                          </span>
+                          <span className="text-[10px] text-teal-700 font-semibold bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">
+                            Extra Doc
+                          </span>
+                        </div>
+
+                        {file ? (
+                          <div>
+                            {isImage ? (
+                              <div
+                                onClick={() => setPreviewDoc({ title: otherItem.title || 'Document', ...file })}
+                                className="relative group cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-slate-50 h-24 flex items-center justify-center mb-2"
+                              >
+                                <img
+                                  src={file.data}
+                                  alt={otherItem.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                />
+                                <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[11px] font-medium">
+                                  <Eye className="w-3.5 h-3.5 mr-1" /> View
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="h-16 flex items-center justify-center bg-slate-50 border border-slate-200 rounded-lg mb-2">
+                                <FileText className="w-6 h-6 text-teal-600" />
+                              </div>
+                            )}
+                            <div className="text-[11px] font-medium text-slate-700 truncate" title={file.name}>
+                              {file.name}
+                            </div>
+                            <div className="text-[10px] text-slate-400">{file.size}</div>
+                          </div>
+                        ) : (
+                          <div className="py-4 text-center text-xs text-slate-400 italic">No file attached</div>
+                        )}
+                      </div>
+
+                      {file && (
+                        <div className="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => setPreviewDoc({ title: otherItem.title || 'Document', ...file })}
+                            className="flex-1 py-1 px-2 text-[11px] font-medium text-teal-700 bg-teal-50 hover:bg-teal-100 rounded flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                          >
+                            <Eye className="w-3 h-3" /> View
+                          </button>
+                          {file.data && (
+                            <a
+                              href={file.data}
+                              download={file.name || `${otherItem.title || 'document'}.png`}
+                              className="py-1 px-2 text-[11px] font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded flex items-center justify-center gap-1 transition-colors"
+                              title="Download"
+                            >
+                              <Download className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </Card>
+    );
+  };
+
   const tabs = [
     { key: 'overview', label: 'Overview' },
+    { key: 'documents', label: 'KYC Documents & Site Photos' },
     { key: 'score', label: 'Score Rules Breakdown' },
     { key: 'timeline', label: 'Timeline' },
     { key: 'activities', label: `Activities (${lead.activities?.length || 0})` },
@@ -442,11 +693,47 @@ export const LeadDetails = () => {
               </div>
 
               <div>
+                <dt className="text-slate-400 font-medium">Lead Source</dt>
+                <dd className="font-semibold text-slate-800 mt-0.5">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200 text-xs">
+                    {lead.lead_source_name || lead.lead_source?.name || 'Website'}
+                  </span>
+                  {lead.other_source_details && (
+                    <span className="text-[11px] text-slate-500 block mt-0.5 italic">
+                      &quot;{lead.other_source_details}&quot;
+                    </span>
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-400 font-medium">Location / City</dt>
+                <dd className="font-semibold text-slate-800 mt-0.5 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                  <span>
+                    {lead.city || lead.state ? `${lead.city || ''}${lead.city && lead.state ? ', ' : ''}${lead.state || ''}` : 'Not Specified'}
+                  </span>
+                  {lead.pincode && (
+                    <span className="text-[10px] text-slate-400 font-mono">({lead.pincode})</span>
+                  )}
+                </dd>
+              </div>
+
+              {lead.address && (
+                <div className="sm:col-span-2">
+                  <dt className="text-slate-400 font-medium">Full Address & Pincode</dt>
+                  <dd className="text-slate-700 mt-0.5 font-medium">
+                    {lead.address} {lead.pincode ? `— PIN: ${lead.pincode}` : ''} ({lead.country || 'India'})
+                  </dd>
+                </div>
+              )}
+
+              <div>
                 <dt className="text-slate-400 font-medium">Website</dt>
                 <dd className="text-teal-600 mt-0.5">
                   {lead.website ? (
-                    <a href={lead.website} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                      {lead.website}
+                    <a href={lead.website} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                      <span>{lead.website}</span>
+                      <ExternalLink className="w-3 h-3" />
                     </a>
                   ) : (
                     '—'
@@ -459,6 +746,31 @@ export const LeadDetails = () => {
                   {lead.industry || 'Technology'} • {lead.company_size || '50-200'} employees
                 </dd>
               </div>
+
+              {lead.linkedin && (
+                <div>
+                  <dt className="text-slate-400 font-medium">LinkedIn Profile</dt>
+                  <dd className="text-blue-600 mt-0.5">
+                    <a href={lead.linkedin} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                      <span className="truncate">{lead.linkedin}</span>
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                    </a>
+                  </dd>
+                </div>
+              )}
+
+              {lead.other_link && (
+                <div>
+                  <dt className="text-slate-400 font-medium">Other Link / Portfolio</dt>
+                  <dd className="text-teal-600 mt-0.5">
+                    <a href={lead.other_link} target="_blank" rel="noopener noreferrer" className="hover:underline flex items-center gap-1">
+                      <span className="truncate">{lead.other_link}</span>
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                    </a>
+                  </dd>
+                </div>
+              )}
+
               {lead.campaign && (
                 <div className="sm:col-span-2 pt-2 border-t border-slate-100">
                   <dt className="text-slate-400 font-medium">Associated Marketing Campaign</dt>
@@ -506,6 +818,16 @@ export const LeadDetails = () => {
               )}
             </div>
           </Card>
+
+          {/* KYC Documents & Site Photos Card (Embedded in Overview) */}
+          {renderDocumentsCard()}
+        </div>
+      )}
+
+      {/* Tab: Dedicated Documents & Site Photos */}
+      {activeTab === 'documents' && (
+        <div className="space-y-6">
+          {renderDocumentsCard()}
         </div>
       )}
 
@@ -778,6 +1100,68 @@ export const LeadDetails = () => {
         onClose={() => setConvertOpen(false)}
         onSuccess={fetchLead}
       />
+
+      {/* Full Document / Photo Preview Modal Lightbox */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/75 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-slate-50/70">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-teal-600" />
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">{previewDoc.title || 'Document Preview'}</h3>
+                  <p className="text-[11px] text-slate-500">{previewDoc.name} ({previewDoc.size})</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {previewDoc.data && (
+                  <a
+                    href={previewDoc.data}
+                    download={previewDoc.name || 'document.png'}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg border border-teal-200 transition-colors"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download</span>
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setPreviewDoc(null)}
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-slate-950/5">
+              {previewDoc.data?.startsWith('data:image') || previewDoc.type?.startsWith('image') ? (
+                <img
+                  src={previewDoc.data}
+                  alt={previewDoc.title}
+                  className="max-h-[70vh] max-w-full rounded-lg shadow-md object-contain"
+                />
+              ) : previewDoc.data?.startsWith('data:application/pdf') ? (
+                <iframe
+                  src={previewDoc.data}
+                  title={previewDoc.title}
+                  className="w-full h-[65vh] rounded-lg border border-slate-200"
+                />
+              ) : (
+                <div className="text-center py-12">
+                  <FileText className="w-16 h-16 text-teal-600 mx-auto mb-3" />
+                  <p className="text-sm font-semibold text-slate-700">{previewDoc.name}</p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Direct in-browser preview is not available for this file type. Please click Download to view it.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

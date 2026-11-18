@@ -124,6 +124,24 @@ export const systemService = {
     const response = await api.get('/v1/system/sessions');
     return response.data?.data || response.data;
   },
+
+  // System Database Backups
+  getBackups: async () => {
+    const response = await api.get('/system/backups');
+    return response.data?.data || response.data || [];
+  },
+  createBackup: async (type = 'database') => {
+    const response = await api.post('/system/backups', { type });
+    return response.data;
+  },
+  deleteBackup: async (filename) => {
+    const response = await api.delete(`/system/backups/${encodeURIComponent(filename)}`);
+    return response.data;
+  },
+  downloadBackupUrl: (filename) => {
+    const base = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+    return `${base}/system/backups/${encodeURIComponent(filename)}/download`;
+  },
 };
 
 export default systemService;

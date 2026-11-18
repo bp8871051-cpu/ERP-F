@@ -148,6 +148,30 @@ export const roleDashboardService = {
       return response.data;
     },
   },
+
+  // 5. Licensing Manager
+  licensingManager: {
+    getDashboard: async () => {
+      const response = await api.get('/v1/licensing-manager/dashboard');
+      return response.data?.data || response.data;
+    },
+    createLicense: async (data) => {
+      const response = await api.post('/v1/licensing-manager/licenses', data);
+      return response.data;
+    },
+    allocateSeat: async (data) => {
+      const response = await api.post('/v1/licensing-manager/allocate-seat', data);
+      return response.data;
+    },
+    renewLicense: async (id, data) => {
+      const response = await api.put(`/v1/licensing-manager/licenses/${id}/renew`, data);
+      return response.data;
+    },
+    updateStatus: async (id, status) => {
+      const response = await api.put(`/v1/licensing-manager/licenses/${id}/status`, { status });
+      return response.data;
+    },
+  },
 };
 
 export default roleDashboardService;

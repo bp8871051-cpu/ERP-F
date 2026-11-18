@@ -10,7 +10,10 @@ export const hrmService = {
   // Employees
   getEmployees: async (params = {}) => {
     const res = await api.get('/hrm/employees', { params });
-    return res.data.data;
+    const data = res.data?.data;
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
   },
 
   getEmployee: async (id) => {
@@ -49,6 +52,11 @@ export const hrmService = {
     return res.data.data;
   },
 
+  getRoles: async () => {
+    const res = await api.get('/hrm/roles');
+    return res.data.data;
+  },
+
   createDesignation: async (data) => {
     const res = await api.post('/hrm/designations', data);
     return res.data;
@@ -57,7 +65,10 @@ export const hrmService = {
   // Attendance
   getAttendance: async (params = {}) => {
     const res = await api.get('/hrm/attendance', { params });
-    return res.data.data;
+    const data = res.data?.data;
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
   },
 
   checkIn: async (data = {}) => {
@@ -94,6 +105,16 @@ export const hrmService = {
   rejectLeave: async (id, reason) => {
     const res = await api.post(`/hrm/leave/${id}/reject`, { reason });
     return res.data;
+  },
+
+  deleteLeave: async (id) => {
+    const res = await api.delete(`/hrm/leave/${id}`);
+    return res.data;
+  },
+
+  getLeaveTypes: async () => {
+    const res = await api.get('/hrm/leave/types');
+    return res.data.data || [];
   },
 
   getLeaveBalances: async (employeeId = null) => {
@@ -194,6 +215,12 @@ export const hrmService = {
   // Analytics
   getAnalytics: async (params = {}) => {
     const res = await api.get('/hrm/analytics', { params });
+    return res.data.data;
+  },
+
+  // Unavailable Users
+  getUnavailableUsers: async (params = {}) => {
+    const res = await api.get('/hrm/unavailable-users', { params });
     return res.data.data;
   },
 };

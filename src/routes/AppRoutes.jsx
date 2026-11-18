@@ -23,6 +23,7 @@ import ServiceEngineerDashboard from '../pages/dashboards/ServiceEngineerDashboa
 import StoreExecutiveDashboard from '../pages/dashboards/StoreExecutiveDashboard';
 import QualityControlDashboard from '../pages/dashboards/QualityControlDashboard';
 import ProjectEngineerDashboard from '../pages/dashboards/ProjectEngineerDashboard';
+import LicensingManagerDashboard from '../pages/dashboards/LicensingManagerDashboard';
 
 // Enterprise Support Management Module Pages
 import ContactMessages from '../pages/support/ContactMessages';
@@ -45,6 +46,7 @@ import UserDetails from '../pages/system/UserDetails';
 import RolesManagement from '../pages/system/Roles';
 import Permissions from '../pages/system/Permissions';
 import DeleteRequests from '../pages/system/DeleteRequests';
+import SystemBackups from '../pages/system/SystemBackups';
 
 // Enterprise Settings Module Pages
 import Settings from '../pages/system/Settings';
@@ -81,19 +83,15 @@ import DocumentWorkflows from '../pages/documents/DocumentWorkflows';
 
 // Applications Module Pages
 import ChatPage from '../pages/applications/Chat/ChatPage';
-import CallsPage from '../pages/applications/Calls/CallsPage';
 import CalendarPage from '../pages/applications/Calendar/CalendarPage';
-import EmailPage from '../pages/applications/Email/EmailPage';
-import FileManagerPage from '../pages/applications/FileManager/FileManagerPage';
-import NotesPage from '../pages/applications/Notes/NotesPage';
 import TodoPage from '../pages/applications/Todo/TodoPage';
-import WorkflowsPage from '../pages/applications/Workflows/WorkflowsPage';
 
 // CRM Module Pages
 import ContactList from '../pages/crm/Contacts/ContactList';
 import ContactDetails from '../pages/crm/Contacts/ContactDetails';
 import LeadList from '../pages/crm/Leads/LeadList';
 import LeadDetails from '../pages/crm/Leads/LeadDetails';
+import DuplicateLeads from '../pages/crm/Leads/DuplicateLeads';
 import DealList from '../pages/crm/Deals/DealList';
 import DealDetails from '../pages/crm/Deals/DealDetails';
 import PipelineBoard from '../pages/crm/Pipeline/PipelineBoard';
@@ -102,8 +100,6 @@ import CampaignDetails from '../pages/crm/Campaigns/CampaignDetails';
 import FeedbackList from '../pages/crm/Feedback/FeedbackList';
 import CustomerAnalytics from '../pages/crm/Analytics/CustomerAnalytics';
 
-// Layouts Module Page
-import LayoutSettingsPage from '../pages/layouts/LayoutSettingsPage';
 import { LayoutProvider } from '../context/LayoutContext';
 
 // Inventory Module Pages
@@ -157,6 +153,8 @@ import ProcurementAnalytics from '../pages/purchase/Analytics/ProcurementAnalyti
 
 // Finance Module Pages
 import ExpenseList from '../pages/finance/Expenses/ExpenseList';
+import SiteExpenseList from '../pages/finance/Expenses/SiteExpenseList';
+import AdvanceManagement from '../pages/finance/Advances/AdvanceManagement';
 import ExpenseCreate from '../pages/finance/Expenses/ExpenseCreate';
 import ExpenseDetails from '../pages/finance/Expenses/ExpenseDetails';
 import ExpenseCategoryList from '../pages/finance/ExpenseCategories/ExpenseCategoryList';
@@ -174,6 +172,9 @@ import DepartmentList from '../pages/hrm/Departments/DepartmentList';
 import DesignationList from '../pages/hrm/Designations/DesignationList';
 import AttendanceDashboard from '../pages/hrm/Attendance/AttendanceDashboard';
 import LeaveList from '../pages/hrm/Leave/LeaveList';
+import LeaveApproval from '../pages/hrm/Leave/LeaveApproval';
+import LeaveBackup from '../pages/hrm/Leave/LeaveBackup';
+import UnavailableUsersPage from '../pages/hrm/Leave/UnavailableUsersPage';
 import HolidayList from '../pages/hrm/Holidays/HolidayList';
 import PayrollDashboard from '../pages/hrm/Payroll/PayrollDashboard';
 import RecruitmentDashboard from '../pages/hrm/Recruitment/RecruitmentDashboard';
@@ -267,6 +268,9 @@ const DashboardDispatcher = () => {
   }
   if (user?.role === 'Project Engineer') {
     return <Navigate to="/app/project-engineer/dashboard" replace />;
+  }
+  if (user?.role === 'Licensing Manager') {
+    return <Navigate to="/app/licensing-manager/dashboard" replace />;
   }
   return <MainDashboard />;
 };
@@ -435,6 +439,7 @@ export const AppRoutes = () => {
         <Route path="store-executive/dashboard" element={<PermissionRoute permission="store.view"><StoreExecutiveDashboard /></PermissionRoute>} />
         <Route path="quality-control/dashboard" element={<PermissionRoute permission="qc.view"><QualityControlDashboard /></PermissionRoute>} />
         <Route path="project-engineer/dashboard" element={<PermissionRoute permission="projects.view"><ProjectEngineerDashboard /></PermissionRoute>} />
+        <Route path="licensing-manager/dashboard" element={<LicensingManagerDashboard />} />
 
         {/* =========================================
             HRM / HUMAN RESOURCE MANAGEMENT ROUTES
@@ -447,7 +452,10 @@ export const AppRoutes = () => {
         <Route path="hrm/departments" element={<PermissionRoute permission="hrm.view"><DepartmentList /></PermissionRoute>} />
         <Route path="hrm/designations" element={<PermissionRoute permission="hrm.view"><DesignationList /></PermissionRoute>} />
         <Route path="hrm/attendance" element={<PermissionRoute permission="hrm.view"><AttendanceDashboard /></PermissionRoute>} />
-        <Route path="hrm/leave" element={<PermissionRoute permission="hrm.view"><LeaveList /></PermissionRoute>} />
+        <Route path="hrm/leave" element={<LeaveList />} />
+        <Route path="hrm/leave/approvals" element={<PermissionRoute permission="hrm.view"><LeaveApproval /></PermissionRoute>} />
+        <Route path="hrm/leave/backup" element={<PermissionRoute permission="hrm.view"><LeaveBackup /></PermissionRoute>} />
+        <Route path="hrm/unavailable-users" element={<UnavailableUsersPage />} />
         <Route path="hrm/holidays" element={<PermissionRoute permission="hrm.view"><HolidayList /></PermissionRoute>} />
         <Route path="hrm/payroll" element={<PermissionRoute permission="hrm.view"><PayrollDashboard /></PermissionRoute>} />
         <Route path="hrm/recruitment" element={<PermissionRoute permission="hrm.view"><RecruitmentDashboard /></PermissionRoute>} />
@@ -463,6 +471,7 @@ export const AppRoutes = () => {
         <Route path="crm/contacts/:id" element={<PermissionRoute permission="crm.view"><ContactDetails /></PermissionRoute>} />
         <Route path="crm/leads" element={<PermissionRoute permission="crm.view"><LeadList /></PermissionRoute>} />
         <Route path="crm/leads/:id" element={<PermissionRoute permission="crm.view"><LeadDetails /></PermissionRoute>} />
+        <Route path="crm/duplicate-leads" element={<PermissionRoute permission="crm.view"><DuplicateLeads /></PermissionRoute>} />
         <Route path="crm/deals" element={<PermissionRoute permission="crm.view"><DealList /></PermissionRoute>} />
         <Route path="crm/deals/:id" element={<PermissionRoute permission="crm.view"><DealDetails /></PermissionRoute>} />
         <Route path="crm/pipeline" element={<PermissionRoute permission="crm.view"><PipelineBoard /></PermissionRoute>} />
@@ -530,6 +539,8 @@ export const AppRoutes = () => {
             ========================================= */}
         <Route path="finance" element={<PermissionRoute permission="finance.view"><FinanceDashboard /></PermissionRoute>} />
         <Route path="finance/expenses" element={<PermissionRoute permission="finance.view"><ExpenseList /></PermissionRoute>} />
+        <Route path="finance/site-expenses" element={<PermissionRoute permission="finance.view"><SiteExpenseList /></PermissionRoute>} />
+        <Route path="finance/advances" element={<AdvanceManagement />} />
         <Route path="finance/expenses/create" element={<PermissionRoute permission="finance.create"><ExpenseCreate /></PermissionRoute>} />
         <Route path="finance/expenses/:id" element={<PermissionRoute permission="finance.view"><ExpenseDetails /></PermissionRoute>} />
         <Route path="finance/expenses/:id/edit" element={<PermissionRoute permission="finance.edit"><ExpenseCreate /></PermissionRoute>} />
@@ -614,6 +625,7 @@ export const AppRoutes = () => {
         <Route path="system/roles" element={<PermissionRoute permission="roles.view"><RolesManagement /></PermissionRoute>} />
         <Route path="system/permissions" element={<PermissionRoute permission="permissions.view"><Permissions /></PermissionRoute>} />
         <Route path="system/delete-requests" element={<PermissionRoute permission="users.view"><DeleteRequests /></PermissionRoute>} />
+        <Route path="system/backups" element={<PermissionRoute permission="users.view"><SystemBackups /></PermissionRoute>} />
 
         {/* =========================================
             ENTERPRISE SETTINGS MANAGEMENT ROUTES
@@ -626,17 +638,8 @@ export const AppRoutes = () => {
 
         {/* Applications Module Routes */}
         <Route path="applications/chat" element={<ChatPage />} />
-        <Route path="applications/calls" element={<CallsPage />} />
         <Route path="applications/calendar" element={<CalendarPage />} />
-        <Route path="applications/email" element={<EmailPage />} />
-        <Route path="applications/files" element={<FileManagerPage />} />
-        <Route path="applications/notes" element={<NotesPage />} />
         <Route path="applications/todo" element={<TodoPage />} />
-        <Route path="applications/workflows" element={<WorkflowsPage />} />
-
-        {/* Layouts Module Routes */}
-        <Route path="layouts" element={<LayoutSettingsPage />} />
-        <Route path="layouts/:preset" element={<LayoutSettingsPage />} />
       </Route>
 
       {/* Fallback */}

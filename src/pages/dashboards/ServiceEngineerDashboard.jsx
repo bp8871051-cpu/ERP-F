@@ -315,21 +315,38 @@ export default function ServiceEngineerDashboard() {
         )}
       </AnimatePresence>
 
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-2xl p-6 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header Banner - Responsive & Clean Design */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-blue-300 text-xs font-bold uppercase tracking-wider mb-1">
-            <Wrench className="w-4 h-4 text-blue-400" />
-            Field Operations & Technical Service
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 text-xs font-semibold uppercase tracking-wider rounded-md bg-emerald-100 text-emerald-800">
+              Field Operations & Technical Service
+            </span>
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Service Engineer Dashboard</h1>
-          <p className="text-xs text-blue-100/80 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1.5">
+            Service Engineer Dashboard
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
             Manage your field service requests, scheduled customer site visits, maintenance logs, and spare parts requisitions.
           </p>
         </div>
 
         {/* Global Quick Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => fetchDashboard(true)}
+            disabled={refreshing}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition shadow-2xs"
+            title="Refresh Metrics"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+
           <button
             onClick={() => {
               setTicketForm({
@@ -341,7 +358,7 @@ export default function ServiceEngineerDashboard() {
               });
               setModalType('new_ticket');
             }}
-            className="px-3.5 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs transition"
           >
             <Plus className="w-3.5 h-3.5" />
             New Service Request
@@ -362,7 +379,7 @@ export default function ServiceEngineerDashboard() {
               });
               setModalType('visit');
             }}
-            className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow flex items-center gap-1.5 transition"
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition"
           >
             <Calendar className="w-3.5 h-3.5" />
             Schedule Site Visit
@@ -383,7 +400,7 @@ export default function ServiceEngineerDashboard() {
               });
               setModalType('report');
             }}
-            className="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow flex items-center gap-1.5 transition"
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-semibold shadow-xs transition"
           >
             <FileText className="w-3.5 h-3.5" />
             Create Service Report
@@ -404,19 +421,10 @@ export default function ServiceEngineerDashboard() {
               });
               setModalType('parts');
             }}
-            className="px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-semibold shadow flex items-center gap-1.5 transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-xs transition"
           >
             <Package className="w-3.5 h-3.5" />
             Request Spare Parts
-          </button>
-
-          <button
-            onClick={() => fetchDashboard(true)}
-            disabled={refreshing}
-            className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold backdrop-blur-xs transition"
-            title="Refresh Metrics"
-          >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -429,11 +437,11 @@ export default function ServiceEngineerDashboard() {
             setActiveTab('tickets');
             setTicketStatusFilter('all');
           }}
-          className="p-4 bg-white border border-slate-200/80 rounded-xl hover:border-blue-400 hover:shadow-md cursor-pointer transition space-y-2"
+          className="p-4 bg-white border border-slate-200/80 rounded-xl hover:border-emerald-400 hover:shadow-md cursor-pointer transition space-y-2"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Assigned</span>
-            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
+            <div className="p-1.5 bg-emerald-50 text-emerald-700 rounded-lg">
               <Wrench className="w-4 h-4" />
             </div>
           </div>
@@ -498,7 +506,7 @@ export default function ServiceEngineerDashboard() {
         {/* 5. Today's Scheduled Visits */}
         <div
           onClick={() => setActiveTab('visits')}
-          className="p-4 bg-white border border-slate-200/80 rounded-xl hover:border-blue-400 hover:shadow-md cursor-pointer transition space-y-2"
+          className="p-4 bg-white border border-slate-200/80 rounded-xl hover:border-emerald-400 hover:shadow-md cursor-pointer transition space-y-2"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Today Visits</span>
@@ -544,40 +552,170 @@ export default function ServiceEngineerDashboard() {
         </div>
       </div>
 
-      {/* Main Grid: Status Chart + Pending Confirmations */}
+      {/* Main Grid: Live Operations Queue + Action Center */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Cols: Service Status & Work Breakdown */}
-        <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-indigo-600" />
-              <h2 className="text-sm font-bold text-slate-900">Service Tickets Status Distribution</h2>
-            </div>
-            <span className="text-xs text-slate-400">Live Database Overview</span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {Object.entries(sections.service_status_chart || {}).map(([label, count]) => (
-              <div key={label} className="p-3 bg-slate-50/70 border border-slate-200/60 rounded-xl text-center">
-                <p className="text-[11px] font-semibold text-slate-500 mb-1">{label}</p>
-                <p className="text-xl font-bold text-slate-900">{count}</p>
+        {/* Left 2 Cols: Main Operations, Workload & Active Queue */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* 1. Status Distribution & Workload Visualizer */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-indigo-600" />
+                <h2 className="text-sm font-bold text-slate-900">Service Tickets Status & Workload Distribution</h2>
               </div>
-            ))}
+              <span className="text-xs text-slate-400">Live Database Overview</span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {Object.entries(sections.service_status_chart || {}).map(([label, count]) => (
+                <div
+                  key={label}
+                  onClick={() => {
+                    setActiveTab('tickets');
+                    const map = {
+                      'Pending': 'open',
+                      'In Progress': 'in_progress',
+                      'Scheduled Visits': 'scheduled',
+                      'Completed': 'completed',
+                      'Waiting Parts': 'waiting_parts',
+                    };
+                    setTicketStatusFilter(map[label] || 'all');
+                  }}
+                  className="p-3 bg-slate-50/80 border border-slate-200/60 rounded-xl text-center hover:bg-emerald-50/50 hover:border-emerald-300 cursor-pointer transition shadow-2xs"
+                >
+                  <p className="text-[11px] font-semibold text-slate-500 mb-1">{label}</p>
+                  <p className="text-xl font-bold text-slate-900">{count}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Active Service Tickets Preview (Live Priority Queue) */}
+            <div className="mt-5 pt-4 border-t border-slate-100">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
+                  <Wrench className="w-4 h-4 text-emerald-700" />
+                  Active Assigned Tickets (Immediate Action Required)
+                </h3>
+                <button
+                  onClick={() => setActiveTab('tickets')}
+                  className="text-xs text-emerald-700 hover:text-blue-800 font-semibold flex items-center gap-1"
+                >
+                  View All ({sections.my_assigned_tickets?.length || 0}) <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {(sections.my_assigned_tickets || []).length > 0 ? (
+                <div className="space-y-2">
+                  {(sections.my_assigned_tickets || [])
+                    .filter((t) => t.status !== 'completed' && t.status !== 'closed')
+                    .slice(0, 4)
+                    .map((t) => (
+                      <div
+                        key={t.id}
+                        className="p-3 bg-slate-50/70 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:border-slate-300 transition"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px]">
+                              {t.ticket_number}
+                            </span>
+                            <span className="font-bold text-slate-900 truncate">{t.subject}</span>
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${
+                                t.priority === 'urgent'
+                                  ? 'bg-rose-100 text-rose-800'
+                                  : t.priority === 'high'
+                                  ? 'bg-amber-100 text-amber-800'
+                                  : 'bg-slate-100 text-slate-700'
+                              }`}
+                            >
+                              {t.priority}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-500 mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                            <span>Client: <strong className="text-slate-700">{t.customer?.name || 'Customer'}</strong></span>
+                            {t.resolution_due_at && (
+                              <span className="flex items-center gap-1 text-amber-700">
+                                <Clock className="w-3 h-3 text-amber-500" />
+                                Due: {new Date(t.resolution_due_at).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                          <button
+                            onClick={() => {
+                              setSelectedTicket(t);
+                              setModalType('view_ticket');
+                            }}
+                            className="px-2.5 py-1 text-[11px] font-semibold bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg transition"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => {
+                              setStatusForm({ ticket_id: t.id, status: t.status, notes: '' });
+                              setModalType('status');
+                            }}
+                            className="px-2.5 py-1 text-[11px] font-semibold bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-800 rounded-lg transition"
+                          >
+                            Status
+                          </button>
+                          <button
+                            onClick={() => {
+                              setReportForm({
+                                ticket_id: t.id,
+                                customer_id: t.customer_id || '',
+                                customer_name: t.customer?.name || '',
+                                equipment_name: 'Main Booster Pump Unit',
+                                serial_number: 'SN-ENG-' + Math.floor(1000 + Math.random() * 9000),
+                                work_performed: '',
+                                hours_spent: 2.0,
+                                recommendations: '',
+                                customer_confirmation_status: 'pending',
+                              });
+                              setModalType('report');
+                            }}
+                            className="px-2.5 py-1 text-[11px] font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
+                          >
+                            Report
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="p-4 bg-emerald-50 rounded-xl text-center text-xs text-emerald-800">
+                  All assigned tickets are currently resolved and up to date!
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Today's Scheduled Visits Summary */}
-          <div className="mt-6 pt-4 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-blue-600" />
-                Today's Field Visits ({sections.today_site_visits?.length || 0})
-              </h3>
-              <button
-                onClick={() => setActiveTab('visits')}
-                className="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1"
-              >
-                View All <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+          {/* 2. Scheduled Field Visits (Today's & Upcoming) */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
+            <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-emerald-700" />
+                <h3 className="text-sm font-bold text-slate-900">
+                  Customer Site Visits Schedule ({sections.today_site_visits?.length || 0} Today)
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setModalType('visit')}
+                  className="px-2.5 py-1 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs font-semibold flex items-center gap-1 transition"
+                >
+                  <Plus className="w-3 h-3" /> Schedule Visit
+                </button>
+                <button
+                  onClick={() => setActiveTab('visits')}
+                  className="text-xs text-emerald-700 hover:text-blue-800 font-semibold flex items-center gap-1"
+                >
+                  View All <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
 
             {sections.today_site_visits && sections.today_site_visits.length > 0 ? (
@@ -585,12 +723,12 @@ export default function ServiceEngineerDashboard() {
                 {sections.today_site_visits.map((v) => (
                   <div
                     key={v.id}
-                    className="p-3 bg-blue-50/40 border border-blue-100 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+                    className="p-3 bg-emerald-50/40 border border-emerald-100 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
                   >
                     <div>
                       <div className="font-bold text-slate-900 flex items-center gap-2">
                         <span>{v.customer_name}</span>
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-[10px] font-bold uppercase">
+                        <span className="px-2 py-0.5 bg-emerald-100 text-blue-800 rounded-full text-[10px] font-bold uppercase">
                           {v.service_type?.replace('_', ' ')}
                         </span>
                       </div>
@@ -606,7 +744,7 @@ export default function ServiceEngineerDashboard() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <span className="px-2.5 py-1 bg-white border border-blue-200 text-blue-700 font-bold rounded-lg text-xs">
+                      <span className="px-2.5 py-1 bg-white border border-emerald-200 text-emerald-800 font-bold rounded-lg text-xs">
                         {v.visit_time}
                       </span>
                       <button
@@ -624,7 +762,7 @@ export default function ServiceEngineerDashboard() {
                           });
                           setModalType('report');
                         }}
-                        className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-xs transition"
+                        className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-xs transition"
                       >
                         Record Report
                       </button>
@@ -633,23 +771,80 @@ export default function ServiceEngineerDashboard() {
                 ))}
               </div>
             ) : (
-              <div className="p-4 bg-slate-50 rounded-xl text-center text-xs text-slate-400">
-                No scheduled site visits for today.
+              <div className="space-y-3">
+                <div className="p-3 bg-emerald-50/40 border border-emerald-100 rounded-xl flex items-center justify-between text-xs text-slate-600">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                    <span>No scheduled site visits for today. Next upcoming customer site visits:</span>
+                  </div>
+                  <button
+                    onClick={() => setModalType('visit')}
+                    className="font-semibold text-emerald-800 hover:underline"
+                  >
+                    + Book New Visit
+                  </button>
+                </div>
+
+                {/* Upcoming scheduled customer visits fallback */}
+                <div className="space-y-2">
+                  {(sections.upcoming_maintenance_schedule || []).slice(0, 3).map((v) => (
+                    <div
+                      key={v.id}
+                      className="p-3 bg-slate-50/70 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+                    >
+                      <div>
+                        <div className="font-bold text-slate-900 flex items-center gap-2">
+                          <span>{v.customer_name}</span>
+                          <span className="px-2 py-0.5 bg-slate-200 text-slate-700 rounded-full text-[10px] font-bold uppercase">
+                            {v.service_type?.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <div className="text-slate-500 text-[11px] flex items-center gap-1 mt-0.5">
+                          <Calendar className="w-3 h-3 text-blue-500" />
+                          <span>{v.visit_date} • {v.visit_time}</span>
+                          <span className="mx-1">•</span>
+                          <MapPin className="w-3 h-3 text-slate-400" />
+                          <span>{v.site_address}</span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setReportForm({
+                            ticket_id: v.ticket_id || '',
+                            customer_id: v.customer_id || '',
+                            customer_name: v.customer_name || '',
+                            equipment_name: 'Field Equipment',
+                            serial_number: '',
+                            work_performed: '',
+                            hours_spent: 2.0,
+                            recommendations: '',
+                            customer_confirmation_status: 'pending',
+                          });
+                          setModalType('report');
+                        }}
+                        className="px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition"
+                      >
+                        Record Report
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Col: Pending Customer Confirmations & Recent Activity */}
+        {/* Right Col: Confirmations, Spare Parts, Activity Center */}
         <div className="space-y-6">
-          {/* Pending Confirmations */}
+          {/* 1. Pending Confirmations */}
           <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
             <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
-              <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wide">
                 <Clock className="w-4 h-4 text-amber-600" />
                 Pending Customer Confirmations
               </h3>
-              <span className="px-2 py-0.5 bg-amber-50 text-amber-700 font-bold text-[10px] rounded-full">
+              <span className="px-2 py-0.5 bg-amber-50 text-amber-700 font-bold text-[10px] rounded-full border border-amber-200">
                 {sections.pending_customer_confirmations?.length || 0}
               </span>
             </div>
@@ -669,13 +864,13 @@ export default function ServiceEngineerDashboard() {
                         <button
                           onClick={() => handleSignOffReport(r.id)}
                           disabled={submitting}
-                          className="px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg text-[10px] font-bold flex items-center gap-1 transition"
+                          className="px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg text-[10px] font-bold flex items-center gap-1 transition cursor-pointer"
                         >
                           Sign Off <CheckCircle className="w-3 h-3" />
                         </button>
                         <button
                           onClick={() => setConfirmDelete({ open: true, type: 'report', id: r.id, title: `Report ${r.report_number}` })}
-                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition"
+                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
                           title="Delete Report"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -692,16 +887,67 @@ export default function ServiceEngineerDashboard() {
             )}
           </div>
 
-          {/* Recent Activities */}
+          {/* 2. Spare Parts Requisition Status Tracker */}
           <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
-            <h3 className="text-xs font-bold text-slate-900 mb-3 pb-2 border-b border-slate-100 flex items-center gap-1.5">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+              <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wide">
+                <Package className="w-4 h-4 text-purple-600" />
+                Spare Parts Requisition Tracker
+              </h3>
+              <button
+                onClick={() => setModalType('parts')}
+                className="text-[11px] font-semibold text-purple-700 hover:underline"
+              >
+                + Request Parts
+              </button>
+            </div>
+
+            {(sections.recent_spare_parts_requests || []).length > 0 ? (
+              <div className="space-y-2.5">
+                {(sections.recent_spare_parts_requests || []).slice(0, 3).map((pr) => (
+                  <div key={pr.id} className="p-2.5 bg-purple-50/40 border border-purple-100 rounded-xl text-xs">
+                    <div className="flex items-center justify-between font-bold text-slate-900">
+                      <span className="font-mono text-purple-700">{pr.request_number}</span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          pr.status === 'issued'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                            : 'bg-amber-100 text-amber-800 border border-amber-200'
+                        }`}
+                      >
+                        {pr.status}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-600 mt-1">
+                      {pr.items && pr.items.length > 0 ? (
+                        <span>{pr.items[0]?.product?.name || 'Item'} × {pr.items[0]?.quantity_requested}</span>
+                      ) : (
+                        <span>{pr.site_location || 'Customer Site'}</span>
+                      )}
+                    </div>
+                    <div className="text-[10px] text-slate-400 mt-1">
+                      Due: {pr.required_date || 'ASAP'} • Priority: <span className="uppercase font-semibold">{pr.priority}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 bg-slate-50 rounded-xl text-center text-xs text-slate-400">
+                No active spare parts requisitions.
+              </div>
+            )}
+          </div>
+
+          {/* 3. Recent Field Activities */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs">
+            <h3 className="text-xs font-bold text-slate-900 mb-3 pb-2 border-b border-slate-100 flex items-center gap-1.5 uppercase tracking-wide">
               <ShieldCheck className="w-4 h-4 text-teal-600" />
               Recent Field Activities
             </h3>
             <div className="space-y-3">
               {(sections.recent_activities || []).slice(0, 5).map((act) => (
                 <div key={act.id} className="flex items-start gap-2.5 text-xs">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-slate-800 truncate">{act.title}</p>
                     <p className="text-[11px] text-slate-500 truncate">{act.description}</p>
@@ -722,7 +968,7 @@ export default function ServiceEngineerDashboard() {
             <button
               onClick={() => setActiveTab('tickets')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                activeTab === 'tickets' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+                activeTab === 'tickets' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               <Wrench className="w-3.5 h-3.5" />
@@ -732,7 +978,7 @@ export default function ServiceEngineerDashboard() {
             <button
               onClick={() => setActiveTab('visits')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                activeTab === 'visits' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+                activeTab === 'visits' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               <Calendar className="w-3.5 h-3.5" />
@@ -742,7 +988,7 @@ export default function ServiceEngineerDashboard() {
             <button
               onClick={() => setActiveTab('reports')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                activeTab === 'reports' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+                activeTab === 'reports' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
@@ -752,7 +998,7 @@ export default function ServiceEngineerDashboard() {
             <button
               onClick={() => setActiveTab('parts')}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                activeTab === 'parts' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+                activeTab === 'parts' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               <Package className="w-3.5 h-3.5" />
@@ -769,7 +1015,7 @@ export default function ServiceEngineerDashboard() {
                 placeholder="Search ticket, customer..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 w-48 sm:w-64"
+                className="pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 w-48 sm:w-64"
               />
             </div>
           </div>
@@ -787,7 +1033,7 @@ export default function ServiceEngineerDashboard() {
                   onClick={() => setTicketStatusFilter(status)}
                   className={`px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] transition ${
                     ticketStatusFilter === status
-                      ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                      ? 'bg-emerald-100 text-blue-800 border border-emerald-200'
                       : 'text-slate-500 hover:bg-slate-100'
                   }`}
                 >
@@ -812,7 +1058,7 @@ export default function ServiceEngineerDashboard() {
                   {filteredTickets.length > 0 ? (
                     filteredTickets.map((t) => (
                       <tr key={t.id} className="hover:bg-slate-50/70 transition">
-                        <td className="p-3 font-bold text-blue-600 font-mono">{t.ticket_number}</td>
+                        <td className="p-3 font-bold text-emerald-700 font-mono">{t.ticket_number}</td>
                         <td className="p-3">
                           <div className="font-bold text-slate-900">{t.subject}</div>
                           <div className="text-[11px] text-slate-400">{t.customer?.name || 'Customer'}</div>
@@ -836,7 +1082,7 @@ export default function ServiceEngineerDashboard() {
                               t.status === 'completed'
                                 ? 'bg-emerald-100 text-emerald-800'
                                 : t.status === 'in_progress'
-                                ? 'bg-blue-100 text-blue-800'
+                                ? 'bg-emerald-100 text-blue-800'
                                 : 'bg-amber-100 text-amber-800'
                             }`}
                           >
@@ -862,7 +1108,7 @@ export default function ServiceEngineerDashboard() {
                                 setStatusForm({ ticket_id: t.id, status: t.status, notes: '' });
                                 setModalType('status');
                               }}
-                              className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-[11px] font-semibold transition"
+                              className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-[11px] font-semibold transition"
                             >
                               Update
                             </button>
@@ -912,7 +1158,7 @@ export default function ServiceEngineerDashboard() {
               </h3>
               <button
                 onClick={() => setModalType('visit')}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1 shadow-xs transition"
+                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1 shadow-xs transition"
               >
                 <Plus className="w-3.5 h-3.5" /> Schedule New Visit
               </button>
@@ -935,7 +1181,7 @@ export default function ServiceEngineerDashboard() {
                   {[...(sections.today_site_visits || []), ...(sections.upcoming_maintenance_schedule || [])].map((v) => (
                     <tr key={v.id} className="hover:bg-slate-50/70 transition">
                       <td className="p-3 font-semibold text-slate-900">
-                        {v.visit_date} • <span className="text-blue-600">{v.visit_time}</span>
+                        {v.visit_date} • <span className="text-emerald-700">{v.visit_time}</span>
                       </td>
                       <td className="p-3 font-bold text-slate-800">{v.customer_name}</td>
                       <td className="p-3 text-slate-500">{v.site_address}</td>
@@ -944,7 +1190,7 @@ export default function ServiceEngineerDashboard() {
                       </td>
                       <td className="p-3 text-slate-600 font-mono text-[11px]">{v.contact_phone || 'N/A'}</td>
                       <td className="p-3">
-                        <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-[10px] font-bold uppercase">
+                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded-full text-[10px] font-bold uppercase">
                           {v.status}
                         </span>
                       </td>
@@ -1143,7 +1389,7 @@ export default function ServiceEngineerDashboard() {
             >
               <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Wrench className="w-4 h-4 text-blue-600" /> Update Service Status
+                  <Wrench className="w-4 h-4 text-emerald-700" /> Update Service Status
                 </h3>
                 <button onClick={() => setModalType(null)} className="text-slate-400 hover:text-slate-600">
                   <X className="w-4 h-4" />
@@ -1156,7 +1402,7 @@ export default function ServiceEngineerDashboard() {
                   <select
                     value={statusForm.ticket_id}
                     onChange={(e) => setStatusForm({ ...statusForm, ticket_id: e.target.value })}
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
                     required
                   >
                     <option value="">Choose ticket...</option>
@@ -1173,7 +1419,7 @@ export default function ServiceEngineerDashboard() {
                   <select
                     value={statusForm.status}
                     onChange={(e) => setStatusForm({ ...statusForm, status: e.target.value })}
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
                     required
                   >
                     <option value="open">Open (Pending Engineer)</option>
@@ -1189,7 +1435,7 @@ export default function ServiceEngineerDashboard() {
                     value={statusForm.notes}
                     onChange={(e) => setStatusForm({ ...statusForm, notes: e.target.value })}
                     placeholder="Details about work in progress, findings..."
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
 
@@ -1204,7 +1450,7 @@ export default function ServiceEngineerDashboard() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold shadow-xs"
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-semibold shadow-xs"
                   >
                     {submitting ? 'Updating...' : 'Save Status'}
                   </button>
@@ -1227,7 +1473,7 @@ export default function ServiceEngineerDashboard() {
             >
               <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-blue-600" /> Schedule Field Site Visit
+                  <Calendar className="w-4 h-4 text-emerald-700" /> Schedule Field Site Visit
                 </h3>
                 <button onClick={() => setModalType(null)} className="text-slate-400 hover:text-slate-600">
                   <X className="w-4 h-4" />
@@ -1242,7 +1488,7 @@ export default function ServiceEngineerDashboard() {
                     value={visitForm.customer_name}
                     onChange={(e) => setVisitForm({ ...visitForm, customer_name: e.target.value })}
                     placeholder="Company or client name"
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
                     required
                   />
                 </div>
@@ -1254,7 +1500,7 @@ export default function ServiceEngineerDashboard() {
                       type="date"
                       value={visitForm.visit_date}
                       onChange={(e) => setVisitForm({ ...visitForm, visit_date: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
                       required
                     />
                   </div>
@@ -1265,7 +1511,7 @@ export default function ServiceEngineerDashboard() {
                       value={visitForm.visit_time}
                       onChange={(e) => setVisitForm({ ...visitForm, visit_time: e.target.value })}
                       placeholder="e.g. 10:30 AM"
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
                       required
                     />
                   </div>
@@ -1277,7 +1523,7 @@ export default function ServiceEngineerDashboard() {
                     <select
                       value={visitForm.service_type}
                       onChange={(e) => setVisitForm({ ...visitForm, service_type: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
                     >
                       <option value="breakdown_repair">Breakdown Repair</option>
                       <option value="preventive_maintenance">Preventive Maintenance</option>
@@ -1292,7 +1538,7 @@ export default function ServiceEngineerDashboard() {
                       value={visitForm.contact_phone}
                       onChange={(e) => setVisitForm({ ...visitForm, contact_phone: e.target.value })}
                       placeholder="+91 98200..."
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
@@ -1304,7 +1550,7 @@ export default function ServiceEngineerDashboard() {
                     value={visitForm.site_address}
                     onChange={(e) => setVisitForm({ ...visitForm, site_address: e.target.value })}
                     placeholder="Plant bay, industrial area, city..."
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
                     required
                   />
                 </div>
@@ -1316,7 +1562,7 @@ export default function ServiceEngineerDashboard() {
                     value={visitForm.notes}
                     onChange={(e) => setVisitForm({ ...visitForm, notes: e.target.value })}
                     placeholder="Specific calibration equipment, safety gear..."
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
 
@@ -1331,7 +1577,7 @@ export default function ServiceEngineerDashboard() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold shadow-xs"
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-semibold shadow-xs"
                   >
                     {submitting ? 'Scheduling...' : 'Confirm Schedule'}
                   </button>
@@ -1468,86 +1714,104 @@ export default function ServiceEngineerDashboard() {
         )}
       </AnimatePresence>
 
-      {/* Modal 4: Request Spare Parts */}
+      {/* Modal 4: Request Spare Parts - Responsive, Polished Design */}
       <AnimatePresence>
         {modalType === 'parts' && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden"
+              className="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200/80 overflow-hidden my-6"
             >
-              <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Package className="w-4 h-4 text-purple-600" /> Requisition Spare Parts from Store
-                </h3>
-                <button onClick={() => setModalType(null)} className="text-slate-400 hover:text-slate-600">
-                  <X className="w-4 h-4" />
+              <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                    <Package className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Request Spare Parts</h3>
+                    <p className="text-xs text-slate-500">Requisition critical replacement parts directly from the store inventory</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setModalType(null)} 
+                  className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"
+                >
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleRequestParts} className="p-5 space-y-3.5 text-xs">
+              <form onSubmit={handleRequestParts} className="p-5 sm:p-6 space-y-4 text-xs">
+                {/* Product selection */}
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Select Spare Part Product *</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Select Spare Part Product <span className="text-rose-500">*</span>
+                  </label>
                   <select
                     value={partsForm.product_id}
                     onChange={(e) => setPartsForm({ ...partsForm, product_id: e.target.value })}
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 font-semibold"
+                    className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none bg-white font-medium text-slate-800"
                     required
                   >
-                    <option value="">Select item...</option>
+                    <option value="">Choose item from warehouse catalog...</option>
                     {(lookups.products || []).map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name} (SKU: {p.sku}) - In Stock: {p.quantity}
+                        {p.name} {p.sku ? `(SKU: ${p.sku})` : ''} - In Stock: {p.quantity || 0}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                {/* Quantity and Priority */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Quantity Needed *</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Quantity Needed <span className="text-rose-500">*</span>
+                    </label>
                     <input
                       type="number"
                       min="1"
                       value={partsForm.quantity}
                       onChange={(e) => setPartsForm({ ...partsForm, quantity: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 font-bold"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-bold text-slate-900"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Priority</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">Priority</label>
                     <select
                       value={partsForm.priority}
                       onChange={(e) => setPartsForm({ ...partsForm, priority: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none bg-white text-slate-700"
                     >
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent Breakdown</option>
+                      <option value="medium">Normal / Medium</option>
+                      <option value="high">High Priority</option>
+                      <option value="urgent">Urgent Breakdown (Line Stopped)</option>
                     </select>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                {/* Required By Date and Warehouse */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Required By Date *</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      Required By Date <span className="text-rose-500">*</span>
+                    </label>
                     <input
                       type="date"
                       value={partsForm.required_date}
                       onChange={(e) => setPartsForm({ ...partsForm, required_date: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none text-slate-800"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Issue Warehouse</label>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">Issue Warehouse</label>
                     <select
                       value={partsForm.warehouse_id}
                       onChange={(e) => setPartsForm({ ...partsForm, warehouse_id: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500"
+                      className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none bg-white text-slate-700"
                     >
                       <option value="">Default Warehouse</option>
                       {(lookups.warehouses || []).map((w) => (
@@ -1559,42 +1823,69 @@ export default function ServiceEngineerDashboard() {
                   </div>
                 </div>
 
+                {/* Service Ticket link */}
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Delivery Site Location *</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Associated Ticket / Service Job
+                  </label>
+                  <select
+                    value={partsForm.ticket_id}
+                    onChange={(e) => setPartsForm({ ...partsForm, ticket_id: e.target.value })}
+                    className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none bg-white text-slate-700"
+                  >
+                    <option value="">General Requisition (No specific ticket)</option>
+                    {(sections.my_assigned_tickets || []).map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.ticket_number} - {t.subject}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Site location */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Delivery Site Location <span className="text-rose-500">*</span>
+                  </label>
                   <input
                     type="text"
                     value={partsForm.site_location}
                     onChange={(e) => setPartsForm({ ...partsForm, site_location: e.target.value })}
                     placeholder="e.g. Unit 3 Valve Station, Hazira Complex"
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500"
+                    className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none text-slate-800"
                     required
                   />
                 </div>
 
+                {/* Notes */}
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Justification & Ticket Reference</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Justification & Breakdown Notes
+                  </label>
                   <textarea
                     rows="2"
                     value={partsForm.notes}
                     onChange={(e) => setPartsForm({ ...partsForm, notes: e.target.value })}
-                    placeholder="Urgent replacement required to clear hydraulic fault..."
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500"
+                    placeholder="Explain why part replacement is needed immediately..."
+                    className="w-full p-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none text-slate-800 resize-none"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                {/* Actions */}
+                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => setModalType(null)}
-                    className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 font-semibold"
+                    className="w-full sm:w-auto px-4 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 font-semibold transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 font-semibold shadow-xs"
+                    className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-semibold shadow-xs transition flex items-center justify-center gap-1.5 disabled:opacity-50"
                   >
+                    <Package className="w-4 h-4" />
                     {submitting ? 'Submitting...' : 'Send Request to Store'}
                   </button>
                 </div>
@@ -1682,7 +1973,7 @@ export default function ServiceEngineerDashboard() {
             >
               <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Wrench className="w-4 h-4 text-blue-600" /> Ticket Details: {selectedTicket.ticket_number}
+                  <Wrench className="w-4 h-4 text-emerald-700" /> Ticket Details: {selectedTicket.ticket_number}
                 </h3>
                 <button onClick={() => setModalType(null)} className="text-slate-400 hover:text-slate-600">
                   <X className="w-4 h-4" />
@@ -1706,7 +1997,7 @@ export default function ServiceEngineerDashboard() {
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 uppercase font-semibold">Current Status</span>
-                    <p className="font-bold text-blue-600 uppercase">{selectedTicket.status?.replace('_', ' ')}</p>
+                    <p className="font-bold text-emerald-700 uppercase">{selectedTicket.status?.replace('_', ' ')}</p>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 uppercase font-semibold">Resolution Due</span>
@@ -1729,7 +2020,7 @@ export default function ServiceEngineerDashboard() {
                       setStatusForm({ ticket_id: selectedTicket.id, status: selectedTicket.status, notes: '' });
                       setModalType('status');
                     }}
-                    className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-xl font-semibold hover:bg-blue-100 transition"
+                    className="px-3 py-1.5 bg-emerald-50 text-emerald-800 rounded-xl font-semibold hover:bg-emerald-100 transition"
                   >
                     Update Status
                   </button>
@@ -1758,7 +2049,7 @@ export default function ServiceEngineerDashboard() {
             >
               <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50">
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <PlusCircle className="w-4 h-4 text-blue-600" /> Create New Service Request
+                  <PlusCircle className="w-4 h-4 text-emerald-700" /> Create New Service Request
                 </h3>
                 <button onClick={() => setModalType(null)} className="text-slate-400 hover:text-slate-600">
                   <X className="w-4 h-4" />
@@ -1771,7 +2062,7 @@ export default function ServiceEngineerDashboard() {
                   <select
                     value={ticketForm.customer_id}
                     onChange={(e) => setTicketForm({ ...ticketForm, customer_id: e.target.value })}
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
                     required
                   >
                     <option value="">Select customer...</option>
@@ -1790,7 +2081,7 @@ export default function ServiceEngineerDashboard() {
                     value={ticketForm.subject}
                     onChange={(e) => setTicketForm({ ...ticketForm, subject: e.target.value })}
                     placeholder="e.g. Hydraulic Ram Cylinder Oil Leakage & Pressure Loss"
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
                     required
                   />
                 </div>
@@ -1801,7 +2092,7 @@ export default function ServiceEngineerDashboard() {
                     <select
                       value={ticketForm.priority}
                       onChange={(e) => setTicketForm({ ...ticketForm, priority: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
                       required
                     >
                       <option value="low">Low (General Checkup)</option>
@@ -1816,7 +2107,7 @@ export default function ServiceEngineerDashboard() {
                       type="date"
                       value={ticketForm.resolution_due_at}
                       onChange={(e) => setTicketForm({ ...ticketForm, resolution_due_at: e.target.value })}
-                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-semibold"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
                     />
                   </div>
                 </div>
@@ -1828,7 +2119,7 @@ export default function ServiceEngineerDashboard() {
                     value={ticketForm.description}
                     onChange={(e) => setTicketForm({ ...ticketForm, description: e.target.value })}
                     placeholder="Symptoms observed by operator, alarm codes, location on plant floor..."
-                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
                     required
                   />
                 </div>
@@ -1844,7 +2135,7 @@ export default function ServiceEngineerDashboard() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-md transition disabled:opacity-50"
+                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md transition disabled:opacity-50"
                   >
                     {submitting ? 'Creating...' : 'Create Service Ticket'}
                   </button>
