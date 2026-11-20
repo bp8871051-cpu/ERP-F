@@ -104,9 +104,11 @@ export const CalendarPage = () => {
   };
 
   const generateGoogleMeetCode = () => {
-    const chars = 'abcdefghijklmnopqrstuvwxyz';
-    const segment = (len) => Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-    return `https://meet.google.com/${segment(3)}-${segment(4)}-${segment(3)}`;
+    return 'https://meet.google.com/new';
+  };
+
+  const startInstantGoogleMeet = () => {
+    window.open('https://meet.google.com/new', '_blank');
   };
 
   // Open modal for new event
@@ -249,13 +251,24 @@ export const CalendarPage = () => {
             ))}
           </div>
 
-          <button
-            onClick={() => openNewEventModal()}
-            className="inline-flex items-center gap-2 px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create Event</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={startInstantGoogleMeet}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs transition-colors cursor-pointer"
+              title="Launch instant Google Meet video call in a new tab"
+            >
+              <Video className="w-4 h-4" />
+              <span>Instant Google Meet</span>
+            </button>
+
+            <button
+              onClick={() => openNewEventModal()}
+              className="inline-flex items-center gap-2 px-3.5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create Event</span>
+            </button>
+          </div>
         </div>
       </div>
 
