@@ -57,6 +57,10 @@ export const LoginPage = () => {
         navigate('/app/documents');
       } else if (userRole === 'Licensing Manager') {
         navigate('/app/licensing-manager/dashboard');
+      } else if (userRole === 'Field Sales') {
+        navigate('/app/crm/field-sales');
+      } else if (userRole === 'Tally Sales') {
+        navigate('/app/crm/tally-sales');
       } else {
         navigate('/app/dashboard');
       }

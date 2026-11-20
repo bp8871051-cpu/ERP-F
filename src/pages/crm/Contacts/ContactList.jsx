@@ -226,7 +226,7 @@ export const ContactList = () => {
       </div>
 
       {/* Search & Filters Card */}
-      <Card className="p-4 !overflow-visible">
+      <Card className="p-4 !overflow-visible relative z-30">
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
           <div className="relative w-full sm:w-80">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -243,7 +243,7 @@ export const ContactList = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <div className="w-40 relative z-10">
+            <div className="w-40 relative z-40">
               <SearchableSelect
                 options={[
                   { value: '', label: 'All Statuses' },
@@ -260,7 +260,7 @@ export const ContactList = () => {
               />
             </div>
 
-            <div className="w-40 relative z-10">
+            <div className="w-44 relative z-40">
               <SearchableSelect
                 options={[
                   { value: '', label: 'All Sources' },

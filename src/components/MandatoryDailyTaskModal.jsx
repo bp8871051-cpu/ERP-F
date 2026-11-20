@@ -10,7 +10,7 @@ import { taskService } from '../services/taskService';
 import { useAuth } from '../context/AuthContext';
 
 export const MandatoryDailyTaskModal = () => {
-  const { user } = useAuth();
+  const { user, currentCompany } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [checking, setChecking] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -42,7 +42,8 @@ export const MandatoryDailyTaskModal = () => {
         const res = await taskService.getTasks({ view: 'today' });
         const todayTasks = res?.tasks || [];
 
-        const localKey = `daily_task_done_${user.id}_${todayStr}`;
+        const compId = currentCompany?.id || 1;
+        const localKey = `daily_task_done_${user.id}_comp_${compId}_${todayStr}`;
         const locallyDone = localStorage.getItem(localKey);
 
         if (todayTasks.length === 0 && !locallyDone) {
@@ -52,7 +53,8 @@ export const MandatoryDailyTaskModal = () => {
         }
       } catch (err) {
         console.error('Failed to check daily task status:', err);
-        const localKey = `daily_task_done_${user?.id}_${todayStr}`;
+        const compId = currentCompany?.id || 1;
+        const localKey = `daily_task_done_${user?.id}_comp_${compId}_${todayStr}`;
         if (!localStorage.getItem(localKey)) {
           setIsOpen(true);
         }
@@ -62,7 +64,7 @@ export const MandatoryDailyTaskModal = () => {
     };
 
     checkDailyTask();
-  }, [user, todayStr]);
+  }, [user, currentCompany, todayStr]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,9 +85,11 @@ export const MandatoryDailyTaskModal = () => {
         status: 'todo',
         due_date: todayStr,
         assigned_to: user?.id,
+        company_id: currentCompany?.id || 1,
       });
 
-      const localKey = `daily_task_done_${user.id}_${todayStr}`;
+      const compId = currentCompany?.id || 1;
+      const localKey = `daily_task_done_${user.id}_comp_${compId}_${todayStr}`;
       localStorage.setItem(localKey, 'true');
 
       setIsOpen(false);
@@ -115,11 +119,14 @@ export const MandatoryDailyTaskModal = () => {
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         }}
       >
-        {/* Header with High-Contrast Falcon Teal Header */}
+        {/* Header with Dynamic Company Gradient */}
         <div
           className="p-5 text-white"
           style={{
-            background: 'linear-gradient(135deg, #0d9488 0%, #059669 100%)',
+            background:
+              currentCompany?.id === 2
+                ? 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)'
+                : 'linear-gradient(135deg, #0d9488 0%, #059669 100%)',
           }}
         >
           <div className="flex items-center gap-3">
@@ -224,8 +231,11 @@ export const MandatoryDailyTaskModal = () => {
               disabled={submitting}
               className="w-full py-3 px-4 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:brightness-105 active:scale-[0.99]"
               style={{
-                backgroundColor: '#0d9488',
-                backgroundImage: 'linear-gradient(135deg, #0d9488 0%, #059669 100%)',
+                backgroundColor: currentCompany?.id === 2 ? '#4f46e5' : '#0d9488',
+                backgroundImage:
+                  currentCompany?.id === 2
+                    ? 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)'
+                    : 'linear-gradient(135deg, #0d9488 0%, #059669 100%)',
                 color: '#ffffff',
                 border: 'none',
               }}
@@ -239,7 +249,7 @@ export const MandatoryDailyTaskModal = () => {
                 <>
                   <Plus className="w-4 h-4 text-white stroke-[2.5]" />
                   <span className="text-white text-xs sm:text-sm font-bold tracking-wide">
-                    Submit Task & Unlock Falcon ERP
+                    Submit Task & Unlock {currentCompany?.name ? (currentCompany.name.includes('Apex') ? 'Apex ERP' : currentCompany.name) : 'Falcon ERP'}
                   </span>
                   <ArrowRight className="w-4 h-4 text-white stroke-[2.5]" />
                 </>

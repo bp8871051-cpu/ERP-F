@@ -7,6 +7,14 @@ export const taskService = {
     if (priority && priority !== 'all') params.priority = priority;
     if (search) params.search = search;
     const response = await api.get('/v1/tasks', { params });
+    // Normalize response: controllers return { status: 'success', data: { tasks: [...], ... } }
+    if (response.data && response.data.data) {
+      return {
+        ...response.data,
+        ...response.data.data,
+        tasks: response.data.data.tasks || [],
+      };
+    }
     return response.data;
   },
 

@@ -77,6 +77,7 @@ import {
   CopyCheck,
   MapPin,
   Database,
+  Navigation,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLayout } from '../context/LayoutContext';
@@ -87,7 +88,7 @@ import HelpSection from './sidebar/HelpSection';
 export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, hasPermission } = useAuth();
+  const { user, hasPermission, currentCompany } = useAuth();
   const {
     sidebarMode,
     contentWidth,
@@ -346,6 +347,8 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   ];
 
   const crmItems = [
+    { name: 'Field Sales Dashboard', path: '/app/crm/field-sales', icon: Navigation },
+    { name: 'Tally Sales Dashboard', path: '/app/crm/tally-sales', icon: FileSpreadsheet },
     { name: 'Contacts', path: '/app/crm/contacts', icon: Users },
     { name: 'Leads', path: '/app/crm/leads', icon: UserPlus },
     { name: 'Duplicate Leads', path: '/app/crm/duplicate-leads', icon: CopyCheck },
@@ -540,18 +543,20 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         {/* Brand Header */}
         <div className="h-16 flex items-center justify-between px-3.5 border-b border-slate-700/60 shrink-0">
           <NavLink to={getRoleDashboardPath()} className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-teal-600 flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0">
-              F
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0 ${currentCompany?.id === 2 ? 'bg-indigo-600' : 'bg-teal-600'}`}>
+              {currentCompany?.name ? currentCompany.name.charAt(0).toUpperCase() : 'F'}
             </div>
             {showText && (
               <div className="flex flex-col min-w-0">
                 <span className="font-bold text-base tracking-wide text-white flex items-center gap-1.5 truncate">
-                  Falcon ERP
-                  <span className="text-[10px] font-semibold uppercase bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded border border-teal-500/30">
+                  {currentCompany?.name ? (currentCompany.name.includes('Apex') ? 'Apex ERP' : currentCompany.name) : 'Falcon ERP'}
+                  <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded border ${currentCompany?.id === 2 ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-teal-500/20 text-teal-300 border-teal-500/30'}`}>
                     PRO
                   </span>
                 </span>
-                <span className="text-[11px] text-slate-400 truncate">Enterprise Suite</span>
+                <span className="text-[11px] text-slate-400 truncate">
+                  {currentCompany?.id === 2 ? 'Global Tech Suite' : 'Enterprise Suite'}
+                </span>
               </div>
             )}
           </NavLink>

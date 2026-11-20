@@ -28,7 +28,7 @@ export const TodoPage = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'today', 'upcoming', 'completed', 'overdue'
+  const [activeFilter, setActiveFilter] = useState('today'); // 'all', 'today', 'upcoming', 'completed', 'overdue'
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' | 'list'
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('all');
@@ -238,11 +238,22 @@ export const TodoPage = () => {
 
     if (priorityFilter !== 'all' && t.priority !== priorityFilter) return false;
 
-    const todayStr = new Date().toISOString().slice(0, 10);
-    if (activeFilter === 'today') return t.due_date?.startsWith(todayStr);
-    if (activeFilter === 'upcoming') return t.due_date && t.due_date > todayStr;
+    const taskDueDate = t.due_date || t.dueDate || '';
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const taskDateOnly = taskDueDate ? taskDueDate.slice(0, 10) : '';
+
+    if (activeFilter === 'my_tasks') {
+      const currentUserId = user?.id ? Number(user.id) : null;
+      if (currentUserId && t.assigned_to) {
+        return Number(t.assigned_to) === currentUserId;
+      }
+      return true;
+    }
+    if (activeFilter === 'today') return taskDateOnly === todayStr;
+    if (activeFilter === 'upcoming') return taskDateOnly && taskDateOnly > todayStr;
     if (activeFilter === 'completed') return t.status === 'completed';
-    if (activeFilter === 'overdue') return t.due_date && t.due_date < todayStr && t.status !== 'completed';
+    if (activeFilter === 'overdue') return taskDateOnly && taskDateOnly < todayStr && t.status !== 'completed';
 
     return true;
   }).sort((a, b) => {
@@ -292,7 +303,8 @@ export const TodoPage = () => {
         {/* Status Filter Tabs */}
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs font-medium overflow-x-auto">
           {[
-            { id: 'all', name: 'My Tasks' },
+            { id: 'all', name: 'All Tasks' },
+            { id: 'my_tasks', name: 'My Tasks' },
             { id: 'today', name: 'Today' },
             { id: 'upcoming', name: 'Upcoming' },
             { id: 'completed', name: 'Completed' },
@@ -467,8 +479,8 @@ export const TodoPage = () => {
                         <div className="flex items-center gap-1.5">
                           <Calendar className="w-3 h-3 text-slate-400" />
                           <span>
-                            {task.due_date
-                              ? new Date(task.due_date).toLocaleDateString([], {
+                            {(task.due_date || task.dueDate)
+                              ? new Date(task.due_date || task.dueDate).toLocaleDateString([], {
                                   month: 'short',
                                   day: 'numeric',
                                 })
@@ -591,8 +603,8 @@ export const TodoPage = () => {
                   <td className="py-3.5 px-4 text-slate-600">{task.category || 'General'}</td>
 
                   <td className="py-3.5 px-4 text-slate-500">
-                    {task.due_date
-                      ? new Date(task.due_date).toLocaleDateString([], {
+                    {(task.due_date || task.dueDate)
+                      ? new Date(task.due_date || task.dueDate).toLocaleDateString([], {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',

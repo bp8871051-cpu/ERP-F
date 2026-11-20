@@ -349,7 +349,7 @@ export const LeadList = () => {
       </div>
 
       {/* Filters Card */}
-      <Card className="p-4 !overflow-visible">
+      <Card className="p-4 !overflow-visible relative z-30">
         <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
           <div className="relative w-full lg:max-w-xs xl:max-w-sm">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
@@ -366,7 +366,7 @@ export const LeadList = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex-1 sm:flex-none sm:w-40 relative z-10">
+            <div className="flex-1 sm:flex-none sm:w-40 relative z-40">
               <SearchableSelect
                 options={[
                   { value: '', label: 'All Statuses' },
@@ -387,7 +387,7 @@ export const LeadList = () => {
               />
             </div>
 
-            <div className="flex-1 sm:flex-none sm:w-40 relative z-10">
+            <div className="flex-1 sm:flex-none sm:w-44 relative z-40">
               <SearchableSelect
                 options={[
                   { value: '', label: 'All Sources' },
@@ -424,7 +424,7 @@ export const LeadList = () => {
       )}
 
       {/* Leads Table */}
-      <Card className="overflow-hidden" noPadding>
+      <Card className="overflow-hidden relative z-10" noPadding>
         {loading ? (
           <div className="p-6">
             <LoadingSkeleton type="table" />

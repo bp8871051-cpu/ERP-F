@@ -172,6 +172,34 @@ export const roleDashboardService = {
       return response.data;
     },
   },
+
+  // 6. Field Sales
+  fieldSales: {
+    getDashboard: async () => {
+      const response = await api.get('/v1/field-sales/dashboard');
+      return response.data?.data || response.data;
+    },
+    recordVisit: async (data) => {
+      const response = await api.post('/v1/field-sales/record-visit', data);
+      return response.data;
+    },
+    quickLead: async (data) => {
+      const response = await api.post('/v1/field-sales/quick-lead', data);
+      return response.data;
+    },
+  },
+
+  // 7. Tally Sales
+  tallySales: {
+    getDashboard: async () => {
+      const response = await api.get('/v1/tally-sales/dashboard');
+      return response.data?.data || response.data;
+    },
+    recordPayment: async (data) => {
+      const response = await api.post('/v1/tally-sales/record-payment', data);
+      return response.data;
+    },
+  },
 };
 
 export default roleDashboardService;

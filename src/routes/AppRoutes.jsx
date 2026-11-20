@@ -24,6 +24,8 @@ import StoreExecutiveDashboard from '../pages/dashboards/StoreExecutiveDashboard
 import QualityControlDashboard from '../pages/dashboards/QualityControlDashboard';
 import ProjectEngineerDashboard from '../pages/dashboards/ProjectEngineerDashboard';
 import LicensingManagerDashboard from '../pages/dashboards/LicensingManagerDashboard';
+import FieldSalesDashboard from '../pages/dashboards/FieldSalesDashboard';
+import TallySalesDashboard from '../pages/dashboards/TallySalesDashboard';
 
 // Enterprise Support Management Module Pages
 import ContactMessages from '../pages/support/ContactMessages';
@@ -467,6 +469,8 @@ export const AppRoutes = () => {
             CRM / ENTERPRISE MODULE ROUTES
             ========================================= */}
         <Route path="crm" element={<PermissionRoute permission="crm.view"><CrmDashboard /></PermissionRoute>} />
+        <Route path="crm/field-sales" element={<PermissionRoute permission="crm.view"><FieldSalesDashboard /></PermissionRoute>} />
+        <Route path="crm/tally-sales" element={<PermissionRoute permission="crm.view"><TallySalesDashboard /></PermissionRoute>} />
         <Route path="crm/contacts" element={<PermissionRoute permission="crm.view"><ContactList /></PermissionRoute>} />
         <Route path="crm/contacts/:id" element={<PermissionRoute permission="crm.view"><ContactDetails /></PermissionRoute>} />
         <Route path="crm/leads" element={<PermissionRoute permission="crm.view"><LeadList /></PermissionRoute>} />
