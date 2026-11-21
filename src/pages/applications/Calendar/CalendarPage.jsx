@@ -45,7 +45,9 @@ export const CalendarPage = () => {
 
   const categories = [
     { id: 'all', name: 'All Categories', color: '#64748B' },
+    { id: 'company_meeting', name: 'Company Meetings', color: '#0284C7' },
     { id: 'meeting', name: 'Meetings', color: '#0F8B7A' },
+    { id: 'festival', name: 'Festivals / Holidays', color: '#EA580C' },
     { id: 'task', name: 'Tasks & Sprints', color: '#2563EB' },
     { id: 'approval', name: 'Approvals', color: '#D97706' },
     { id: 'personal', name: 'Personal', color: '#7C3AED' },
@@ -111,14 +113,29 @@ export const CalendarPage = () => {
     window.open('https://meet.google.com/new', '_blank');
   };
 
+  // Helper to format Date into YYYY-MM-DD
+  const formatDateKey = (d) => {
+    if (!d) return '';
+    const dateObj = typeof d === 'string' ? new Date(d) : d;
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // Open modal for new event
   const openNewEventModal = (dateStr = null) => {
     setSelectedEvent(null);
-    const now = new Date();
-    const start = dateStr ? new Date(dateStr) : now;
-    start.setHours(9, 0, 0, 0);
+    let start;
+    if (dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      start = new Date(y, m - 1, d, 9, 0, 0);
+    } else {
+      start = new Date();
+      start.setHours(9, 0, 0, 0);
+    }
     const end = new Date(start);
-    end.setHours(10, 0, 0, 0);
+    end.setHours(start.getHours() + 1, 0, 0, 0);
 
     const formatForInput = (d) => {
       const pad = (n) => (n < 10 ? '0' + n : n);
@@ -142,15 +159,22 @@ export const CalendarPage = () => {
   // Open modal for editing
   const openEditEventModal = (event) => {
     setSelectedEvent(event);
-    const formatForInput = (iso) => (iso ? iso.slice(0, 16) : '');
+    const formatForInput = (iso) => {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso.slice(0, 16);
+      const pad = (n) => (n < 10 ? '0' + n : n);
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
     setFormData({
       title: event.title || '',
       description: event.description || '',
       category: event.category || 'meeting',
-      start_time: formatForInput(event.start_time),
-      end_time: formatForInput(event.end_time),
+      start_time: formatForInput(event.start_time || event.start),
+      end_time: formatForInput(event.end_time || event.end),
       location: event.location || '',
-      meeting_link: event.meeting_link || '',
+      meeting_link: event.meeting_link || event.meetingLink || '',
       color: event.color || '#0F8B7A',
       status: event.status || 'scheduled',
     });
@@ -190,6 +214,26 @@ export const CalendarPage = () => {
     if (selectedCategory !== 'all' && ev.category !== selectedCategory) return false;
     return true;
   });
+
+  // Category style badges helper
+  const getCategoryBadge = (cat) => {
+    switch (cat) {
+      case 'festival':
+        return { label: 'Festival', bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' };
+      case 'company_meeting':
+        return { label: 'Company Meeting', bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200' };
+      case 'meeting':
+        return { label: 'Meeting', bg: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-200' };
+      case 'task':
+        return { label: 'Sprint / Task', bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' };
+      case 'approval':
+        return { label: 'Approval', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' };
+      case 'personal':
+        return { label: 'Personal', bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' };
+      default:
+        return { label: cat, bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' };
+    }
+  };
 
   // Calculate days for month grid
   const year = currentDate.getFullYear();
@@ -336,8 +380,13 @@ export const CalendarPage = () => {
           {/* Days Grid */}
           <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-100">
             {daysArray.map((cell, idx) => {
-              const cellDateStr = cell.date.toISOString().slice(0, 10);
-              const dayEvents = filteredEvents.filter((e) => e.start_time?.startsWith(cellDateStr));
+              const cellDateStr = formatDateKey(cell.date);
+              const dayEvents = filteredEvents.filter((e) => {
+                const eStart = e.start_time || e.start || e.startDate;
+                if (!eStart) return false;
+                const eDateKey = formatDateKey(eStart);
+                return eDateKey === cellDateStr;
+              });
               const todayFlag = isToday(cell.date);
 
               return (
@@ -369,19 +418,33 @@ export const CalendarPage = () => {
 
                   {/* Day Events list */}
                   <div className="space-y-1 overflow-y-auto max-h-[85px]">
-                    {dayEvents.slice(0, 3).map((ev) => (
-                      <div
-                        key={ev.id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEditEventModal(ev);
-                        }}
-                        style={{ borderLeftColor: ev.color || '#0F8B7A' }}
-                        className="px-1.5 py-1 text-[11px] rounded bg-slate-50 hover:bg-slate-100 border-l-3 text-slate-800 truncate font-medium transition-colors shadow-2xs"
-                      >
-                        {ev.title}
-                      </div>
-                    ))}
+                    {dayEvents.slice(0, 3).map((ev) => {
+                      const isFestive = ev.category === 'festival';
+                      const isCompany = ev.category === 'company_meeting';
+                      return (
+                        <div
+                          key={ev.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditEventModal(ev);
+                          }}
+                          style={{
+                            borderLeftColor: ev.color || (isFestive ? '#EA580C' : isCompany ? '#0284C7' : '#0F8B7A'),
+                          }}
+                          className={`px-1.5 py-1 text-[11px] rounded border-l-3 truncate font-medium transition-colors shadow-2xs flex items-center gap-1 ${
+                            isFestive
+                              ? 'bg-amber-50/80 text-amber-900 border-l-amber-600 hover:bg-amber-100/90'
+                              : isCompany
+                              ? 'bg-sky-50/80 text-sky-900 border-l-sky-600 hover:bg-sky-100/90'
+                              : 'bg-slate-50 hover:bg-slate-100 text-slate-800'
+                          }`}
+                        >
+                          {isFestive && <Sparkles className="w-2.5 h-2.5 text-amber-600 shrink-0" />}
+                          {isCompany && <Users className="w-2.5 h-2.5 text-sky-600 shrink-0" />}
+                          <span className="truncate">{ev.title}</span>
+                        </div>
+                      );
+                    })}
                     {dayEvents.length > 3 && (
                       <span className="text-[10px] text-teal-600 font-semibold block px-1">
                         +{dayEvents.length - 3} more
@@ -448,6 +511,14 @@ export const CalendarPage = () => {
                 </div>
 
                 <div className="flex items-center gap-2 self-end sm:self-center">
+                  {(() => {
+                    const badge = getCategoryBadge(ev.category);
+                    return (
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${badge.bg} ${badge.text} ${badge.border}`}>
+                        {badge.label}
+                      </span>
+                    );
+                  })()}
                   <span
                     className={`px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize ${
                       ev.status === 'completed'
@@ -526,7 +597,9 @@ export const CalendarPage = () => {
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-800"
                   >
-                    <option value="meeting">Meeting</option>
+                    <option value="company_meeting">Company Meeting (All-Hands / AGM)</option>
+                    <option value="meeting">Meeting (Client / Internal)</option>
+                    <option value="festival">Festival / Company Holiday</option>
                     <option value="task">Task / Sprint</option>
                     <option value="approval">Workflow Approval</option>
                     <option value="personal">Personal</option>
